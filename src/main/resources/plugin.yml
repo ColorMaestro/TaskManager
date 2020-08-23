@@ -1,0 +1,41 @@
+name: TaskManager
+version: ${project.version}
+main: me.colormaestro.taskmanager.TaskManager
+api-version: 1.15
+authors: [ColorMaestro]
+commands:
+  tasks:
+    description: Shows your or other player tasks.
+    usage: Usage /<command> [player] or /<command> help
+    permission: taskmanager.tasks
+    permission-message: You don't have permission to viev tasks
+  addtask:
+    description: Adds new task.
+    usage: Usage /addtask <IGN> <description>
+    permission: taskmanager.addtask
+    permission-message: You don't have permission to add task
+  finishtask:
+    description: Mark task as finished.
+    usage: Usage /finishtask <id>
+    permission: taskmanager.finishtask
+    permission-message: You don't have permission to finish task
+  approvetask:
+    description: Approves the finished task.
+    usage: Usage /approvetask <id> [force]
+    permission: taskmanager.approvetask
+    permission-message: You don't have permission to approve task
+  returntask:
+    description: Returns finished task to unfinished state.
+    usage: Usage /returntask <id>
+    permission: taskmanager.returntask
+    permission-message: You don't have permission to return task
+  visittask:
+    description: Teleports player to the task workplace.
+    usage: Usage /visittask <id>
+    permission: taskmanager.visittask
+    permission-message: You don't have permission to visit task
+  settaskplace:
+    description: Sets the spawning point for the task.
+    usage: Usage /settaskplace <id>
+    permission: taskmanager.settaskplace
+    permission-message: You don't have permission to set spawn position for task
