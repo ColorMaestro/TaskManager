@@ -20,17 +20,7 @@ public class Tasks implements CommandExecutor {
     public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
 
         if (args.length == 1 && args[0].equals("help")) {
-            ChatColor g = ChatColor.GOLD;
-            ChatColor w = ChatColor.WHITE;
-            sender.sendMessage(ChatColor.AQUA + "-=-=-=-=-=- TaskManager help -=-=-=-=-=-");
-            sender.sendMessage(g + "/tasks help" + w + " - shows this help");
-            sender.sendMessage(g + "/tasks [IGN]" + w + " - shows your or other player tasks");
-            sender.sendMessage(g + "/visittask <id>" + w + " - teleports to the task workplace");
-            sender.sendMessage(g + "/addtask <IGN> <description>" + w + " - adds new task");
-            sender.sendMessage(g + "/finishtask <id>" + w + " - mark task as finished");
-            sender.sendMessage(g + "/approvetask <id> [force]" + w + " - approves the finished task (with force also unfinished one)");
-            sender.sendMessage(g + "/returntask <id> <reason>" + w + " - return finished task back to the unfinished state");
-            sender.sendMessage(g + "/settaskplace <id>" + w + " - sets spawning point for this task for more comfort :)");
+            sendHelp(sender);
             return true;
         }
 
@@ -120,5 +110,18 @@ public class Tasks implements CommandExecutor {
 
         sender.sendMessage(ChatColor.RED + "Usage: /tasks [player] or /tasks help");
         return true;
+    }
+
+    private void sendHelp(CommandSender sender) {
+        ChatColor g = ChatColor.GOLD;
+        ChatColor w = ChatColor.WHITE;
+        sender.sendMessage(ChatColor.AQUA + "-=-=-=-=-=- TaskManager help -=-=-=-=-=-");
+        sender.sendMessage(g + "/tasks help" + w + " - shows this help");
+        sender.sendMessage(g + "/tasks [IGN]" + w + " - shows your or other player tasks");
+        sender.sendMessage(g + "/visittask <id>" + w + " - teleports to the task workplace");
+        sender.sendMessage(g + "/addtask <IGN> <description>" + w + " - adds new task");
+        sender.sendMessage(g + "/finishtask <id>" + w + " - mark task as finished");
+        sender.sendMessage(g + "/approvetask <id> [force]" + w + " - approves the finished task (with force also unfinished one)");
+        sender.sendMessage(g + "/settaskplace <id>" + w + " - sets spawning point for this task for more comfort :)");
     }
 }

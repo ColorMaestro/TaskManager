@@ -24,11 +24,6 @@ commands:
     usage: Usage /approvetask <id> [force]
     permission: taskmanager.approvetask
     permission-message: You don't have permission to approve task
-  returntask:
-    description: Returns finished task to unfinished state.
-    usage: Usage /returntask <id>
-    permission: taskmanager.returntask
-    permission-message: You don't have permission to return task
   visittask:
     description: Teleports player to the task workplace.
     usage: Usage /visittask <id>

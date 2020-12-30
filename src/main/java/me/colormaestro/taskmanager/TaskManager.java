@@ -1,29 +1,33 @@
 package me.colormaestro.taskmanager;
 
+import me.colormaestro.taskmanager.data.PlayerDAO;
+import me.colormaestro.taskmanager.data.TaskDAO;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.*;
+import java.util.Objects;
 
 public final class TaskManager extends JavaPlugin {
-    private File configFile;
     private FileConfiguration config;
+    private TaskDAO taskDAO;
+    private PlayerDAO playerDAO;
 
     @Override
     public void onEnable() {
         loadConfig();
-        this.getCommand("tasks").setExecutor(new Tasks(config));
-        this.getCommand("addtask").setExecutor(new AddTask(config));
-        this.getCommand("finishtask").setExecutor(new FinishTask(config));
-        this.getCommand("approvetask").setExecutor(new ApproveTask(config));
-        this.getCommand("returntask").setExecutor(new ReturnTask(config));
-        this.getCommand("visittask").setExecutor(new VisitTask(config));
-        this.getCommand("settaskplace").setExecutor(new SetTaskPlace(config));
+        createDAOs();
+        Objects.requireNonNull(this.getCommand("tasks")).setExecutor(new Tasks(config));
+        Objects.requireNonNull(this.getCommand("addtask")).setExecutor(new AddTask(taskDAO));
+        Objects.requireNonNull(this.getCommand("finishtask")).setExecutor(new FinishTask(taskDAO));
+        Objects.requireNonNull(this.getCommand("approvetask")).setExecutor(new ApproveTask(taskDAO));
+        Objects.requireNonNull(this.getCommand("visittask")).setExecutor(new VisitTask(config));
+        Objects.requireNonNull(this.getCommand("settaskplace")).setExecutor(new SetTaskPlace(config));
 
-        this.getCommand("tasks").setTabCompleter(new TasksTabCompleter(config));
-        this.getCommand("addtask").setTabCompleter(new TasksTabCompleter(config));
+        Objects.requireNonNull(this.getCommand("tasks")).setTabCompleter(new TasksTabCompleter(config));
+        Objects.requireNonNull(this.getCommand("addtask")).setTabCompleter(new TasksTabCompleter(config));
     }
 
     @Override
@@ -32,7 +36,7 @@ public final class TaskManager extends JavaPlugin {
     }
 
     private void loadConfig() {
-        configFile = new File(getDataFolder(), "config.yml");
+        File configFile = new File(getDataFolder(), "config.yml");
         if (!configFile.exists()) {
             configFile.getParentFile().mkdirs();
             saveResource("config.yml", false);
@@ -44,5 +48,10 @@ public final class TaskManager extends JavaPlugin {
         } catch (IOException | InvalidConfigurationException e) {
             e.printStackTrace();
         }
+    }
+
+    private void createDAOs() {
+        taskDAO = new TaskDAO(getDataFolder().getAbsolutePath());
+        playerDAO = new PlayerDAO(getDataFolder().getAbsolutePath());
     }
 }
