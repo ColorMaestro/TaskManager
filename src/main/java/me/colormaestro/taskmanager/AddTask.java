@@ -44,7 +44,13 @@ public class AddTask implements CommandExecutor {
             ex.printStackTrace();
         }
         String description = buildDescription(args);
-        Task task = new Task(description, assigneeID, advisorID, p.getLocation());
+        Task task = new Task(description, assigneeID, advisorID,
+                p.getLocation().getX(),
+                p.getLocation().getY(),
+                p.getLocation().getZ(),
+                p.getLocation().getYaw(),
+                p.getLocation().getPitch()
+        );
         try {
             taskDAO.createTask(task);
             p.sendMessage(ChatColor.GREEN + "Task added.");

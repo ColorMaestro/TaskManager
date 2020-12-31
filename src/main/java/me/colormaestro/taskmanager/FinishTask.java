@@ -40,7 +40,7 @@ public class FinishTask implements CommandExecutor {
             p.sendMessage(ChatColor.GREEN + "Task finished.");
         } catch (SQLException | DataAccessException | NumberFormatException ex) {
             p.sendMessage(ChatColor.RED + ex.getMessage());
-            System.out.println(ex.getMessage());
+            ex.printStackTrace();
         }
         return true;
     }

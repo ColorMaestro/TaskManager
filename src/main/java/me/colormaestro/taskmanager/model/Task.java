@@ -23,15 +23,16 @@ public class Task {
 
     }
 
-    public Task(String description, int assigneeID, int advisorID, Location location) {
+    public Task(String description, int assigneeID, int advisorID,
+                double x, double y, double z, float yaw, float pitch) {
         this.description = description;
         this.assigneeID = assigneeID;
         this.advisorID = advisorID;
-        this.x = location.getX();
-        this.y = location.getY();
-        this.z = location.getZ();
-        this.yaw = location.getYaw();
-        this.pitch = location.getPitch();
+        this.x = x;
+        this.y = y;
+        this.z = z;
+        this.yaw = yaw;
+        this.pitch = pitch;
         this.status = TaskStatus.DOING;
         this.dateCreation = new Date(System.currentTimeMillis());
     }

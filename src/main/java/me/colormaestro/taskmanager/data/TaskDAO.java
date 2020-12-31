@@ -125,4 +125,30 @@ public class TaskDAO {
             }
         }
     }
+
+    public synchronized Task findTask(int id) throws SQLException, DataAccessException {
+        try (Connection connection = DriverManager.getConnection(url);
+             PreparedStatement st = connection.prepareStatement(
+                     "SELECT description, assignee_id, advisor_id, x, y, z, yaw, pitch, " +
+                             "status, date_given, date_finished FROM TASKS WHERE id = ?")) {
+
+            st.setInt(1, id);
+            ResultSet rs = st.executeQuery();
+            if (rs.isClosed()) {
+                throw new DataAccessException("No task found with id " + id);
+            }
+            Task task = new Task(
+                    rs.getString("description"),
+                    rs.getInt("assignee_id"),
+                    rs.getInt("advisor_id"),
+                    rs.getDouble("x"),
+                    rs.getDouble("y"),
+                    rs.getDouble("z"),
+                    rs.getFloat("yaw"),
+                    rs.getFloat("pitch")
+            );
+            rs.close();
+            return task;
+        }
+    }
 }

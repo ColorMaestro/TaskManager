@@ -35,9 +35,9 @@ public class ApproveTask implements CommandExecutor {
             int id = Integer.parseInt(args[0]);
             taskDAO.approveTask(id, force);
             p.sendMessage(ChatColor.GREEN + "Task approved.");
-        } catch (SQLException | DataAccessException | NumberFormatException e) {
-            System.out.println(e.getMessage());
-            p.sendMessage(ChatColor.RED + e.getMessage());
+        } catch (SQLException | DataAccessException | NumberFormatException ex) {
+            p.sendMessage(ChatColor.RED + ex.getMessage());
+            ex.printStackTrace();
         }
         return true;
     }
