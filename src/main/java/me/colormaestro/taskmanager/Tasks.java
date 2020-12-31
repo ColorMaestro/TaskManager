@@ -33,7 +33,7 @@ public class Tasks implements CommandExecutor {
         if (sender instanceof Player && (args.length == 0 || args.length == 1)) {
             Player p = (Player) sender;
             try {
-                int id = -1;
+                int id;
                 if (args.length == 0) {
                     id = playerDAO.getPlayerID(p.getUniqueId());
                 } else {

@@ -2,6 +2,7 @@ package me.colormaestro.taskmanager.data;
 
 import me.colormaestro.taskmanager.enums.TaskStatus;
 import me.colormaestro.taskmanager.model.Task;
+import org.bukkit.Location;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -185,6 +186,25 @@ public class TaskDAO {
             }
             rs.close();
             return tasks;
+        }
+    }
+
+    public synchronized void updateTaskCords(int id, int assignee, Location location) throws SQLException, DataAccessException {
+        try (Connection connection = DriverManager.getConnection(url);
+             PreparedStatement st = connection.prepareStatement(
+                     "UPDATE TASKS SET x = ?, y = ?, z = ?, yaw = ?, pitch = ? WHERE id = ? AND assignee_id = ?")) {
+
+            st.setDouble(1, location.getX());
+            st.setDouble(2, location.getY());
+            st.setDouble(3, location.getZ());
+            st.setFloat(4, location.getYaw());
+            st.setFloat(5, location.getPitch());
+            st.setInt(6, id);
+            st.setInt(7, assignee);
+            int affected = st.executeUpdate();
+            if (affected == 0) {
+                throw new DataAccessException("No change. Make sure you choose your existing task.");
+            }
         }
     }
 }

@@ -20,12 +20,12 @@ public class ApproveTask implements CommandExecutor {
     @Override
     public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
         if (!(sender instanceof Player)) {
-            sender.sendMessage(ChatColor.RED + "This command cant be run from console.");
+            sender.sendMessage(ChatColor.RED + "This command can't be run from console.");
             return true;
         }
 
         if (args.length == 0) {
-            sender.sendMessage(ChatColor.RED + "You must specify task_id.");
+            sender.sendMessage(ChatColor.RED + "You must specify task id.");
             return true;
         }
 

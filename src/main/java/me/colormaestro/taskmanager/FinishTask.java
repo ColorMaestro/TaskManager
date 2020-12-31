@@ -23,7 +23,7 @@ public class FinishTask implements CommandExecutor {
     @Override
     public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
         if (!(sender instanceof Player)) {
-            sender.sendMessage(ChatColor.RED + "This command cant be run from console.");
+            sender.sendMessage(ChatColor.RED + "This command can't be run from console.");
             return true;
         }
 
