@@ -160,7 +160,7 @@ public class TaskDAO {
     public synchronized List<Task> fetchPlayersActiveTasks(int assignee) throws SQLException {
         try (Connection connection = DriverManager.getConnection(url);
              PreparedStatement st = connection.prepareStatement(
-                     "SELECT description, assignee_id, advisor_id, x, y, z, yaw, pitch, status, " +
+                     "SELECT id, description, assignee_id, advisor_id, x, y, z, yaw, pitch, status, " +
                              "date_given, date_finished FROM TASKS WHERE assignee_id = ? AND status != 'approved'")) {
 
             st.setInt(1, assignee);
@@ -180,6 +180,7 @@ public class TaskDAO {
                         rs.getDate("date_given"),
                         rs.getDate("date_finished")
                 );
+                task.setId(rs.getInt("id"));
                 tasks.add(task);
             }
             rs.close();

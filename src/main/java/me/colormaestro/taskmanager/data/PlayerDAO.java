@@ -111,12 +111,12 @@ public class PlayerDAO {
         }
     }
 
-    public synchronized String getPlayerIGN(UUID uuid) throws SQLException, DataAccessException {
+    public synchronized String getPlayerIGN(int id) throws SQLException, DataAccessException {
         try (Connection connection = DriverManager.getConnection(url);
              PreparedStatement st = connection.prepareStatement(
-                     "SELECT ign FROM PLAYERS WHERE uuid = ?"
+                     "SELECT ign FROM PLAYERS WHERE id = ?"
              )) {
-            st.setString(1, uuid.toString());
+            st.setInt(1, id);
             ResultSet rs = st.executeQuery();
             if (rs.isClosed()) {
                 throw new DataAccessException("Failed to get player IGN according to UUID. Contact developers!");

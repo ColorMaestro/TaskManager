@@ -30,11 +30,16 @@ public class Tasks implements CommandExecutor {
             return true;
         }
 
-        if ((args.length == 0 && sender instanceof Player) || args.length == 1) {
+        if (sender instanceof Player && (args.length == 0 || args.length == 1)) {
             Player p = (Player) sender;
             try {
-                int id = playerDAO.getPlayerID(p.getUniqueId());
-                String ign = playerDAO.getPlayerIGN(p.getUniqueId());
+                int id = -1;
+                if (args.length == 0) {
+                    id = playerDAO.getPlayerID(p.getUniqueId());
+                } else {
+                    id = playerDAO.getPlayerID(args[0]);
+                }
+                String ign = playerDAO.getPlayerIGN(id);
                 List<Task> tasks = taskDAO.fetchPlayersActiveTasks(id);
                 sendTasks(p, tasks, ign);
             } catch (SQLException | DataAccessException ex) {
@@ -66,10 +71,10 @@ public class Tasks implements CommandExecutor {
         for (Task task : tasks) {
             switch (task.getStatus()) {
                 case DOING:
-                    p.sendMessage(ChatColor.GOLD + "[" + task.getId() + "]" + ChatColor.WHITE + task.getDescription());
+                    p.sendMessage(ChatColor.GOLD + "[" + task.getId() + "] " + ChatColor.WHITE + task.getDescription());
                     break;
                 case FINISHED:
-                    p.sendMessage(ChatColor.GREEN + "[" + task.getId() + "]" + ChatColor.WHITE + task.getDescription());
+                    p.sendMessage(ChatColor.GREEN + "[" + task.getId() + "] " + ChatColor.WHITE + task.getDescription());
                     break;
             }
         }
