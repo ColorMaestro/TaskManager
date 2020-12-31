@@ -67,6 +67,10 @@ public class Tasks implements CommandExecutor {
     }
 
     private void sendTasks(Player p, List<Task> tasks, String name) {
+        if (tasks.isEmpty()) {
+            p.sendMessage(ChatColor.GREEN + name + " has no tasks");
+            return;
+        }
         p.sendMessage(ChatColor.AQUA + "-=-=-=- " + name + "'s tasks -=-=-=-");
         for (Task task : tasks) {
             switch (task.getStatus()) {
