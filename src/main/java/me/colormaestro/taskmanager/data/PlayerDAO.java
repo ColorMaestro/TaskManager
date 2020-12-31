@@ -29,7 +29,7 @@ public class PlayerDAO {
 
     private void addRecords() {
         try (Connection connection = DriverManager.getConnection(url);
-             var st = connection.createStatement()) {
+             Statement st = connection.createStatement()) {
 
             st.executeUpdate("INSERT INTO PLAYERS (uuid, ign, discord_id) VALUES " +
                     "('3bfe0fa3-033a-421d-839b-5b450c37ead4', 'AWEJOKER', '347783781119164418')," +
