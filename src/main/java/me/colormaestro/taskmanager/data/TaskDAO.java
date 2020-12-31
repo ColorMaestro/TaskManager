@@ -12,7 +12,6 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.UUID;
 
 public class TaskDAO {
     private final String url;
@@ -61,7 +60,7 @@ public class TaskDAO {
         }
     }
 
-    public void createTask(Task task) throws SQLException {
+    public synchronized void createTask(Task task) throws SQLException {
         if (task.getId() != null) {
             throw new IllegalArgumentException("Creating task with set ID");
         }
@@ -84,20 +83,10 @@ public class TaskDAO {
         }
     }
 
-    public void finishTask(int id, UUID uuid) throws SQLException, DataAccessException {
+    public synchronized void finishTask(int id, int assignee) throws SQLException, DataAccessException {
         try (Connection connection = DriverManager.getConnection(url);
-             PreparedStatement statement = connection.prepareStatement(
-                     "SELECT id FROM PLAYERS WHERE uuid = ?"
-             );
              PreparedStatement st = connection.prepareStatement(
                      "UPDATE TASKS SET status = 'finished', date_finished = ? WHERE id = ? AND assignee_id = ?")) {
-            statement.setString(1, uuid.toString());
-            ResultSet rs = statement.executeQuery();
-            if (rs.isClosed()) {
-                throw new DataAccessException("Your uuid was not found in the database. Contact project manager!");
-            }
-            int assignee = rs.getInt("id");
-            rs.close();
 
             st.setDate(1, new Date(System.currentTimeMillis()));
             st.setInt(2, id);
@@ -109,7 +98,7 @@ public class TaskDAO {
         }
     }
 
-    public void approveTask(int id, boolean force) throws SQLException, DataAccessException {
+    public synchronized void approveTask(int id, boolean force) throws SQLException, DataAccessException {
         try (Connection connection = DriverManager.getConnection(url);
              PreparedStatement statement = connection.prepareStatement(
                      "SELECT status FROM TASKS WHERE id = ?"

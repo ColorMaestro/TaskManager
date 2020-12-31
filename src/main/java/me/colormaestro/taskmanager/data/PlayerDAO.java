@@ -64,7 +64,7 @@ public class PlayerDAO {
         }
     }
 
-    public int getPlayerID(String name) throws SQLException, DataAccessException {
+    public synchronized int getPlayerID(String name) throws SQLException, DataAccessException {
         try (Connection connection = DriverManager.getConnection(url);
              PreparedStatement st = connection.prepareStatement(
                      "SELECT id FROM PLAYERS WHERE name = ?"
@@ -80,7 +80,7 @@ public class PlayerDAO {
         }
     }
 
-    public int getPlayerID(UUID uuid) throws SQLException, DataAccessException {
+    public synchronized int getPlayerID(UUID uuid) throws SQLException, DataAccessException {
         try (Connection connection = DriverManager.getConnection(url);
              PreparedStatement st = connection.prepareStatement(
                      "SELECT id FROM PLAYERS WHERE uuid = ?"
