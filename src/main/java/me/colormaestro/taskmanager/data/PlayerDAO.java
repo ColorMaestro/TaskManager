@@ -79,15 +79,15 @@ public class PlayerDAO {
         }
     }
 
-    public synchronized int getPlayerID(String name) throws SQLException, DataAccessException {
+    public synchronized int getPlayerID(String ign) throws SQLException, DataAccessException {
         try (Connection connection = DriverManager.getConnection(url);
              PreparedStatement st = connection.prepareStatement(
-                     "SELECT id FROM PLAYERS WHERE name = ?"
+                     "SELECT id FROM PLAYERS WHERE ign = ?"
              )) {
-            st.setString(1, name);
+            st.setString(1, ign);
             ResultSet rs = st.executeQuery();
             if (rs.isClosed()) {
-                throw new DataAccessException("Player with name " + name + " was not found in the database.");
+                throw new DataAccessException("Player with name " + ign + " was not found in the database.");
             }
             int id = rs.getInt("id");
             rs.close();
@@ -108,6 +108,22 @@ public class PlayerDAO {
             int id = rs.getInt("id");
             rs.close();
             return id;
+        }
+    }
+
+    public synchronized String getPlayerIGN(UUID uuid) throws SQLException, DataAccessException {
+        try (Connection connection = DriverManager.getConnection(url);
+             PreparedStatement st = connection.prepareStatement(
+                     "SELECT ign FROM PLAYERS WHERE uuid = ?"
+             )) {
+            st.setString(1, uuid.toString());
+            ResultSet rs = st.executeQuery();
+            if (rs.isClosed()) {
+                throw new DataAccessException("Failed to get player IGN according to UUID. Contact developers!");
+            }
+            String ign = rs.getString("ign");
+            rs.close();
+            return ign;
         }
     }
 }

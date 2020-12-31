@@ -34,8 +34,9 @@ public class Tasks implements CommandExecutor {
             Player p = (Player) sender;
             try {
                 int id = playerDAO.getPlayerID(p.getUniqueId());
+                String ign = playerDAO.getPlayerIGN(p.getUniqueId());
                 List<Task> tasks = taskDAO.fetchPlayersActiveTasks(id);
-                sendTasks(p, tasks);
+                sendTasks(p, tasks, ign);
             } catch (SQLException | DataAccessException ex) {
                 p.sendMessage(ChatColor.RED + ex.getMessage());
                 ex.printStackTrace();
@@ -60,15 +61,15 @@ public class Tasks implements CommandExecutor {
         sender.sendMessage(g + "/settaskplace <id>" + w + " - sets spawning point for this task for more comfort :)");
     }
 
-    private void sendTasks(Player p, List<Task> tasks) {
-        p.sendMessage(ChatColor.AQUA + "-=-=-=- " + p.getName() + "'s tasks -=-=-=-");
+    private void sendTasks(Player p, List<Task> tasks, String name) {
+        p.sendMessage(ChatColor.AQUA + "-=-=-=- " + name + "'s tasks -=-=-=-");
         for (Task task : tasks) {
             switch (task.getStatus()) {
                 case DOING:
-                    p.sendMessage(ChatColor.GOLD + task.getDescription());
+                    p.sendMessage(ChatColor.GOLD + "[" + task.getId() + "]" + ChatColor.WHITE + task.getDescription());
                     break;
                 case FINISHED:
-                    p.sendMessage(ChatColor.GREEN + task.getDescription());
+                    p.sendMessage(ChatColor.GREEN + "[" + task.getId() + "]" + ChatColor.WHITE + task.getDescription());
                     break;
             }
         }
