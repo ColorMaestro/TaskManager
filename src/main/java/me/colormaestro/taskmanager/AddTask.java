@@ -3,6 +3,7 @@ package me.colormaestro.taskmanager;
 import me.colormaestro.taskmanager.data.DataAccessException;
 import me.colormaestro.taskmanager.data.PlayerDAO;
 import me.colormaestro.taskmanager.data.TaskDAO;
+import me.colormaestro.taskmanager.enums.TaskStatus;
 import me.colormaestro.taskmanager.model.Task;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
@@ -10,7 +11,9 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
-import java.sql.*;
+import java.sql.Date;
+import java.sql.SQLException;
+
 
 public class AddTask implements CommandExecutor {
     private final TaskDAO taskDAO;
@@ -49,7 +52,10 @@ public class AddTask implements CommandExecutor {
                 p.getLocation().getY(),
                 p.getLocation().getZ(),
                 p.getLocation().getYaw(),
-                p.getLocation().getPitch()
+                p.getLocation().getPitch(),
+                TaskStatus.DOING,
+                new Date(System.currentTimeMillis()),
+                null
         );
         try {
             taskDAO.createTask(task);

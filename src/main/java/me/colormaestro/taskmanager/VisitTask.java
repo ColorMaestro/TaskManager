@@ -10,7 +10,7 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
-import java.sql.*;
+import java.sql.SQLException;
 
 public class VisitTask implements CommandExecutor {
     private final TaskDAO taskDAO;
@@ -31,7 +31,6 @@ public class VisitTask implements CommandExecutor {
             return true;
         }
 
-        Connection conn = null;
         Player p = (Player) sender;
         try {
             int id = Integer.parseInt(args[0]);

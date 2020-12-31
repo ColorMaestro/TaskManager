@@ -1,7 +1,6 @@
 package me.colormaestro.taskmanager.model;
 
 import me.colormaestro.taskmanager.enums.TaskStatus;
-import org.bukkit.Location;
 
 import java.sql.Date;
 
@@ -19,12 +18,9 @@ public class Task {
     private Date dateCreation;
     private Date dateCompleted;
 
-    public Task() {
-
-    }
-
     public Task(String description, int assigneeID, int advisorID,
-                double x, double y, double z, float yaw, float pitch) {
+                double x, double y, double z, float yaw, float pitch,
+                TaskStatus status, Date dateCreation, Date dateCompleted) {
         this.description = description;
         this.assigneeID = assigneeID;
         this.advisorID = advisorID;

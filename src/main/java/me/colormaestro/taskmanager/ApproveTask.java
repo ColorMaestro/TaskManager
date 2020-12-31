@@ -8,10 +8,10 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
-import java.sql.*;
+import java.sql.SQLException;
 
 public class ApproveTask implements CommandExecutor {
-    private TaskDAO taskDAO;
+    private final TaskDAO taskDAO;
 
     public ApproveTask(TaskDAO taskDAO) {
         this.taskDAO = taskDAO;

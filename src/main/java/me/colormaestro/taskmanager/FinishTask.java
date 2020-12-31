@@ -9,7 +9,7 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
-import java.sql.*;
+import java.sql.SQLException;
 
 public class FinishTask implements CommandExecutor {
     private final TaskDAO taskDAO;

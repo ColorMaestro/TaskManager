@@ -7,7 +7,8 @@ import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.plugin.java.JavaPlugin;
 
-import java.io.*;
+import java.io.File;
+import java.io.IOException;
 import java.util.Objects;
 
 public final class TaskManager extends JavaPlugin {
@@ -19,7 +20,7 @@ public final class TaskManager extends JavaPlugin {
     public void onEnable() {
         loadConfig();
         createDAOs();
-        Objects.requireNonNull(this.getCommand("tasks")).setExecutor(new Tasks(config));
+        Objects.requireNonNull(this.getCommand("tasks")).setExecutor(new Tasks(taskDAO, playerDAO));
         Objects.requireNonNull(this.getCommand("addtask")).setExecutor(new AddTask(taskDAO, playerDAO));
         Objects.requireNonNull(this.getCommand("finishtask")).setExecutor(new FinishTask(taskDAO, playerDAO));
         Objects.requireNonNull(this.getCommand("approvetask")).setExecutor(new ApproveTask(taskDAO));

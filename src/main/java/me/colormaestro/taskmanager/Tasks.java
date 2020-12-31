@@ -1,19 +1,25 @@
 package me.colormaestro.taskmanager;
 
+import me.colormaestro.taskmanager.data.DataAccessException;
+import me.colormaestro.taskmanager.data.PlayerDAO;
+import me.colormaestro.taskmanager.data.TaskDAO;
+import me.colormaestro.taskmanager.model.Task;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
-import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 
-import java.sql.*;
+import java.sql.SQLException;
+import java.util.List;
 
 public class Tasks implements CommandExecutor {
-    private final FileConfiguration config;
+    private final TaskDAO taskDAO;
+    private final PlayerDAO playerDAO;
 
-    public Tasks(FileConfiguration config) {
-        this.config = config;
+    public Tasks(TaskDAO taskDAO, PlayerDAO playerDAO) {
+        this.taskDAO = taskDAO;
+        this.playerDAO = playerDAO;
     }
 
     @Override
@@ -26,84 +32,13 @@ public class Tasks implements CommandExecutor {
 
         if ((args.length == 0 && sender instanceof Player) || args.length == 1) {
             Player p = (Player) sender;
-            Connection conn = null;
             try {
-                Class.forName("org.sqlite.JDBC");
-
-                String path = config.getString("db_file_path");
-                String url = "jdbc:sqlite:" + path;
-
-                String columnName = config.getString("translation_table." + p.getName() + ".column");
-                if (args.length == 1) {
-                    columnName = config.getString("translation_table." + args[0] + ".column");
-                    if (columnName == null) {
-                        p.sendMessage(ChatColor.RED + "Invalid username specified, if you believe the username is " +
-                                "correct, check the translation table in config file");
-                        return true;
-                    }
-                }
-                int project_id = config.getInt("project_id");
-
-                conn = DriverManager.getConnection(url);
-
-                // find column according to username and project_id
-                Statement stmt = conn.createStatement();
-                ResultSet rs_column = stmt.executeQuery( "SELECT id FROM columns WHERE " +
-                        "title = '" + columnName + "' AND project_id = " + project_id + ";");
-                if (rs_column.isClosed()) {
-                    p.sendMessage(ChatColor.RED + "ResultSet is empty, check the project_id in config file," +
-                            " also this can happen when player changes his IGN and forget to update the config");
-                } else {
-                    int column_id = rs_column.getInt("id");
-                    ResultSet tasks = stmt.executeQuery( "SELECT id, title, color_id FROM tasks WHERE " +
-                            "column_id = " + column_id + " AND project_id = " + project_id + " AND is_active = 1;");
-                    if (tasks.isClosed()) {
-                        if (args.length == 1) {
-                            p.sendMessage(ChatColor.GREEN + args[0] + " has no tasks!");
-                        } else {
-                            p.sendMessage(ChatColor.GREEN + "You have no tasks!");
-                        }
-                    } else {
-                        if (args.length == 1) {
-                            p.sendMessage(ChatColor.AQUA + "-=-=-=- " + args[0] + "'s tasks -=-=-=-");
-                        } else {
-                            p.sendMessage(ChatColor.AQUA + "-=-=-=- Your tasks -=-=-=-");
-                        }
-                        while (tasks.next()) {
-                            int id = tasks.getInt("id");
-                            String color = tasks.getString("color_id");
-                            String title = tasks.getString("title");
-                            switch (color) {
-                                case "orange":
-                                    p.sendMessage(ChatColor.GOLD + "[" + id + "] " + ChatColor.WHITE + title);
-                                    break;
-                                case "green":
-                                    p.sendMessage(ChatColor.GREEN + "[" + id + "] " + ChatColor.WHITE + title);
-                                    break;
-                                case "red":
-                                    p.sendMessage(ChatColor.RED + "[" + id + "] " + ChatColor.WHITE + title);
-                                    break;
-                                default:
-                                    p.sendMessage("[" + id + "] " + title);
-                            }
-                        }
-                        tasks.close();
-                    }
-                    rs_column.close();
-                }
-                stmt.close();
-            } catch (SQLException | ClassNotFoundException e) {
-                System.out.println(e.getMessage());
-                p.sendMessage(ChatColor.RED + e.getMessage());
-            } finally {
-                try {
-                    if (conn != null) {
-                        conn.close();
-                    }
-                } catch (SQLException ex) {
-                    System.out.println(ex.getMessage());
-                    p.sendMessage(ChatColor.DARK_RED + ex.getMessage());
-                }
+                int id = playerDAO.getPlayerID(p.getUniqueId());
+                List<Task> tasks = taskDAO.fetchPlayersActiveTasks(id);
+                sendTasks(p, tasks);
+            } catch (SQLException | DataAccessException ex) {
+                p.sendMessage(ChatColor.RED + ex.getMessage());
+                ex.printStackTrace();
             }
             return true;
         }
@@ -123,5 +58,19 @@ public class Tasks implements CommandExecutor {
         sender.sendMessage(g + "/finishtask <id>" + w + " - mark task as finished");
         sender.sendMessage(g + "/approvetask <id> [force]" + w + " - approves the finished task (with force also unfinished one)");
         sender.sendMessage(g + "/settaskplace <id>" + w + " - sets spawning point for this task for more comfort :)");
+    }
+
+    private void sendTasks(Player p, List<Task> tasks) {
+        p.sendMessage(ChatColor.AQUA + "-=-=-=- " + p.getName() + "'s tasks -=-=-=-");
+        for (Task task : tasks) {
+            switch (task.getStatus()) {
+                case DOING:
+                    p.sendMessage(ChatColor.GOLD + task.getDescription());
+                    break;
+                case FINISHED:
+                    p.sendMessage(ChatColor.GREEN + task.getDescription());
+                    break;
+            }
+        }
     }
 }
