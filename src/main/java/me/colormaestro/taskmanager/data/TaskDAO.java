@@ -79,7 +79,7 @@ public class TaskDAO {
             st.setDouble(6, task.getZ());
             st.setFloat(7, task.getYaw());
             st.setFloat(8, task.getPitch());
-            st.setString(9, String.valueOf(task.getStatus()));
+            st.setString(9, task.getStatus().name());
             st.setDate(10, new Date(System.currentTimeMillis()));
             st.setDate(11, null);
             st.executeUpdate();
