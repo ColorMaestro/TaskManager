@@ -16,7 +16,7 @@ public class Task {
     private final float pitch;
     private final TaskStatus status;
     private final Date dateCreation;
-    private Date dateCompleted;
+    private final Date dateCompleted;
 
     public Task(String description, int assigneeID, int advisorID,
                 double x, double y, double z, float yaw, float pitch,
@@ -29,8 +29,9 @@ public class Task {
         this.z = z;
         this.yaw = yaw;
         this.pitch = pitch;
-        this.status = TaskStatus.DOING;
-        this.dateCreation = new Date(System.currentTimeMillis());
+        this.status = status;
+        this.dateCreation = dateCreation;
+        this.dateCompleted = dateCompleted;
     }
 
     public void setId(Integer id) {
