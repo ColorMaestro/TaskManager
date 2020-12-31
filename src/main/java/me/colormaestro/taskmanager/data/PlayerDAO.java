@@ -70,8 +70,8 @@ public class PlayerDAO {
             st.executeUpdate("CREATE TABLE PLAYERS (" +
                     "id INTEGER PRIMARY KEY," +
                     "uuid VARCHAR(36) NOT NULL," +
-                    "ign INT NOT NULL," +
-                    "discord_id INT" +
+                    "ign VARCHAR(30) NOT NULL," +
+                    "discord_id VARCHAR(20)" +
                     ")");
         } catch (SQLException ex) {
             throw new RuntimeException("Failed to create PLAYERS table", ex);
