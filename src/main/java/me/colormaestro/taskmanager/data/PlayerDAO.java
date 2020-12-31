@@ -3,10 +3,13 @@ package me.colormaestro.taskmanager.data;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.sql.Connection;
+import java.sql.Date;
 import java.sql.DriverManager;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.UUID;
 
 public class PlayerDAO {
     private final String url;
@@ -58,6 +61,38 @@ public class PlayerDAO {
                     ")");
         } catch (SQLException ex) {
             throw new RuntimeException("Failed to create PLAYERS table", ex);
+        }
+    }
+
+    public int getPlayerID(String name) throws SQLException, DataAccessException {
+        try (Connection connection = DriverManager.getConnection(url);
+             PreparedStatement st = connection.prepareStatement(
+                     "SELECT id FROM PLAYERS WHERE name = ?"
+             )) {
+            st.setString(1, name);
+            ResultSet rs = st.executeQuery();
+            if (rs.isClosed()) {
+                throw new DataAccessException("Player with name " + name + " was not found in the database.");
+            }
+            int id = rs.getInt("id");
+            rs.close();
+            return id;
+        }
+    }
+
+    public int getPlayerID(UUID uuid) throws SQLException, DataAccessException {
+        try (Connection connection = DriverManager.getConnection(url);
+             PreparedStatement st = connection.prepareStatement(
+                     "SELECT id FROM PLAYERS WHERE uuid = ?"
+             )) {
+            st.setString(1, uuid.toString());
+            ResultSet rs = st.executeQuery();
+            if (rs.isClosed()) {
+                throw new DataAccessException("Your uuid was not found in the database. Contact project manager!");
+            }
+            int id = rs.getInt("id");
+            rs.close();
+            return id;
         }
     }
 }

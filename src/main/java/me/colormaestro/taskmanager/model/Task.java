@@ -1,6 +1,7 @@
 package me.colormaestro.taskmanager.model;
 
 import me.colormaestro.taskmanager.enums.TaskStatus;
+import org.bukkit.Location;
 
 import java.sql.Date;
 
@@ -17,6 +18,23 @@ public class Task {
     private TaskStatus status;
     private Date dateCreation;
     private Date dateCompleted;
+
+    public Task() {
+
+    }
+
+    public Task(String description, int assigneeID, int advisorID, Location location) {
+        this.description = description;
+        this.assigneeID = assigneeID;
+        this.advisorID = advisorID;
+        this.x = location.getX();
+        this.y = location.getY();
+        this.z = location.getZ();
+        this.yaw = location.getYaw();
+        this.pitch = location.getPitch();
+        this.status = TaskStatus.DOING;
+        this.dateCreation = new Date(System.currentTimeMillis());
+    }
 
     public Integer getId() {
         return id;

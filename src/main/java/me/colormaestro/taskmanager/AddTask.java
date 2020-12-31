@@ -1,22 +1,24 @@
 package me.colormaestro.taskmanager;
 
+import me.colormaestro.taskmanager.data.DataAccessException;
+import me.colormaestro.taskmanager.data.PlayerDAO;
 import me.colormaestro.taskmanager.data.TaskDAO;
 import me.colormaestro.taskmanager.model.Task;
 import org.bukkit.ChatColor;
-import org.bukkit.Location;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
-import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 
 import java.sql.*;
 
 public class AddTask implements CommandExecutor {
-    private TaskDAO taskDAO;
+    private final TaskDAO taskDAO;
+    private final PlayerDAO playerDAO;
 
-    public AddTask(TaskDAO taskDAO) {
+    public AddTask(TaskDAO taskDAO, PlayerDAO playerDAO) {
         this.taskDAO = taskDAO;
+        this.playerDAO = playerDAO;
     }
 
     @Override
@@ -33,7 +35,16 @@ public class AddTask implements CommandExecutor {
         }
 
         Player p = (Player) sender;
-        Task task = new Task();
+        int assigneeID = 0, advisorID = 0;
+        try {
+            assigneeID = playerDAO.getPlayerID(args[0]);
+            advisorID = playerDAO.getPlayerID(p.getUniqueId());
+        } catch (SQLException | DataAccessException ex) {
+            p.sendMessage(ChatColor.RED + ex.getMessage());
+            ex.printStackTrace();
+        }
+        String description = buildDescription(args);
+        Task task = new Task(description, assigneeID, advisorID, p.getLocation());
         try {
             taskDAO.createTask(task);
             p.sendMessage(ChatColor.GREEN + "Task added.");
@@ -42,5 +53,13 @@ public class AddTask implements CommandExecutor {
             ex.printStackTrace();
         }
         return true;
+    }
+
+    private String buildDescription(String[] args) {
+        StringBuilder builder = new StringBuilder();
+        for (int i = 1; i < args.length; i++) {
+            builder.append(args[i]).append(" ");
+        }
+        return builder.substring(0, builder.length() - 1);
     }
 }

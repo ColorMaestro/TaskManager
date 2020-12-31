@@ -20,7 +20,7 @@ public final class TaskManager extends JavaPlugin {
         loadConfig();
         createDAOs();
         Objects.requireNonNull(this.getCommand("tasks")).setExecutor(new Tasks(config));
-        Objects.requireNonNull(this.getCommand("addtask")).setExecutor(new AddTask(taskDAO));
+        Objects.requireNonNull(this.getCommand("addtask")).setExecutor(new AddTask(taskDAO, playerDAO));
         Objects.requireNonNull(this.getCommand("finishtask")).setExecutor(new FinishTask(taskDAO));
         Objects.requireNonNull(this.getCommand("approvetask")).setExecutor(new ApproveTask(taskDAO));
         Objects.requireNonNull(this.getCommand("visittask")).setExecutor(new VisitTask(config));

@@ -52,7 +52,7 @@ public class TaskDAO {
                     "z DOUBLE," +
                     "yaw DOUBLE," +
                     "pitch DOUBLE," +
-                    "status VARCHAR(20)," +
+                    "status VARCHAR(10)," +
                     "date_given DATE," +
                     "date_finished DATE" +
                     ")");
