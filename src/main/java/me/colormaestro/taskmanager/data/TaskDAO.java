@@ -89,14 +89,15 @@ public class TaskDAO {
     public synchronized void finishTask(int id, int assignee) throws SQLException, DataAccessException {
         try (Connection connection = DriverManager.getConnection(url);
              PreparedStatement st = connection.prepareStatement(
-                     "UPDATE TASKS SET status = 'FINISHED', date_finished = ? WHERE id = ? AND assignee_id = ?")) {
+                     "UPDATE TASKS SET status = 'FINISHED', date_finished = ? WHERE id = ? AND " +
+                             "assignee_id = ? AND status = 'DOING'")) {
 
             st.setDate(1, new Date(System.currentTimeMillis()));
             st.setInt(2, id);
             st.setInt(3, assignee);
             int affected = st.executeUpdate();
             if (affected == 0) {
-                throw new DataAccessException("No change. Make sure you choose your task and not completed yet.");
+                throw new DataAccessException("No change. Make sure you choose your existing task and not completed yet.");
             }
         }
     }
