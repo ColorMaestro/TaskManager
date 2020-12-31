@@ -89,7 +89,7 @@ public class TaskDAO {
     public synchronized void finishTask(int id, int assignee) throws SQLException, DataAccessException {
         try (Connection connection = DriverManager.getConnection(url);
              PreparedStatement st = connection.prepareStatement(
-                     "UPDATE TASKS SET status = 'finished', date_finished = ? WHERE id = ? AND assignee_id = ?")) {
+                     "UPDATE TASKS SET status = 'FINISHED', date_finished = ? WHERE id = ? AND assignee_id = ?")) {
 
             st.setDate(1, new Date(System.currentTimeMillis()));
             st.setInt(2, id);
@@ -107,7 +107,7 @@ public class TaskDAO {
                      "SELECT status FROM TASKS WHERE id = ?"
              );
              PreparedStatement st = connection.prepareStatement(
-                     "UPDATE TASKS SET status = 'approved' WHERE id = ?")) {
+                     "UPDATE TASKS SET status = 'APPROVED' WHERE id = ?")) {
 
             statement.setInt(1, id);
             ResultSet rs = statement.executeQuery();
@@ -162,7 +162,7 @@ public class TaskDAO {
         try (Connection connection = DriverManager.getConnection(url);
              PreparedStatement st = connection.prepareStatement(
                      "SELECT id, description, assignee_id, advisor_id, x, y, z, yaw, pitch, status, " +
-                             "date_given, date_finished FROM TASKS WHERE assignee_id = ? AND status != 'approved'")) {
+                             "date_given, date_finished FROM TASKS WHERE assignee_id = ? AND status != 'APPROVED'")) {
 
             st.setInt(1, assignee);
             ResultSet rs = st.executeQuery();

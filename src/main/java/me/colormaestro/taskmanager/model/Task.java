@@ -6,16 +6,16 @@ import java.sql.Date;
 
 public class Task {
     private Integer id;
-    private String description;
-    private int assigneeID;
-    private int advisorID;
-    private double x;
-    private double y;
-    private double z;
-    private float yaw;
-    private float pitch;
-    private TaskStatus status;
-    private Date dateCreation;
+    private final String description;
+    private final int assigneeID;
+    private final int advisorID;
+    private final double x;
+    private final double y;
+    private final double z;
+    private final float yaw;
+    private final float pitch;
+    private final TaskStatus status;
+    private final Date dateCreation;
     private Date dateCompleted;
 
     public Task(String description, int assigneeID, int advisorID,
