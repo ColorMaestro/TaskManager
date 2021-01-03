@@ -40,6 +40,8 @@ public class HologramLayer {
         manager.saveHologram(hologram);  // Adds to YAML file in plugin working directory
         hologram.spawn();  // Shows the hologram (It doesn't show by default, when added this way)
         player.sendMessage(ChatColor.GREEN + "✔ Your personal visual task list has been established!");
+        player.sendMessage(ChatColor.GREEN + "ℹ If you want to move hologram somewhere else, do "
+                + ChatColor.GOLD + "" + ChatColor.BOLD + " /establish" + ChatColor.GREEN +" there");
     }
 
     public boolean hologramExists(String key) {
@@ -51,5 +53,18 @@ public class HologramLayer {
             }
         }
         return false;
+    }
+
+    public void teleportHologram(Player player, String key) {
+        Map<String, Hologram> map = manager.getActiveHolograms();
+        Set<String> names = map.keySet();
+        for (String name : names) {
+            if (name.equals(key)) {
+                Location location = player.getLocation();
+                location.setY(location.getY() + 2);
+                map.get(key).teleport(location);
+                break;
+            }
+        }
     }
 }

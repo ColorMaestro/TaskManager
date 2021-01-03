@@ -19,7 +19,7 @@ public class Establish implements CommandExecutor {
         Player player = (Player) sender;
         String uuid = player.getUniqueId().toString();
         if (HologramLayer.getInstance().hologramExists(uuid)) {
-            player.sendMessage(ChatColor.RED + "█ Your visual task list has been established yet!");
+            HologramLayer.getInstance().teleportHologram(player, uuid);
         } else {
             HologramLayer.getInstance().establishTasksHologram(player);
         }
