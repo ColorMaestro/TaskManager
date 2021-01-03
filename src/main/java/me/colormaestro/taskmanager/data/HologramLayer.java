@@ -31,6 +31,7 @@ public class HologramLayer {
 
     public void establishTasksHologram(Player player) {
         Location location = player.getLocation();
+        location.setY(location.getY() + 2);
         Hologram hologram = new Hologram(player.getUniqueId().toString(), location);
         HologramLine line = new TextLine(hologram,
                 ChatColor.YELLOW + "" + ChatColor.BOLD + player.getName() + "'s task list");
@@ -38,7 +39,7 @@ public class HologramLayer {
         manager.addActiveHologram(hologram);  // Adds to memory
         manager.saveHologram(hologram);  // Adds to YAML file in plugin working directory
         hologram.spawn();  // Shows the hologram (It doesn't show by default, when added this way)
-        player.sendMessage(ChatColor.DARK_AQUA + "█ Your personal hologram has been established! █");
+        player.sendMessage(ChatColor.GREEN + "✔ Your personal visual task list has been established!");
     }
 
     public boolean hologramExists(String key) {
