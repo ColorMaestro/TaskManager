@@ -3,6 +3,7 @@ version: ${project.version}
 main: me.colormaestro.taskmanager.TaskManager
 api-version: 1.15
 authors: [ColorMaestro]
+depend: [Holograms]
 commands:
   tasks:
     description: Shows your or other player tasks.
