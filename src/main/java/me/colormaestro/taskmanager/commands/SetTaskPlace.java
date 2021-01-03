@@ -1,6 +1,7 @@
-package me.colormaestro.taskmanager;
+package me.colormaestro.taskmanager.commands;
 
 import me.colormaestro.taskmanager.data.DataAccessException;
+import me.colormaestro.taskmanager.data.PlayerDAO;
 import me.colormaestro.taskmanager.data.TaskDAO;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
@@ -10,11 +11,13 @@ import org.bukkit.entity.Player;
 
 import java.sql.SQLException;
 
-public class ApproveTask implements CommandExecutor {
+public class SetTaskPlace implements CommandExecutor {
     private final TaskDAO taskDAO;
+    private final PlayerDAO playerDAO;
 
-    public ApproveTask(TaskDAO taskDAO) {
+    public SetTaskPlace(TaskDAO taskDAO, PlayerDAO playerDAO) {
         this.taskDAO = taskDAO;
+        this.playerDAO = playerDAO;
     }
 
     @Override
@@ -30,11 +33,10 @@ public class ApproveTask implements CommandExecutor {
         }
 
         Player p = (Player) sender;
-        boolean force = args.length == 2 && args[1].equals("force");
         try {
+            int assignee = playerDAO.getPlayerID(p.getUniqueId());
             int id = Integer.parseInt(args[0]);
-            taskDAO.approveTask(id, force);
-            p.sendMessage(ChatColor.GREEN + "Task approved.");
+            taskDAO.updateTaskCords(id, assignee, p.getLocation());
         } catch (SQLException | DataAccessException | NumberFormatException ex) {
             p.sendMessage(ChatColor.RED + ex.getMessage());
             ex.printStackTrace();

@@ -35,3 +35,8 @@ commands:
     usage: Usage /settaskplace <id>
     permission: taskmanager.settaskplace
     permission-message: You don't have permission to set spawn position for task
+  establish:
+    description: Establishes the Hologram where is summary of players tasks.
+    usage: Usage /establish
+    permission: taskmanager.establish
+    permission-message: You don't have permission to establish task hologram

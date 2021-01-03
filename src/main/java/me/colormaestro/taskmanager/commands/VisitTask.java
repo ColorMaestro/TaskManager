@@ -1,4 +1,4 @@
-package me.colormaestro.taskmanager;
+package me.colormaestro.taskmanager.commands;
 
 import me.colormaestro.taskmanager.data.DataAccessException;
 import me.colormaestro.taskmanager.data.TaskDAO;
