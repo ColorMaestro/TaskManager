@@ -39,8 +39,8 @@ public class HologramLayer {
         manager.addActiveHologram(hologram);  // Adds to memory
         manager.saveHologram(hologram);  // Adds to YAML file in plugin working directory
         hologram.spawn();  // Shows the hologram (It doesn't show by default, when added this way)
-        player.sendMessage(ChatColor.GREEN + "✔ Your personal visual task list has been established!");
-        player.sendMessage(ChatColor.GREEN + "ℹ If you want to move hologram somewhere else, do "
+        player.sendMessage(ChatColor.GREEN + "✔ Your visual task list has been established!");
+        player.sendMessage(ChatColor.GREEN + "ℹ If you want to move it somewhere else, do"
                 + ChatColor.GOLD + "" + ChatColor.BOLD + " /establish" + ChatColor.GREEN +" there");
     }
 
