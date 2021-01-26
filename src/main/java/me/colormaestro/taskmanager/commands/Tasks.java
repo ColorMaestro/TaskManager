@@ -4,14 +4,17 @@ import me.colormaestro.taskmanager.data.DataAccessException;
 import me.colormaestro.taskmanager.data.PlayerDAO;
 import me.colormaestro.taskmanager.data.TaskDAO;
 import me.colormaestro.taskmanager.model.Task;
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import org.bukkit.plugin.Plugin;
 
 import java.sql.SQLException;
 import java.util.List;
+import java.util.UUID;
 
 public class Tasks implements CommandExecutor {
     private final TaskDAO taskDAO;
@@ -31,21 +34,27 @@ public class Tasks implements CommandExecutor {
         }
 
         if (sender instanceof Player && (args.length == 0 || args.length == 1)) {
+            Plugin plugin = Bukkit.getPluginManager().getPlugin("TaskManager");
             Player p = (Player) sender;
-            try {
-                int id;
-                if (args.length == 0) {
-                    id = playerDAO.getPlayerID(p.getUniqueId());
-                } else {
-                    id = playerDAO.getPlayerID(args[0]);
+            UUID uuid = p.getUniqueId();
+            Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
+                try {
+                    int id;
+                    if (args.length == 0) {
+                        id = playerDAO.getPlayerID(uuid);
+                    } else {
+                        id = playerDAO.getPlayerID(args[0]);
+                    }
+                    String playerIGN = playerDAO.getPlayerIGN(id);
+                    List<Task> tasks = taskDAO.fetchPlayersActiveTasks(id);
+                    Bukkit.getScheduler().runTask(plugin,
+                            () -> sendTasks(p, tasks, playerIGN));
+                } catch (SQLException | DataAccessException ex) {
+                    Bukkit.getScheduler().runTask(plugin,
+                            () -> p.sendMessage(ChatColor.RED + ex.getMessage()));
+                    ex.printStackTrace();
                 }
-                String ign = playerDAO.getPlayerIGN(id);
-                List<Task> tasks = taskDAO.fetchPlayersActiveTasks(id);
-                sendTasks(p, tasks, ign);
-            } catch (SQLException | DataAccessException ex) {
-                p.sendMessage(ChatColor.RED + ex.getMessage());
-                ex.printStackTrace();
-            }
+            });
             return true;
         }
 
