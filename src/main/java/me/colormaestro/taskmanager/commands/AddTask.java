@@ -5,14 +5,17 @@ import me.colormaestro.taskmanager.data.PlayerDAO;
 import me.colormaestro.taskmanager.data.TaskDAO;
 import me.colormaestro.taskmanager.enums.TaskStatus;
 import me.colormaestro.taskmanager.model.Task;
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import org.bukkit.plugin.Plugin;
 
 import java.sql.Date;
 import java.sql.SQLException;
+import java.util.UUID;
 
 
 public class AddTask implements CommandExecutor {
@@ -37,33 +40,41 @@ public class AddTask implements CommandExecutor {
             return true;
         }
 
+
+        Plugin plugin = Bukkit.getPluginManager().getPlugin("TaskManager");
         Player p = (Player) sender;
-        int assigneeID = 0, advisorID = 0;
-        try {
-            assigneeID = playerDAO.getPlayerID(args[0]);
-            advisorID = playerDAO.getPlayerID(p.getUniqueId());
-        } catch (SQLException | DataAccessException ex) {
-            p.sendMessage(ChatColor.RED + ex.getMessage());
-            ex.printStackTrace();
-        }
+        UUID uuid = p.getUniqueId();
+        String ign = args[0];
         String description = buildDescription(args);
-        Task task = new Task(description, assigneeID, advisorID,
-                p.getLocation().getX(),
-                p.getLocation().getY(),
-                p.getLocation().getZ(),
-                p.getLocation().getYaw(),
-                p.getLocation().getPitch(),
-                TaskStatus.DOING,
-                new Date(System.currentTimeMillis()),
-                null
-        );
-        try {
-            taskDAO.createTask(task);
-            p.sendMessage(ChatColor.GREEN + "Task added.");
-        } catch (SQLException | IllegalArgumentException ex) {
-            p.sendMessage(ChatColor.RED + ex.getMessage());
-            ex.printStackTrace();
-        }
+        double x = p.getLocation().getX();
+        double y = p.getLocation().getY();
+        double z = p.getLocation().getZ();
+        float yaw = p.getLocation().getYaw();
+        float pitch = p.getLocation().getPitch();
+
+        Bukkit.getScheduler().runTaskAsynchronously(plugin,
+                () -> {
+                    int assigneeID = 0, advisorID = 0;
+                    try {
+                        assigneeID = playerDAO.getPlayerID(ign);
+                        advisorID = playerDAO.getPlayerID(uuid);
+                    } catch (SQLException | DataAccessException ex) {
+                        Bukkit.getScheduler().runTask(plugin,
+                                () -> p.sendMessage(ChatColor.RED + ex.getMessage()));
+                        ex.printStackTrace();
+                    }
+                    Task task = new Task(description, assigneeID, advisorID, x, y, z, yaw, pitch,
+                            TaskStatus.DOING, new Date(System.currentTimeMillis()), null);
+                    try {
+                        taskDAO.createTask(task);
+                        Bukkit.getScheduler().runTask(plugin,
+                                () -> p.sendMessage(ChatColor.GREEN + "Task added."));
+                    } catch (SQLException | IllegalArgumentException ex) {
+                        Bukkit.getScheduler().runTask(plugin,
+                                () -> p.sendMessage(ChatColor.RED + ex.getMessage()));
+                        ex.printStackTrace();
+                    }
+                });
         return true;
     }
 
