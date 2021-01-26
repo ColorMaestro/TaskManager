@@ -3,12 +3,14 @@ package me.colormaestro.taskmanager.commands;
 import me.colormaestro.taskmanager.data.DataAccessException;
 import me.colormaestro.taskmanager.data.TaskDAO;
 import me.colormaestro.taskmanager.model.Task;
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import org.bukkit.plugin.Plugin;
 
 import java.sql.SQLException;
 
@@ -31,17 +33,25 @@ public class VisitTask implements CommandExecutor {
             return true;
         }
 
+        Plugin plugin = Bukkit.getPluginManager().getPlugin("TaskManager");
         Player p = (Player) sender;
-        try {
-            int id = Integer.parseInt(args[0]);
-            Task task = taskDAO.findTask(id);
-            Location location = new Location(p.getWorld(), task.getX(), task.getY(), task.getZ(),
-                    task.getYaw(), task.getPitch());
-            p.teleport(location);
-        } catch (SQLException | DataAccessException | NumberFormatException ex) {
-            p.sendMessage(ChatColor.RED + ex.getMessage());
-            ex.printStackTrace();
-        }
+        String sid = args[0];
+        Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
+            try {
+                int id = Integer.parseInt(sid);
+                Task task = taskDAO.findTask(id);
+                Bukkit.getScheduler().runTask(plugin,
+                        () -> {
+                            Location location = new Location(p.getWorld(), task.getX(), task.getY(), task.getZ(),
+                                    task.getYaw(), task.getPitch());
+                            p.teleport(location);
+                        });
+            } catch (SQLException | DataAccessException | NumberFormatException ex) {
+                Bukkit.getScheduler().runTask(plugin,
+                        () -> p.sendMessage(ChatColor.RED + ex.getMessage()));
+                ex.printStackTrace();
+            }
+        });
         return true;
     }
 }
