@@ -2,13 +2,16 @@ package me.colormaestro.taskmanager.commands;
 
 import me.colormaestro.taskmanager.data.DataAccessException;
 import me.colormaestro.taskmanager.data.TaskDAO;
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import org.bukkit.plugin.Plugin;
 
 import java.sql.SQLException;
+import java.util.function.BiConsumer;
 
 public class ApproveTask implements CommandExecutor {
     private final TaskDAO taskDAO;
@@ -29,16 +32,23 @@ public class ApproveTask implements CommandExecutor {
             return true;
         }
 
+        Plugin plugin = Bukkit.getPluginManager().getPlugin("TaskManager");
         Player p = (Player) sender;
+        String sid = args[0];
         boolean force = args.length == 2 && args[1].equals("force");
-        try {
-            int id = Integer.parseInt(args[0]);
-            taskDAO.approveTask(id, force);
-            p.sendMessage(ChatColor.GREEN + "Task approved.");
-        } catch (SQLException | DataAccessException | NumberFormatException ex) {
-            p.sendMessage(ChatColor.RED + ex.getMessage());
-            ex.printStackTrace();
-        }
+        Bukkit.getScheduler().runTaskAsynchronously(plugin,
+                () -> {
+                    try {
+                        int id = Integer.parseInt(sid);
+                        taskDAO.approveTask(id, force);
+                        Bukkit.getScheduler().runTask(plugin,
+                                () -> p.sendMessage(ChatColor.GREEN + "Task approved."));
+                    } catch (SQLException | DataAccessException | NumberFormatException ex) {
+                        Bukkit.getScheduler().runTask(plugin,
+                                () -> p.sendMessage(ChatColor.RED + ex.getMessage()));
+                        ex.printStackTrace();
+                    }
+                });
         return true;
     }
 }
