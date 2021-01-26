@@ -35,12 +35,11 @@ public class AddTask implements CommandExecutor {
             return true;
         }
 
-        if (args.length < 2) {
-            sender.sendMessage(ChatColor.RED + "You must provide description for task.");
+        if (args.length < 1) {
+            sender.sendMessage(ChatColor.RED + "You must provide player name who to add task to.");
             return true;
         }
-
-
+        
         Plugin plugin = Bukkit.getPluginManager().getPlugin("TaskManager");
         Player p = (Player) sender;
         UUID uuid = p.getUniqueId();
