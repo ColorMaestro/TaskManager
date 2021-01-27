@@ -4,16 +4,19 @@ import com.sainttx.holograms.api.Hologram;
 import com.sainttx.holograms.api.HologramManager;
 import com.sainttx.holograms.api.line.HologramLine;
 import com.sainttx.holograms.api.line.TextLine;
+import me.colormaestro.taskmanager.enums.TaskStatus;
+import me.colormaestro.taskmanager.model.Task;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 public class HologramLayer {
     private static HologramLayer instance;
-    private HologramManager manager;
+    private final HologramManager manager;
 
     private HologramLayer(HologramManager manager) {
         this.manager = manager;
@@ -66,5 +69,23 @@ public class HologramLayer {
                 break;
             }
         }
+    }
+
+    public void setTasks(String uuid, List<Task> tasks) {
+        Hologram hologram = manager.getHologram(uuid);
+        if (hologram == null) {
+            return;
+        }
+        HologramLine currentLine;
+        while ((currentLine = hologram.getLine(1)) != null) {
+            hologram.removeLine(currentLine);
+        }
+        for (Task task : tasks) {
+            ChatColor color = task.getStatus() == TaskStatus.FINISHED ? ChatColor.GREEN : ChatColor.GOLD;
+            HologramLine line = new TextLine(hologram, color + "[" + task.getId() + "] "
+                    + ChatColor.WHITE + task.getTitle());
+            hologram.addLine(line);
+        }
+        manager.saveHologram(hologram);
     }
 }

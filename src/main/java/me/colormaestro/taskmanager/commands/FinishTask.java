@@ -1,8 +1,10 @@
 package me.colormaestro.taskmanager.commands;
 
 import me.colormaestro.taskmanager.data.DataAccessException;
+import me.colormaestro.taskmanager.data.HologramLayer;
 import me.colormaestro.taskmanager.data.PlayerDAO;
 import me.colormaestro.taskmanager.data.TaskDAO;
+import me.colormaestro.taskmanager.model.Task;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
@@ -12,6 +14,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 
 import java.sql.SQLException;
+import java.util.List;
 import java.util.UUID;
 
 public class FinishTask implements CommandExecutor {
@@ -40,11 +43,16 @@ public class FinishTask implements CommandExecutor {
         UUID uuid = p.getUniqueId();
         Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
             try {
-                int assignee = playerDAO.getPlayerID(uuid);
+                int assigneeID = playerDAO.getPlayerID(uuid);
                 int id = Integer.parseInt(args[0]);
-                taskDAO.finishTask(id, assignee);
+                taskDAO.finishTask(id, assigneeID);
+                List<Task> activeTasks = taskDAO.fetchPlayersActiveTasks(assigneeID);
+                String assigneeUUID = playerDAO.getPlayerUUID(assigneeID);
                 Bukkit.getScheduler().runTask(plugin,
-                        () -> p.sendMessage(ChatColor.GREEN + "Task finished."));
+                        () -> {
+                            p.sendMessage(ChatColor.GREEN + "Task finished.");
+                            HologramLayer.getInstance().setTasks(assigneeUUID, activeTasks);
+                        });
             } catch (SQLException | DataAccessException | NumberFormatException ex) {
                 Bukkit.getScheduler().runTask(plugin,
                         () -> p.sendMessage(ChatColor.RED + ex.getMessage()));

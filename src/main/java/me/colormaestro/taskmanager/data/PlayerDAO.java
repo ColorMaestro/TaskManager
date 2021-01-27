@@ -125,4 +125,20 @@ public class PlayerDAO {
             return ign;
         }
     }
+
+    public synchronized String getPlayerUUID(int id) throws SQLException, DataAccessException {
+        try (Connection connection = DriverManager.getConnection(url);
+             PreparedStatement st = connection.prepareStatement(
+                     "SELECT uuid FROM PLAYERS WHERE id = ?"
+             )) {
+            st.setInt(1, id);
+            ResultSet rs = st.executeQuery();
+            if (rs.isClosed()) {
+                throw new DataAccessException("Failed to get player UUID according to UUID. Contact developers!");
+            }
+            String ign = rs.getString("uuid");
+            rs.close();
+            return ign;
+        }
+    }
 }

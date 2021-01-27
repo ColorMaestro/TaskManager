@@ -1,7 +1,10 @@
 package me.colormaestro.taskmanager.commands;
 
 import me.colormaestro.taskmanager.data.DataAccessException;
+import me.colormaestro.taskmanager.data.HologramLayer;
+import me.colormaestro.taskmanager.data.PlayerDAO;
 import me.colormaestro.taskmanager.data.TaskDAO;
+import me.colormaestro.taskmanager.model.Task;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
@@ -11,13 +14,16 @@ import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 
 import java.sql.SQLException;
+import java.util.List;
 import java.util.function.BiConsumer;
 
 public class ApproveTask implements CommandExecutor {
     private final TaskDAO taskDAO;
+    private final PlayerDAO playerDAO;
 
-    public ApproveTask(TaskDAO taskDAO) {
+    public ApproveTask(TaskDAO taskDAO, PlayerDAO playerDAO) {
         this.taskDAO = taskDAO;
+        this.playerDAO = playerDAO;
     }
 
     @Override
@@ -41,8 +47,14 @@ public class ApproveTask implements CommandExecutor {
                     try {
                         int id = Integer.parseInt(sid);
                         taskDAO.approveTask(id, force);
+                        Task task = taskDAO.findTask(id);
+                        List<Task> activeTasks = taskDAO.fetchPlayersActiveTasks(task.getAssigneeID());
+                        String assigneeUUID = playerDAO.getPlayerUUID(task.getAssigneeID());
                         Bukkit.getScheduler().runTask(plugin,
-                                () -> p.sendMessage(ChatColor.GREEN + "Task approved."));
+                                () -> {
+                                    p.sendMessage(ChatColor.GREEN + "Task approved.");
+                                    HologramLayer.getInstance().setTasks(assigneeUUID, activeTasks);
+                                });
                     } catch (SQLException | DataAccessException | NumberFormatException ex) {
                         Bukkit.getScheduler().runTask(plugin,
                                 () -> p.sendMessage(ChatColor.RED + ex.getMessage()));

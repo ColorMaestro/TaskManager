@@ -17,6 +17,7 @@ import org.bukkit.plugin.Plugin;
 
 import java.sql.Date;
 import java.sql.SQLException;
+import java.util.List;
 import java.util.UUID;
 
 public class CustomListener implements Listener {
@@ -96,9 +97,14 @@ public class CustomListener implements Listener {
                             TaskStatus.DOING, new Date(System.currentTimeMillis()), null);
                     try {
                         taskDAO.createTask(task);
+                        List<Task> activeTasks = taskDAO.fetchPlayersActiveTasks(assigneeID);
+                        String assigneeUUID = playerDAO.getPlayerUUID(assigneeID);
                         Bukkit.getScheduler().runTask(plugin,
-                                () -> p.sendMessage(ChatColor.GREEN + "Task added."));
-                    } catch (SQLException | IllegalArgumentException ex) {
+                                () -> {
+                                    p.sendMessage(ChatColor.GREEN + "Task added.");
+                                    HologramLayer.getInstance().setTasks(assigneeUUID, activeTasks);
+                                });
+                    } catch (SQLException | IllegalArgumentException | DataAccessException ex) {
                         Bukkit.getScheduler().runTask(plugin,
                                 () -> p.sendMessage(ChatColor.RED + ex.getMessage()));
                         ex.printStackTrace();
