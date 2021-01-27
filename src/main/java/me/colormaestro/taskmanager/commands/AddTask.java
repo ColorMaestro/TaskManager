@@ -1,31 +1,18 @@
 package me.colormaestro.taskmanager.commands;
 
-import me.colormaestro.taskmanager.data.DataAccessException;
-import me.colormaestro.taskmanager.data.PlayerDAO;
-import me.colormaestro.taskmanager.data.TaskDAO;
-import me.colormaestro.taskmanager.enums.TaskStatus;
-import me.colormaestro.taskmanager.model.Task;
-import org.bukkit.Bukkit;
+import net.md_5.bungee.api.chat.BaseComponent;
+import net.md_5.bungee.api.chat.ComponentBuilder;
 import org.bukkit.ChatColor;
+import org.bukkit.Material;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
-import org.bukkit.plugin.Plugin;
-
-import java.sql.Date;
-import java.sql.SQLException;
-import java.util.UUID;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.BookMeta;
 
 
 public class AddTask implements CommandExecutor {
-    private final TaskDAO taskDAO;
-    private final PlayerDAO playerDAO;
-
-    public AddTask(TaskDAO taskDAO, PlayerDAO playerDAO) {
-        this.taskDAO = taskDAO;
-        this.playerDAO = playerDAO;
-    }
 
     @Override
     public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
@@ -39,49 +26,35 @@ public class AddTask implements CommandExecutor {
             sender.sendMessage(ChatColor.RED + "You must provide player name who to add task to.");
             return true;
         }
-        
-        Plugin plugin = Bukkit.getPluginManager().getPlugin("TaskManager");
-        Player p = (Player) sender;
-        UUID uuid = p.getUniqueId();
-        String ign = args[0];
-        String description = buildDescription(args);
-        double x = p.getLocation().getX();
-        double y = p.getLocation().getY();
-        double z = p.getLocation().getZ();
-        float yaw = p.getLocation().getYaw();
-        float pitch = p.getLocation().getPitch();
 
-        Bukkit.getScheduler().runTaskAsynchronously(plugin,
-                () -> {
-                    int assigneeID = 0, advisorID = 0;
-                    try {
-                        assigneeID = playerDAO.getPlayerID(ign);
-                        advisorID = playerDAO.getPlayerID(uuid);
-                    } catch (SQLException | DataAccessException ex) {
-                        Bukkit.getScheduler().runTask(plugin,
-                                () -> p.sendMessage(ChatColor.RED + ex.getMessage()));
-                        ex.printStackTrace();
-                    }
-                    Task task = new Task(description, assigneeID, advisorID, x, y, z, yaw, pitch,
-                            TaskStatus.DOING, new Date(System.currentTimeMillis()), null);
-                    try {
-                        taskDAO.createTask(task);
-                        Bukkit.getScheduler().runTask(plugin,
-                                () -> p.sendMessage(ChatColor.GREEN + "Task added."));
-                    } catch (SQLException | IllegalArgumentException ex) {
-                        Bukkit.getScheduler().runTask(plugin,
-                                () -> p.sendMessage(ChatColor.RED + ex.getMessage()));
-                        ex.printStackTrace();
-                    }
-                });
+        Player p = (Player) sender;
+        ItemStack book = buildBook(args[0]);
+        p.getInventory().addItem(book);
         return true;
     }
 
-    private String buildDescription(String[] args) {
-        StringBuilder builder = new StringBuilder();
-        for (int i = 1; i < args.length; i++) {
-            builder.append(args[i]).append(" ");
-        }
-        return builder.substring(0, builder.length() - 1);
+    private ItemStack buildBook(String ign) {
+        ItemStack book = new ItemStack(Material.WRITABLE_BOOK);
+        BookMeta bookMeta = (BookMeta) book.getItemMeta();
+
+        BaseComponent[] page = new ComponentBuilder("*@create\n")
+                .append("Do not modify this page!\n")
+                .color(net.md_5.bungee.api.ChatColor.DARK_RED).bold(true)
+                .append("Instructions:\n")
+                .color(net.md_5.bungee.api.ChatColor.BLUE).bold(false)
+                .append("1) Only the second page of this book serves as task description " +
+                    "for player what to do in this task.\n")
+                .color(net.md_5.bungee.api.ChatColor.RESET)
+                .append("2) Book title serves as headline for the task - this will be displayed at the hologram.\n")
+                .append("3) Tasks is created immediately after you sign the book.\n")
+                .create();
+
+        BaseComponent[] page2 = new ComponentBuilder("").create();
+
+        bookMeta.spigot().addPage(page);
+        bookMeta.spigot().addPage(page2);
+        bookMeta.setDisplayName(ChatColor.GOLD + "Assignment book for:" + ign);
+        book.setItemMeta(bookMeta);
+        return book;
     }
 }
