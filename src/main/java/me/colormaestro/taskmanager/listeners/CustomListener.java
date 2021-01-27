@@ -18,6 +18,7 @@ import org.bukkit.plugin.Plugin;
 import java.sql.Date;
 import java.sql.SQLException;
 import java.util.UUID;
+import java.util.regex.PatternSyntaxException;
 
 public class CustomListener implements Listener {
     private final TaskDAO taskDAO;
@@ -64,10 +65,17 @@ public class CustomListener implements Listener {
         UUID uuid = p.getUniqueId();
 
         String prevDispName = event.getPreviousBookMeta().getDisplayName();
-        String[] tmp = prevDispName.split(":");
+        String[] tmp = {"-1"};
+        try {
+            tmp = prevDispName.split(":");
+        } catch (PatternSyntaxException ex) {
+            p.sendMessage(ChatColor.DARK_PURPLE + "Ayyy you, you found the plugin secret :D POG, however, you need "
+                    + "to use /addtask command for creating tasks ;)");
+        }
         String ign = tmp[1];
 
         String description = event.getNewBookMeta().getPage(2);
+        String title = event.getNewBookMeta().getTitle();
 
         double x = p.getLocation().getX();
         double y = p.getLocation().getY();
@@ -86,7 +94,7 @@ public class CustomListener implements Listener {
                                 () -> p.sendMessage(ChatColor.RED + ex.getMessage()));
                         ex.printStackTrace();
                     }
-                    Task task = new Task(description, assigneeID, advisorID, x, y, z, yaw, pitch,
+                    Task task = new Task(title, description, assigneeID, advisorID, x, y, z, yaw, pitch,
                             TaskStatus.DOING, new Date(System.currentTimeMillis()), null);
                     try {
                         taskDAO.createTask(task);

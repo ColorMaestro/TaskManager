@@ -6,6 +6,7 @@ import java.sql.Date;
 
 public class Task {
     private Integer id;
+    private final String title;
     private final String description;
     private final int assigneeID;
     private final int advisorID;
@@ -18,9 +19,10 @@ public class Task {
     private final Date dateCreation;
     private final Date dateCompleted;
 
-    public Task(String description, int assigneeID, int advisorID,
+    public Task(String title, String description, int assigneeID, int advisorID,
                 double x, double y, double z, float yaw, float pitch,
                 TaskStatus status, Date dateCreation, Date dateCompleted) {
+        this.title = title;
         this.description = description;
         this.assigneeID = assigneeID;
         this.advisorID = advisorID;
@@ -40,6 +42,10 @@ public class Task {
 
     public Integer getId() {
         return id;
+    }
+
+    public String getTitle() {
+        return title;
     }
 
     public String getDescription() {

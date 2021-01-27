@@ -46,7 +46,8 @@ public class TaskDAO {
 
             st.executeUpdate("CREATE TABLE TASKS (" +
                     "id INTEGER PRIMARY KEY," +
-                    "description VARCHAR(100) NOT NULL," +
+                    "title VARCHAR(40) NOT NULL," +
+                    "description VARCHAR(200) NOT NULL," +
                     "assignee_id INT NOT NULL," +
                     "advisor_id INT NOT NULL," +
                     "x DOUBLE," +
@@ -142,6 +143,7 @@ public class TaskDAO {
                 throw new DataAccessException("No task found with id " + id);
             }
             Task task = new Task(
+                    rs.getString("title"),
                     rs.getString("description"),
                     rs.getInt("assignee_id"),
                     rs.getInt("advisor_id"),
@@ -170,6 +172,7 @@ public class TaskDAO {
             List<Task> tasks = new ArrayList<>();
             while (rs.next()) {
                 Task task = new Task(
+                        rs.getString("title"),
                         rs.getString("description"),
                         rs.getInt("assignee_id"),
                         rs.getInt("advisor_id"),

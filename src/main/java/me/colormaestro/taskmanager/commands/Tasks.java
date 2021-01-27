@@ -84,10 +84,10 @@ public class Tasks implements CommandExecutor {
         for (Task task : tasks) {
             switch (task.getStatus()) {
                 case DOING:
-                    p.sendMessage(ChatColor.GOLD + "[" + task.getId() + "] " + ChatColor.WHITE + task.getDescription());
+                    p.sendMessage(ChatColor.GOLD + "[" + task.getId() + "] " + ChatColor.WHITE + task.getTitle());
                     break;
                 case FINISHED:
-                    p.sendMessage(ChatColor.GREEN + "[" + task.getId() + "] " + ChatColor.WHITE + task.getDescription());
+                    p.sendMessage(ChatColor.GREEN + "[" + task.getId() + "] " + ChatColor.WHITE + task.getTitle());
                     break;
             }
         }
