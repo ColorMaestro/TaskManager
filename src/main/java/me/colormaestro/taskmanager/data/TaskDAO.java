@@ -158,6 +158,7 @@ public class TaskDAO {
                     rs.getDate("date_finished")
             );
             rs.close();
+            task.setId(id);
             return task;
         }
     }

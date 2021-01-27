@@ -75,7 +75,6 @@ public class CustomListener implements Listener {
 
         String description = event.getNewBookMeta().getPage(2);
         String title = event.getNewBookMeta().getTitle();
-        p.sendMessage("Tile: " + event.getNewBookMeta().getTitle());
 
         double x = p.getLocation().getX();
         double y = p.getLocation().getY();
