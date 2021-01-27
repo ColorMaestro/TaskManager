@@ -73,6 +73,7 @@ public class Tasks implements CommandExecutor {
         sender.sendMessage(g + "/finishtask <id>" + w + " - mark task as finished");
         sender.sendMessage(g + "/approvetask <id> [force]" + w + " - approves the finished task (with force also unfinished one)");
         sender.sendMessage(g + "/settaskplace <id>" + w + " - sets spawning point for this task for more comfort :)");
+        sender.sendMessage(g + "/establish" + w + " - establishes the Hologram where is summary of players tasks.");
     }
 
     private void sendTasks(Player p, List<Task> tasks, String name) {

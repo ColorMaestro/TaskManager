@@ -18,7 +18,6 @@ import org.bukkit.plugin.Plugin;
 import java.sql.Date;
 import java.sql.SQLException;
 import java.util.UUID;
-import java.util.regex.PatternSyntaxException;
 
 public class CustomListener implements Listener {
     private final TaskDAO taskDAO;
