@@ -1,5 +1,7 @@
 package me.colormaestro.taskmanager.data;
 
+import me.colormaestro.taskmanager.model.Task;
+
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.sql.Connection;
@@ -8,6 +10,8 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 public class PlayerDAO {
@@ -139,6 +143,20 @@ public class PlayerDAO {
             String ign = rs.getString("uuid");
             rs.close();
             return ign;
+        }
+    }
+
+    public synchronized List<String> getAllIGN() throws SQLException {
+        try (Connection connection = DriverManager.getConnection(url);
+             PreparedStatement st = connection.prepareStatement(
+                     "SELECT ign FROM PLAYERS")) {
+            ResultSet rs = st.executeQuery();
+            List<String> result = new ArrayList<>();
+            while (rs.next()) {
+                result.add(rs.getString("ign"));
+            }
+            rs.close();
+            return result;
         }
     }
 }

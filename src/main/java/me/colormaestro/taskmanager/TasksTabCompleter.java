@@ -1,40 +1,43 @@
 package me.colormaestro.taskmanager;
 
+import me.colormaestro.taskmanager.data.PlayerDAO;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
-import org.bukkit.configuration.MemorySection;
-import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 
-import java.util.LinkedList;
+import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 
 public class TasksTabCompleter implements TabCompleter {
-    private final FileConfiguration config;
+    private final List<String> igns;
 
-    public TasksTabCompleter(FileConfiguration config) {
-        this.config = config;
+    public TasksTabCompleter(PlayerDAO playerDAO) {
+        List<String> tmp;
+        try {
+            tmp = playerDAO.getAllIGN();
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+            tmp = new ArrayList<>();
+        }
+        this.igns = tmp;
     }
 
     @Override
     public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
         if (sender instanceof Player) {
-            Player p = (Player) sender;
-            if (args.length > 0) {
-                MemorySection memorySection = (MemorySection) config.get("translation_table");
-                Set<String> set = memorySection.getKeys(false);
-                List<String> list = new LinkedList<>();
-                for (String s : set) {
-                    if (s.toLowerCase().contains(args[0].toLowerCase())) {
-                        list.add(s);
+            if (args.length == 1) {
+                List<String> results = new ArrayList<>();
+                for (String ign : igns) {
+                    if (ign.toLowerCase().contains(args[0].toLowerCase())) {
+                        results.add(ign);
                     }
                 }
                 if ("help".contains(args[0].toLowerCase())) {
-                    list.add("help");
+                    results.add("help");
                 }
-                return list;
+                return results;
             }
         }
         return null;

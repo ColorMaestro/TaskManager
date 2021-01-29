@@ -39,8 +39,8 @@ public final class TaskManager extends JavaPlugin {
         Objects.requireNonNull(this.getCommand("settaskplace")).setExecutor(new SetTaskPlace(taskDAO, playerDAO));
         Objects.requireNonNull(this.getCommand("establish")).setExecutor(new Establish());
 
-        Objects.requireNonNull(this.getCommand("tasks")).setTabCompleter(new TasksTabCompleter(config));
-        Objects.requireNonNull(this.getCommand("addtask")).setTabCompleter(new TasksTabCompleter(config));
+        Objects.requireNonNull(this.getCommand("tasks")).setTabCompleter(new TasksTabCompleter(playerDAO));
+        Objects.requireNonNull(this.getCommand("addtask")).setTabCompleter(new TasksTabCompleter(playerDAO));
         HologramLayer.instantiate(JavaPlugin.getPlugin(HologramPlugin.class).getHologramManager());
     }
 
