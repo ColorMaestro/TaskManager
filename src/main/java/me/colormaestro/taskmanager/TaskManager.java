@@ -30,7 +30,7 @@ public final class TaskManager extends JavaPlugin {
     public void onEnable() {
         loadConfig();
         createDAOs();
-        getServer().getPluginManager().registerEvents(new CustomListener(taskDAO, playerDAO), this);
+        getServer().getPluginManager().registerEvents(new CustomListener(this, taskDAO, playerDAO), this);
         Objects.requireNonNull(this.getCommand("tasks")).setExecutor(new Tasks(taskDAO, playerDAO));
         Objects.requireNonNull(this.getCommand("addtask")).setExecutor(new AddTask());
         Objects.requireNonNull(this.getCommand("finishtask")).setExecutor(new FinishTask(taskDAO, playerDAO));

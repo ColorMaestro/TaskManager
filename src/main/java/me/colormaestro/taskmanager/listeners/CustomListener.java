@@ -21,22 +21,22 @@ import java.util.List;
 import java.util.UUID;
 
 public class CustomListener implements Listener {
+    private final Plugin plugin;
     private final TaskDAO taskDAO;
     private final PlayerDAO playerDAO;
 
-    public CustomListener(TaskDAO taskDAO, PlayerDAO playerDAO) {
+    public CustomListener(Plugin plugin, TaskDAO taskDAO, PlayerDAO playerDAO) {
+        this.plugin = plugin;
         this.taskDAO = taskDAO;
         this.playerDAO = playerDAO;
     }
 
     @EventHandler
     public void onJoin(PlayerJoinEvent event) {
-        Bukkit.getScheduler().runTaskLater(Bukkit.getPluginManager().getPlugin("TaskManager"),
-                function(event),
-                200);
+        Bukkit.getScheduler().runTaskLater(plugin, checkHologram(event), 200);
     }
 
-    private static Runnable function(PlayerJoinEvent event) {
+    private static Runnable checkHologram(PlayerJoinEvent event) {
         return () -> {
             String uuid = event.getPlayer().getUniqueId().toString();
             if (!HologramLayer.getInstance().hologramExists(uuid)) {
@@ -60,7 +60,6 @@ public class CustomListener implements Listener {
             return;
         }
 
-        Plugin plugin = Bukkit.getPluginManager().getPlugin("TaskManager");
         Player p = event.getPlayer();
         UUID uuid = p.getUniqueId();
 

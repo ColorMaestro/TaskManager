@@ -37,7 +37,7 @@ public class HologramLayer {
         location.setY(location.getY() + 2);
         Hologram hologram = new Hologram(player.getUniqueId().toString(), location);
         HologramLine line = new TextLine(hologram,
-                ChatColor.YELLOW + "" + ChatColor.BOLD + player.getName() + "'s task list");
+                ChatColor.BLUE + "" + ChatColor.BOLD + player.getName() + "'s task list");
         hologram.addLine(line);
         manager.addActiveHologram(hologram);  // Adds to memory
         manager.saveHologram(hologram);  // Adds to YAML file in plugin working directory
