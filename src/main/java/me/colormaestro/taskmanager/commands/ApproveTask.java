@@ -56,6 +56,7 @@ public class ApproveTask implements CommandExecutor {
                                     HologramLayer.getInstance().setTasks(assigneeUUID, activeTasks);
                                     for (Player target : Bukkit.getOnlinePlayers()) {
                                         if (target.getUniqueId().toString().equals(assigneeUUID)) {
+                                            target.sendMessage(ChatColor.GREEN + p.getName() + " has accepted your task. Great Job!");
                                             target.playSound(target.getLocation(),
                                                     "minecraft:record.taskaccepted", 10, 1);
                                         }

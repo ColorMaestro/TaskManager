@@ -56,6 +56,7 @@ public class FinishTask implements CommandExecutor {
                             HologramLayer.getInstance().setTasks(assigneeUUID, activeTasks);
                             for (Player target : Bukkit.getOnlinePlayers()) {
                                 if (target.getUniqueId().toString().equals(advisorUUID)) {
+                                    target.sendMessage(ChatColor.GREEN + p.getName() + " finished task " + id);
                                     target.playSound(target.getLocation(),
                                             "minecraft:record.taskfinished", 10, 1);
                                 }
