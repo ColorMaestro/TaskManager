@@ -4,33 +4,29 @@ import me.colormaestro.taskmanager.data.DataAccessException;
 import me.colormaestro.taskmanager.data.PlayerDAO;
 import me.colormaestro.taskmanager.data.TaskDAO;
 import me.colormaestro.taskmanager.model.Task;
-import net.md_5.bungee.api.chat.BaseComponent;
-import net.md_5.bungee.api.chat.ComponentBuilder;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
-import org.bukkit.Material;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.BookMeta;
 import org.bukkit.plugin.Plugin;
 
 import java.sql.SQLException;
 
-public class VisitTask implements CommandExecutor {
+public class TaskInfo implements CommandExecutor {
     private final TaskDAO taskDAO;
     private final PlayerDAO playerDAO;
 
-    public VisitTask(TaskDAO taskDAO, PlayerDAO playerDAO) {
+    public TaskInfo(TaskDAO taskDAO, PlayerDAO playerDAO) {
         this.taskDAO = taskDAO;
         this.playerDAO = playerDAO;
     }
 
     @Override
-    public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
+    public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         if (!(sender instanceof Player)) {
             sender.sendMessage(ChatColor.RED + "This command can't be run from console.");
             return true;
@@ -51,10 +47,7 @@ public class VisitTask implements CommandExecutor {
                 String advisorName = playerDAO.getPlayerIGN(task.getAdvisorID());
                 Bukkit.getScheduler().runTask(plugin,
                         () -> {
-                            Location location = new Location(p.getWorld(), task.getX(), task.getY(), task.getZ(),
-                                    task.getYaw(), task.getPitch());
-                            ItemStack book = buildBook(task, advisorName);
-                            p.teleport(location);
+                            ItemStack book = VisitTask.buildBook(task, advisorName);
                             p.getInventory().addItem(book);
                         });
             } catch (SQLException | DataAccessException | NumberFormatException ex) {
@@ -63,32 +56,7 @@ public class VisitTask implements CommandExecutor {
                 ex.printStackTrace();
             }
         });
+
         return true;
-    }
-
-    public static ItemStack buildBook(Task task, String advisorName) {
-        ItemStack book = new ItemStack(Material.WRITTEN_BOOK);
-        BookMeta bookMeta = (BookMeta) book.getItemMeta();
-
-        BaseComponent[] page = new ComponentBuilder("   " + task.getTitle() + "\n")
-                .color(net.md_5.bungee.api.ChatColor.BLUE).bold(true)
-                .append("From: ")
-                .color(net.md_5.bungee.api.ChatColor.RESET).bold(false)
-                .append(advisorName + "\n")
-                .color(net.md_5.bungee.api.ChatColor.GOLD)
-                .append("Created: " + task.getDateCreation() + "\n\n")
-                .color(net.md_5.bungee.api.ChatColor.RESET)
-                .append("Turn the page for instructions!\n")
-                .create();
-
-        BaseComponent[] page2 = new ComponentBuilder(task.getDescription()).create();
-
-        bookMeta.spigot().addPage(page);
-        bookMeta.spigot().addPage(page2);
-        bookMeta.setTitle("blank");
-        bookMeta.setDisplayName(ChatColor.GOLD + "" + ChatColor.BOLD + "Task " + task.getId());
-        bookMeta.setAuthor(advisorName);
-        book.setItemMeta(bookMeta);
-        return book;
     }
 }
