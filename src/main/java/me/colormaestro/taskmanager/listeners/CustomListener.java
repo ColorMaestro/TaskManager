@@ -102,6 +102,12 @@ public class CustomListener implements Listener {
                                 () -> {
                                     p.sendMessage(ChatColor.GREEN + "Task added.");
                                     HologramLayer.getInstance().setTasks(assigneeUUID, activeTasks);
+                                    for (Player target : Bukkit.getOnlinePlayers()) {
+                                        if (target.getUniqueId().toString().equals(assigneeUUID)) {
+                                            target.playSound(target.getLocation(),
+                                                    "minecraft:record.newtask", 10, 1);
+                                        }
+                                    }
                                 });
                     } catch (SQLException | IllegalArgumentException | DataAccessException ex) {
                         Bukkit.getScheduler().runTask(plugin,
