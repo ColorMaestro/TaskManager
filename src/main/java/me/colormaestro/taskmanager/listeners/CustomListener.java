@@ -33,7 +33,8 @@ public class CustomListener implements Listener {
 
     @EventHandler
     public void onJoin(PlayerJoinEvent event) {
-        Bukkit.getScheduler().runTaskLater(plugin, checkHologram(event), 200);
+        Bukkit.getScheduler().runTaskLater(plugin, addPlayerToDB(event, plugin, playerDAO), 200);
+        Bukkit.getScheduler().runTaskLater(plugin, checkHologram(event), 250);
     }
 
     private static Runnable checkHologram(PlayerJoinEvent event) {
@@ -46,6 +47,26 @@ public class CustomListener implements Listener {
                         "⚠ To do so issue command" + ChatColor.GOLD + "" + ChatColor.BOLD +
                         " /establish" + ChatColor.DARK_AQUA +" on the place, where you want to have it");
             }
+        };
+    }
+
+    private static Runnable addPlayerToDB(PlayerJoinEvent event, Plugin plugin, PlayerDAO playerDAO) {
+        return () -> {
+            String uuid = event.getPlayer().getUniqueId().toString();
+            String ign = event.getPlayer().getName();
+            Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
+                try {
+                    if (!playerDAO.playerExists(uuid)) {
+                        playerDAO.addPlayer(uuid, ign);
+                        Bukkit.getScheduler().runTask(plugin, () -> {
+                            Bukkit.getServer().broadcastMessage(ChatColor.DARK_GREEN + "" + ChatColor.BOLD + "Player " +
+                                    ign + " has been added to database (first join)");
+                        });
+                    }
+                } catch (SQLException ex) {
+                    ex.printStackTrace();
+                }
+            });
         };
     }
 

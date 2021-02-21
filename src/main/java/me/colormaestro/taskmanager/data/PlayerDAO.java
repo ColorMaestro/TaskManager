@@ -159,4 +159,28 @@ public class PlayerDAO {
             return result;
         }
     }
+
+    public synchronized boolean playerExists(String uuid) throws SQLException {
+        try (Connection connection = DriverManager.getConnection(url);
+             PreparedStatement st = connection.prepareStatement(
+                     "SELECT ign FROM PLAYERS WHERE uuid = ?")) {
+            st.setString(1, uuid);
+            ResultSet rs = st.executeQuery();
+            if (rs.isClosed()) {
+                return false;
+            }
+            rs.close();
+            return true;
+        }
+    }
+
+    public synchronized void addPlayer(String uuid, String ign) throws SQLException {
+        try (Connection connection = DriverManager.getConnection(url);
+             PreparedStatement st = connection.prepareStatement(
+                     "INSERT INTO PLAYERS (uuid, ign) VALUES (?, ?)")) {
+            st.setString(1, uuid);
+            st.setString(2, ign);
+            st.executeUpdate();
+        }
+    }
 }
