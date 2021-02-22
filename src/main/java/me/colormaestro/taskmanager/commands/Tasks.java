@@ -33,6 +33,26 @@ public class Tasks implements CommandExecutor {
             return true;
         }
 
+        if (sender instanceof Player && args.length == 1 && args[0].equals("given")) {
+            Plugin plugin = Bukkit.getPluginManager().getPlugin("TaskManager");
+            Player p = (Player) sender;
+            UUID uuid = p.getUniqueId();
+            Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
+                try {
+                    int id = playerDAO.getPlayerID(uuid);
+                    List<Task> tasks = taskDAO.fetchAdvisorActiveTasks(id);
+                    Bukkit.getScheduler().runTask(plugin,
+                            () -> sendAdvisorTasks(p, tasks));
+                } catch (SQLException | DataAccessException ex) {
+                    Bukkit.getScheduler().runTask(plugin,
+                            () -> p.sendMessage(ChatColor.RED + ex.getMessage()));
+                    ex.printStackTrace();
+                }
+
+            });
+            return true;
+        }
+
         if (sender instanceof Player && (args.length == 0 || args.length == 1)) {
             Plugin plugin = Bukkit.getPluginManager().getPlugin("TaskManager");
             Player p = (Player) sender;
@@ -67,6 +87,7 @@ public class Tasks implements CommandExecutor {
         ChatColor w = ChatColor.WHITE;
         sender.sendMessage(ChatColor.AQUA + "-=-=-=-=-=- TaskManager help -=-=-=-=-=-");
         sender.sendMessage(g + "/tasks help" + w + " - shows this help");
+        sender.sendMessage(g + "/tasks given" + w + " - shows tasks, which you are advising");
         sender.sendMessage(g + "/tasks [IGN]" + w + " - shows your or other player tasks");
         sender.sendMessage(g + "/visittask <id>" + w + " - teleports to the task workplace");
         sender.sendMessage(g + "/taskinfo <id>" + w + " - obtains info in book for related task");
@@ -83,6 +104,24 @@ public class Tasks implements CommandExecutor {
             return;
         }
         p.sendMessage(ChatColor.AQUA + "-=-=-=- " + name + "'s tasks -=-=-=-");
+        for (Task task : tasks) {
+            switch (task.getStatus()) {
+                case DOING:
+                    p.sendMessage(ChatColor.GOLD + "[" + task.getId() + "] " + ChatColor.WHITE + task.getTitle());
+                    break;
+                case FINISHED:
+                    p.sendMessage(ChatColor.GREEN + "[" + task.getId() + "] " + ChatColor.WHITE + task.getTitle());
+                    break;
+            }
+        }
+    }
+
+    private void sendAdvisorTasks(Player p, List<Task> tasks) {
+        if (tasks.isEmpty()) {
+            p.sendMessage(ChatColor.GREEN + "No active supervised tasks");
+            return;
+        }
+        p.sendMessage(ChatColor.LIGHT_PURPLE + "-=-=-=- " + p.getName() + "'s supervised tasks -=-=-=-");
         for (Task task : tasks) {
             switch (task.getStatus()) {
                 case DOING:
