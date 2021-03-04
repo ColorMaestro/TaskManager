@@ -37,6 +37,9 @@ public class TasksTabCompleter implements TabCompleter {
                 if ("help".contains(args[0].toLowerCase())) {
                     results.add("help");
                 }
+                if ("given".contains(args[0].toLowerCase())) {
+                    results.add("given");
+                }
                 return results;
             }
         }

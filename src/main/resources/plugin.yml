@@ -30,6 +30,11 @@ commands:
     usage: Usage /visittask <id>
     permission: taskmanager.visittask
     permission-message: You don't have permission to visit task
+  taskinfo:
+    description: Gets related task info in book.
+    usage: Usage /taskinfo <id>
+    permission: taskmanager.taskinfo
+    permission-message: You don't have permission to obtain task info
   settaskplace:
     description: Sets the spawning point for the task.
     usage: Usage /settaskplace <id>

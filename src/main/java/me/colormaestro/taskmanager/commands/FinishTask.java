@@ -48,10 +48,19 @@ public class FinishTask implements CommandExecutor {
                 taskDAO.finishTask(id, assigneeID);
                 List<Task> activeTasks = taskDAO.fetchPlayersActiveTasks(assigneeID);
                 String assigneeUUID = playerDAO.getPlayerUUID(assigneeID);
+                Task task = taskDAO.findTask(id);
+                String advisorUUID = playerDAO.getPlayerUUID(task.getAdvisorID());
                 Bukkit.getScheduler().runTask(plugin,
                         () -> {
                             p.sendMessage(ChatColor.GREEN + "Task finished.");
                             HologramLayer.getInstance().setTasks(assigneeUUID, activeTasks);
+                            for (Player target : Bukkit.getOnlinePlayers()) {
+                                if (target.getUniqueId().toString().equals(advisorUUID)) {
+                                    target.sendMessage(ChatColor.GREEN + p.getName() + " finished task " + id);
+                                    target.playSound(target.getLocation(),
+                                            "minecraft:record.taskfinished", 10, 1);
+                                }
+                            }
                         });
             } catch (SQLException | DataAccessException | NumberFormatException ex) {
                 Bukkit.getScheduler().runTask(plugin,
