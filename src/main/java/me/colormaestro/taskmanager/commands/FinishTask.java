@@ -1,6 +1,7 @@
 package me.colormaestro.taskmanager.commands;
 
 import me.colormaestro.taskmanager.data.DataAccessException;
+import me.colormaestro.taskmanager.data.DiscordManager;
 import me.colormaestro.taskmanager.data.HologramLayer;
 import me.colormaestro.taskmanager.data.PlayerDAO;
 import me.colormaestro.taskmanager.data.TaskDAO;
@@ -50,16 +51,27 @@ public class FinishTask implements CommandExecutor {
                 String assigneeUUID = playerDAO.getPlayerUUID(assigneeID);
                 Task task = taskDAO.findTask(id);
                 String advisorUUID = playerDAO.getPlayerUUID(task.getAdvisorID());
+                long discordUserID = playerDAO.getDiscordUserID(advisorUUID);
                 Bukkit.getScheduler().runTask(plugin,
                         () -> {
                             p.sendMessage(ChatColor.GREEN + "Task finished.");
                             HologramLayer.getInstance().setTasks(assigneeUUID, activeTasks);
+
+                            // Firstly we try to notify the assigner in game
+                            boolean messageSent = false;
                             for (Player target : Bukkit.getOnlinePlayers()) {
                                 if (target.getUniqueId().toString().equals(advisorUUID)) {
                                     target.sendMessage(ChatColor.GREEN + p.getName() + " finished task " + id);
                                     target.playSound(target.getLocation(),
                                             "minecraft:record.taskfinished", 10, 1);
+                                    messageSent = true;
+                                    break;
                                 }
+                            }
+
+                            // If the assigner is not online, sent him message to discord
+                            if (!messageSent) {
+                                DiscordManager.getInstance().taskFinished(discordUserID, p.getName(), id);
                             }
                         });
             } catch (SQLException | DataAccessException | NumberFormatException ex) {

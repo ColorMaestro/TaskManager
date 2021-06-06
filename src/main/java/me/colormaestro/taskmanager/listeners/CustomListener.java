@@ -1,6 +1,7 @@
 package me.colormaestro.taskmanager.listeners;
 
 import me.colormaestro.taskmanager.data.DataAccessException;
+import me.colormaestro.taskmanager.data.DiscordManager;
 import me.colormaestro.taskmanager.data.HologramLayer;
 import me.colormaestro.taskmanager.data.PlayerDAO;
 import me.colormaestro.taskmanager.data.TaskDAO;
@@ -119,16 +120,27 @@ public class CustomListener implements Listener {
                         taskDAO.createTask(task);
                         List<Task> activeTasks = taskDAO.fetchPlayersActiveTasks(assigneeID);
                         String assigneeUUID = playerDAO.getPlayerUUID(assigneeID);
+                        long discordUserID = playerDAO.getDiscordUserID(assigneeUUID);
                         Bukkit.getScheduler().runTask(plugin,
                                 () -> {
                                     p.sendMessage(ChatColor.GREEN + "Task added.");
+
+                                    // Firstly we try to notify the assignee in game
+                                    boolean messageSent = false;
                                     HologramLayer.getInstance().setTasks(assigneeUUID, activeTasks);
                                     for (Player target : Bukkit.getOnlinePlayers()) {
                                         if (target.getUniqueId().toString().equals(assigneeUUID)) {
                                             target.sendMessage(ChatColor.GOLD + "You have new task from " + p.getName());
                                             target.playSound(target.getLocation(),
                                                     "minecraft:record.newtask", 10, 1);
+                                            messageSent = true;
+                                            break;
                                         }
+                                    }
+
+                                    // If the assignee is not online, sent him message to discord
+                                    if (!messageSent) {
+                                        DiscordManager.getInstance().taskCreated(discordUserID, p.getName());
                                     }
                                 });
                     } catch (SQLException | IllegalArgumentException | DataAccessException ex) {

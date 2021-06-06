@@ -183,4 +183,20 @@ public class PlayerDAO {
             st.executeUpdate();
         }
     }
+
+    public synchronized long getDiscordUserID(String uuid) throws SQLException, DataAccessException {
+        try (Connection connection = DriverManager.getConnection(url);
+             PreparedStatement st = connection.prepareStatement(
+                     "SELECT discord_id FROM PLAYERS WHERE uuid = ?"
+             )) {
+            st.setString(1, uuid);
+            ResultSet rs = st.executeQuery();
+            if (rs.isClosed()) {
+                throw new DataAccessException("Player with uuid " + uuid + " was not found in the database.");
+            }
+            long id = rs.getLong("discord_id");
+            rs.close();
+            return id;
+        }
+    }
 }

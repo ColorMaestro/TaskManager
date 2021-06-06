@@ -9,6 +9,7 @@ import me.colormaestro.taskmanager.commands.SetTaskPlace;
 import me.colormaestro.taskmanager.commands.TaskInfo;
 import me.colormaestro.taskmanager.commands.Tasks;
 import me.colormaestro.taskmanager.commands.VisitTask;
+import me.colormaestro.taskmanager.data.DiscordManager;
 import me.colormaestro.taskmanager.data.HologramLayer;
 import me.colormaestro.taskmanager.data.PlayerDAO;
 import me.colormaestro.taskmanager.data.TaskDAO;
@@ -44,6 +45,7 @@ public final class TaskManager extends JavaPlugin {
         Objects.requireNonNull(this.getCommand("tasks")).setTabCompleter(new TasksTabCompleter(playerDAO));
         Objects.requireNonNull(this.getCommand("addtask")).setTabCompleter(new TasksTabCompleter(playerDAO));
         HologramLayer.instantiate(JavaPlugin.getPlugin(HologramPlugin.class).getHologramManager());
+        DiscordManager.instantiate(config.getString("token"));
     }
 
     @Override
