@@ -34,8 +34,8 @@ public class CustomListener implements Listener {
 
     @EventHandler
     public void onJoin(PlayerJoinEvent event) {
-        Bukkit.getScheduler().runTaskLater(plugin, addPlayerToDB(event, plugin, playerDAO), 200);
-        Bukkit.getScheduler().runTaskLater(plugin, checkHologram(event), 250);
+        Bukkit.getScheduler().runTaskLater(plugin, addPlayerToDB(event, plugin, playerDAO), 30);
+        Bukkit.getScheduler().runTaskLater(plugin, checkHologram(event), 200);
     }
 
     private static Runnable checkHologram(PlayerJoinEvent event) {
