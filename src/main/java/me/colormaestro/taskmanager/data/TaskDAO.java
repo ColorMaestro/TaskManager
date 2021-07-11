@@ -257,4 +257,18 @@ public class TaskDAO {
             }
         }
     }
+
+    public synchronized void updateTaskAssignee(int id, int assignee) throws SQLException, DataAccessException {
+        try (Connection connection = DriverManager.getConnection(url);
+             PreparedStatement st = connection.prepareStatement(
+                     "UPDATE TASKS SET assignee_id = ? WHERE id = ?")) {
+
+            st.setInt(1, assignee);
+            st.setInt(2, id);
+            int affected = st.executeUpdate();
+            if (affected == 0) {
+                throw new DataAccessException("No change. Make sure you choose valid task.");
+            }
+        }
+    }
 }

@@ -30,6 +30,11 @@ commands:
     usage: Usage /visittask <id>
     permission: taskmanager.visittask
     permission-message: You don't have permission to visit task
+  transfertask:
+    description: Gives selected task to another player.
+    usage: Usage /transfertask <id> <IGN>
+    permission: taskmanager.transfertask
+    permission-message: You don't have permission to transfer task
   taskinfo:
     description: Gets related task info in book.
     usage: Usage /taskinfo <id>
