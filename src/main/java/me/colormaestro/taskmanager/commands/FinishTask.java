@@ -71,7 +71,7 @@ public class FinishTask implements CommandExecutor {
 
                             // If the assigner is not online, sent him message to discord
                             if (!messageSent) {
-                                DiscordManager.getInstance().taskFinished(discordUserID, p.getName(), id);
+                                DiscordManager.getInstance().taskFinished(discordUserID, p.getName(), task);
                             }
                         });
             } catch (SQLException | DataAccessException | NumberFormatException ex) {

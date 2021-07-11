@@ -1,9 +1,14 @@
 package me.colormaestro.taskmanager.data;
 
+import me.colormaestro.taskmanager.model.Task;
+import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
+import net.dv8tion.jda.api.entities.MessageEmbed;
 
 import javax.security.auth.login.LoginException;
+import java.awt.Color;
+import java.time.Instant;
 
 public class DiscordManager {
     private static DiscordManager instance;
@@ -28,21 +33,29 @@ public class DiscordManager {
         return instance;
     }
 
-    public void taskCreated(long userID, String assigner) {
-        if (api != null)
+    public void taskCreated(long userID, String assigner, Task task) {
+        if (api != null) {
+            MessageEmbed e = new EmbedBuilder().setTitle(task.getTitle()).setColor(new Color(255, 132, 0))
+                    .setDescription(task.getDescription()).setFooter(assigner).setTimestamp(Instant.now()).build();
+            String message = ":small_orange_diamond: " + assigner + " created new task for you :small_orange_diamond:";
             api.retrieveUserById(userID).flatMap(x -> x.openPrivateChannel()
-                    .flatMap(y -> y.sendMessage(assigner + "created new task for you!"))).queue();
+                    .flatMap(channel -> channel.sendMessage(message).embed(e))).queue();
+        }
     }
 
-    public void taskFinished(long userID, String assignee, int taskID) {
-        if (api != null)
+    public void taskFinished(long userID, String assignee, Task task) {
+        if (api != null) {
+            String message = String.format(":bellhop: %s finished task *%s* (%d)", assignee, task.getTitle(), task.getId());
             api.retrieveUserById(userID).flatMap(x -> x.openPrivateChannel()
-                    .flatMap(y -> y.sendMessage(assignee + "has finished task" + taskID))).queue();
+                    .flatMap(channel -> channel.sendMessage(message))).queue();
+        }
     }
 
-    public void taskApproved(long userID, String assigner) {
-        if (api != null)
+    public void taskApproved(long userID, String assigner, Task task) {
+        if (api != null) {
+            String message = String.format(":white_check_mark: %s approved your task *%s* (%d)", assigner, task.getTitle(), task.getId());
             api.retrieveUserById(userID).flatMap(x -> x.openPrivateChannel()
-                    .flatMap(y -> y.sendMessage(assigner + "has approved your task! Great Job!"))).queue();
+                    .flatMap(channel -> channel.sendMessage(message))).queue();
+        }
     }
 }

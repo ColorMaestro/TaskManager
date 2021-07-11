@@ -71,7 +71,7 @@ public class ApproveTask implements CommandExecutor {
 
                                     // If the assignee is not online, sent him message to discord
                                     if (!messageSent) {
-                                        DiscordManager.getInstance().taskApproved(discordUserID, p.getName());
+                                        DiscordManager.getInstance().taskApproved(discordUserID, p.getName(), task);
                                     }
                                 });
                     } catch (SQLException | DataAccessException | NumberFormatException ex) {

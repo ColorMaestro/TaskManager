@@ -140,7 +140,7 @@ public class CustomListener implements Listener {
 
                                     // If the assignee is not online, sent him message to discord
                                     if (!messageSent) {
-                                        DiscordManager.getInstance().taskCreated(discordUserID, p.getName());
+                                        DiscordManager.getInstance().taskCreated(discordUserID, p.getName(), task);
                                     }
                                 });
                     } catch (SQLException | IllegalArgumentException | DataAccessException ex) {
