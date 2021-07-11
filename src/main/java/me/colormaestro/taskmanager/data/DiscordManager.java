@@ -45,7 +45,7 @@ public class DiscordManager {
 
     public void taskFinished(long userID, String assignee, Task task) {
         if (api != null) {
-            String message = String.format(":bellhop: %s finished task *%s* (%d)", assignee, task.getTitle(), task.getId());
+            String message = String.format(":bellhop: %s finished task [%d] *%s*", assignee, task.getId(), task.getTitle());
             api.retrieveUserById(userID).flatMap(x -> x.openPrivateChannel()
                     .flatMap(channel -> channel.sendMessage(message))).queue();
         }
@@ -53,7 +53,7 @@ public class DiscordManager {
 
     public void taskApproved(long userID, String assigner, Task task) {
         if (api != null) {
-            String message = String.format(":white_check_mark: %s approved your task *%s* (%d)", assigner, task.getTitle(), task.getId());
+            String message = String.format(":white_check_mark: %s approved your task [%d] *%s*", assigner, task.getId(), task.getTitle());
             api.retrieveUserById(userID).flatMap(x -> x.openPrivateChannel()
                     .flatMap(channel -> channel.sendMessage(message))).queue();
         }

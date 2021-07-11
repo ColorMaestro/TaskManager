@@ -94,6 +94,7 @@ public class Tasks implements CommandExecutor {
         sender.sendMessage(g + "/addtask <IGN>" + w + " - adds new task");
         sender.sendMessage(g + "/finishtask <id>" + w + " - mark task as finished");
         sender.sendMessage(g + "/approvetask <id> [force]" + w + " - approves the finished task");
+        sender.sendMessage(g + "/transfertask <id> <IGN>" + w + " - changes the assignee of the task");
         sender.sendMessage(g + "/settaskplace <id>" + w + " - sets spawning point for this task for more comfort :)");
         sender.sendMessage(g + "/establish" + w + " - establishes the Hologram where is summary of players tasks.");
     }
