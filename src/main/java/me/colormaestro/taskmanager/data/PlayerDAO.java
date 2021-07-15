@@ -106,7 +106,7 @@ public class PlayerDAO {
             st.setString(1, uuid.toString());
             ResultSet rs = st.executeQuery();
             if (rs.isClosed()) {
-                throw new DataAccessException("Your uuid was not found in the database. Contact project manager!");
+                throw new DataAccessException("Your uuid was not found in the database. Contact developers!");
             }
             int id = rs.getInt("id");
             rs.close();
@@ -197,6 +197,19 @@ public class PlayerDAO {
             long id = rs.getLong("discord_id");
             rs.close();
             return id;
+        }
+    }
+
+    public synchronized void setDiscordUserID(UUID uuid, long discordID) throws SQLException, DataAccessException {
+        try (Connection connection = DriverManager.getConnection(url);
+             PreparedStatement st = connection.prepareStatement(
+                     "UPDATE PLAYERS SET discord_id = ? WHERE uuid = ?")) {
+            st.setLong(1, discordID);
+            st.setString(2, uuid.toString());
+            int affected = st.executeUpdate();
+            if (affected == 0) {
+                throw new DataAccessException("Your uuid was not found in the database. Contact developers!");
+            }
         }
     }
 }

@@ -1,31 +1,45 @@
 package me.colormaestro.taskmanager.data;
 
+import me.colormaestro.taskmanager.listeners.DiscordMessageListener;
 import me.colormaestro.taskmanager.model.Task;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.entities.MessageEmbed;
+import org.bukkit.Bukkit;
+import org.bukkit.plugin.java.JavaPlugin;
 
 import javax.security.auth.login.LoginException;
 import java.awt.Color;
+import java.sql.SQLException;
 import java.time.Instant;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Random;
+import java.util.UUID;
 
 public class DiscordManager {
+    private final PlayerDAO playerDAO;
     private static DiscordManager instance;
+    private final JavaPlugin plugin;
+    private Map<String, UUID> codes;
     private JDA api = null;
 
-    private DiscordManager(String token) {
+    private DiscordManager(String token, PlayerDAO playerDAO, JavaPlugin plugin) {
         try {
-            api = JDABuilder.createDefault(token).build();
+            api = JDABuilder.createDefault(token).addEventListeners(new DiscordMessageListener()).build();
         } catch (LoginException e) {
             System.out.println("Cannot login Discord bot - LoginException");
             e.printStackTrace();
         }
+        codes = new HashMap<>();
+        this.playerDAO = playerDAO;
+        this.plugin = plugin;
     }
 
-    public static void instantiate(String token) {
+    public static void instantiate(String token, PlayerDAO playerDAO, JavaPlugin plugin) {
         if (instance == null) {
-            instance = new DiscordManager(token);
+            instance = new DiscordManager(token, playerDAO, plugin);
         }
     }
 
@@ -66,5 +80,49 @@ public class DiscordManager {
             api.retrieveUserById(userID).flatMap(x -> x.openPrivateChannel()
                     .flatMap(channel -> channel.sendMessage(taken ? messageTaken : messageGiven))).queue();
         }
+    }
+
+    /**
+     * Generates authentication code for given UUID and stores it internally for short time.
+     * @param uuid of the player to authenticate
+     */
+    public synchronized String generateCode(UUID uuid) {
+        StringBuilder builder = new StringBuilder();
+        Random random = new Random();
+        int i = 0;
+        while (i < 10) {
+            int number = 48 + random.nextInt(75);
+            if ((58 <= number && number <= 64) || (91 <= number && number <= 96)) {
+                continue;
+            }
+            builder.append((char) number);
+            i++;
+        }
+        String code = builder.toString();
+        codes.put(code, uuid);
+        // Code automatically expires in 60 seconds
+        Bukkit.getScheduler().runTaskLater(plugin, () -> codes.remove(code), 1200);
+        return code;
+    }
+
+    /**
+     * Verifies, whether given code is present for user authentication. In case it is, the code is removed and
+     * discord ID in the record with corresponding UUID is updated in database.
+     * @param code code to verify
+     * @return true, if code was present for user authentication, false otherwise
+     */
+    public synchronized boolean verifyCode(String code, long discordID) {
+        if (codes.containsKey(code)) {
+            try {
+                playerDAO.setDiscordUserID(codes.get(code), discordID);
+                codes.remove(code);
+                return true;
+            } catch (SQLException | DataAccessException ex) {
+                System.out.println(ex);
+                ex.printStackTrace();
+                return false;
+            }
+        }
+        return false;
     }
 }

@@ -96,6 +96,7 @@ public class Tasks implements CommandExecutor {
         sender.sendMessage(g + "/approvetask <id> [force]" + w + " - approves the finished task");
         sender.sendMessage(g + "/transfertask <id> <IGN>" + w + " - changes the assignee of the task");
         sender.sendMessage(g + "/settaskplace <id>" + w + " - sets spawning point for this task for more comfort :)");
+        sender.sendMessage(g + "/linkdiscord" + w + " - links discord account for notifications");
         sender.sendMessage(g + "/establish" + w + " - establishes the Hologram where is summary of players tasks.");
     }
 

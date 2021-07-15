@@ -5,6 +5,7 @@ import me.colormaestro.taskmanager.commands.AddTask;
 import me.colormaestro.taskmanager.commands.ApproveTask;
 import me.colormaestro.taskmanager.commands.Establish;
 import me.colormaestro.taskmanager.commands.FinishTask;
+import me.colormaestro.taskmanager.commands.LinkDiscord;
 import me.colormaestro.taskmanager.commands.SetTaskPlace;
 import me.colormaestro.taskmanager.commands.TaskInfo;
 import me.colormaestro.taskmanager.commands.Tasks;
@@ -40,6 +41,7 @@ public final class TaskManager extends JavaPlugin {
         Objects.requireNonNull(this.getCommand("approvetask")).setExecutor(new ApproveTask(taskDAO, playerDAO));
         Objects.requireNonNull(this.getCommand("visittask")).setExecutor(new VisitTask(taskDAO, playerDAO));
         Objects.requireNonNull(this.getCommand("settaskplace")).setExecutor(new SetTaskPlace(taskDAO, playerDAO));
+        Objects.requireNonNull(this.getCommand("linkdiscord")).setExecutor(new LinkDiscord());
         Objects.requireNonNull(this.getCommand("establish")).setExecutor(new Establish());
         Objects.requireNonNull(this.getCommand("taskinfo")).setExecutor(new TaskInfo(taskDAO, playerDAO));
         Objects.requireNonNull(this.getCommand("transfertask")).setExecutor(new TransferTask(taskDAO, playerDAO));
@@ -47,7 +49,7 @@ public final class TaskManager extends JavaPlugin {
         Objects.requireNonNull(this.getCommand("tasks")).setTabCompleter(new TasksTabCompleter(playerDAO));
         Objects.requireNonNull(this.getCommand("addtask")).setTabCompleter(new TasksTabCompleter(playerDAO));
         HologramLayer.instantiate(JavaPlugin.getPlugin(HologramPlugin.class).getHologramManager());
-        DiscordManager.instantiate(config.getString("token"));
+        DiscordManager.instantiate(config.getString("token"), playerDAO, this);
     }
 
     @Override

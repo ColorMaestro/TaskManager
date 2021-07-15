@@ -45,6 +45,11 @@ commands:
     usage: Usage /settaskplace <id>
     permission: taskmanager.settaskplace
     permission-message: You don't have permission to set spawn position for task
+  linkdiscord:
+    description: Links discord account for notifications.
+    usage: Usage /linkdiscord
+    permission: taskmanager.linkdiscord
+    permission-message: You don't have permission to link discord account
   establish:
     description: Establishes the Hologram where is summary of players tasks.
     usage: Usage /establish
