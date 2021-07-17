@@ -13,6 +13,7 @@ import javax.security.auth.login.LoginException;
 import java.awt.Color;
 import java.sql.SQLException;
 import java.time.Instant;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
@@ -22,7 +23,7 @@ public class DiscordManager {
     private final PlayerDAO playerDAO;
     private static DiscordManager instance;
     private final JavaPlugin plugin;
-    private Map<String, UUID> codes;
+    private final Map<String, UUID> codes;
     private JDA api = null;
 
     private DiscordManager(String token, PlayerDAO playerDAO, JavaPlugin plugin) {
@@ -32,7 +33,7 @@ public class DiscordManager {
             System.out.println("Cannot login Discord bot - LoginException");
             e.printStackTrace();
         }
-        codes = new HashMap<>();
+        codes = Collections.synchronizedMap(new HashMap<>());
         this.playerDAO = playerDAO;
         this.plugin = plugin;
     }
@@ -86,7 +87,7 @@ public class DiscordManager {
      * Generates authentication code for given UUID and stores it internally for short time.
      * @param uuid of the player to authenticate
      */
-    public synchronized String generateCode(UUID uuid) {
+    public String generateCode(UUID uuid) {
         StringBuilder builder = new StringBuilder();
         Random random = new Random();
         int i = 0;
@@ -99,9 +100,14 @@ public class DiscordManager {
             i++;
         }
         String code = builder.toString();
-        codes.put(code, uuid);
+        synchronized (codes) {
+            codes.put(code, uuid);
+        }
         // Code automatically expires in 60 seconds
-        Bukkit.getScheduler().runTaskLater(plugin, () -> codes.remove(code), 1200);
+        Bukkit.getScheduler().runTaskLater(plugin, () -> {
+            synchronized (codes) {
+                codes.remove(code);
+            }}, 1200);
         return code;
     }
 
@@ -112,17 +118,19 @@ public class DiscordManager {
      * @return true, if code was present for user authentication, false otherwise
      */
     public synchronized boolean verifyCode(String code, long discordID) {
-        if (codes.containsKey(code)) {
-            try {
-                playerDAO.setDiscordUserID(codes.get(code), discordID);
-                codes.remove(code);
-                return true;
-            } catch (SQLException | DataAccessException ex) {
-                System.out.println(ex);
-                ex.printStackTrace();
-                return false;
+        synchronized (codes) {
+            if (codes.containsKey(code)) {
+                try {
+                    playerDAO.setDiscordUserID(codes.get(code), discordID);
+                    codes.remove(code);
+                    return true;
+                } catch (SQLException | DataAccessException ex) {
+                    System.out.println(ex);
+                    ex.printStackTrace();
+                    return false;
+                }
             }
+            return false;
         }
-        return false;
     }
 }
