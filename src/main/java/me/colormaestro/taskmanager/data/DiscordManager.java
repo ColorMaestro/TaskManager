@@ -117,7 +117,7 @@ public class DiscordManager {
      * @param code code to verify
      * @return true, if code was present for user authentication, false otherwise
      */
-    public synchronized boolean verifyCode(String code, long discordID) {
+    public boolean verifyCode(String code, long discordID) {
         synchronized (codes) {
             if (codes.containsKey(code)) {
                 try {
