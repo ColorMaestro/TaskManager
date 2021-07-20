@@ -13,21 +13,22 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
+import org.jetbrains.annotations.NotNull;
 
 import java.sql.SQLException;
 import java.util.List;
 
-public class ApproveTask implements CommandExecutor {
+public class ReturnTask implements CommandExecutor {
     private final TaskDAO taskDAO;
     private final PlayerDAO playerDAO;
 
-    public ApproveTask(TaskDAO taskDAO, PlayerDAO playerDAO) {
+    public ReturnTask(TaskDAO taskDAO, PlayerDAO playerDAO) {
         this.taskDAO = taskDAO;
         this.playerDAO = playerDAO;
     }
 
     @Override
-    public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
+    public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
         if (!(sender instanceof Player)) {
             sender.sendMessage(ChatColor.RED + "This command can't be run from console.");
             return true;
@@ -46,23 +47,21 @@ public class ApproveTask implements CommandExecutor {
                 () -> {
                     try {
                         int id = Integer.parseInt(sid);
-                        taskDAO.approveTask(id, force);
+                        taskDAO.returnTask(id, force);
                         Task task = taskDAO.findTask(id);
                         List<Task> activeTasks = taskDAO.fetchPlayersActiveTasks(task.getAssigneeID());
                         String assigneeUUID = playerDAO.getPlayerUUID(task.getAssigneeID());
                         long discordUserID = playerDAO.getDiscordUserID(assigneeUUID);
                         Bukkit.getScheduler().runTask(plugin,
                                 () -> {
-                                    p.sendMessage(ChatColor.GREEN + "Task approved.");
+                                    p.sendMessage(ChatColor.GREEN + "Task returned.");
                                     HologramLayer.getInstance().setTasks(assigneeUUID, activeTasks);
 
                                     // Firstly we try to notify the assignee in game
                                     boolean messageSent = false;
                                     for (Player target : Bukkit.getOnlinePlayers()) {
                                         if (target.getUniqueId().toString().equals(assigneeUUID)) {
-                                            target.sendMessage(ChatColor.GREEN + p.getName() + " has accepted your task. Great Job!");
-                                            target.playSound(target.getLocation(),
-                                                    "minecraft:record.taskaccepted", 10, 1);
+                                            target.sendMessage(ChatColor.GOLD + p.getName() + " has returned your task.");
                                             messageSent = true;
                                             break;
                                         }
@@ -70,7 +69,7 @@ public class ApproveTask implements CommandExecutor {
 
                                     // If the assignee is not online, sent him message to discord
                                     if (!messageSent) {
-                                        DiscordManager.getInstance().taskApproved(discordUserID, p.getName(), task);
+                                        DiscordManager.getInstance().taskReturned(discordUserID, p.getName(), task);
                                     }
                                 });
                     } catch (SQLException | DataAccessException | NumberFormatException ex) {

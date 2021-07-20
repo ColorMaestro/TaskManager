@@ -30,6 +30,11 @@ commands:
     usage: Usage /visittask <id>
     permission: taskmanager.visittask
     permission-message: You don't have permission to visit task
+  returntask:
+    description: Returns task back to given (unfinished) state.
+    usage: Usage /returntask <id> [force]
+    permission: taskmanager.returntask
+    permission-message: You don't have permission to return task
   transfertask:
     description: Gives selected task to another player.
     usage: Usage /transfertask <id> <IGN>

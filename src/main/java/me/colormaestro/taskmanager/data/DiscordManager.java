@@ -74,6 +74,14 @@ public class DiscordManager {
         }
     }
 
+    public void taskReturned(long userID, String assigner, Task task) {
+        if (api != null) {
+            String message = String.format(":leftwards_arrow_with_hook: %s has returned your task [%d] *%s*", assigner, task.getId(), task.getTitle());
+            api.retrieveUserById(userID).flatMap(x -> x.openPrivateChannel()
+                    .flatMap(channel -> channel.sendMessage(message))).queue();
+        }
+    }
+
     public void taskTransfered(long userID, String advisor, String oldAssignee, String newAssignee, Task task, boolean taken) {
         if (api != null) {
             String messageGiven = String.format(":inbox_tray: %s has transferred task [%d] *%s* from %s to you.", advisor, task.getId(), task.getTitle(), oldAssignee);

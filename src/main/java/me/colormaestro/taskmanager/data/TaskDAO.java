@@ -104,6 +104,34 @@ public class TaskDAO {
         }
     }
 
+    public synchronized void returnTask(int id, boolean force) throws SQLException, DataAccessException {
+        try (Connection connection = DriverManager.getConnection(url);
+             PreparedStatement statement = connection.prepareStatement(
+                     "SELECT status FROM TASKS WHERE id = ?"
+             );
+             PreparedStatement st = connection.prepareStatement(
+                     "UPDATE TASKS SET status = 'DOING' WHERE id = ?")) {
+
+            statement.setInt(1, id);
+            ResultSet rs = statement.executeQuery();
+            if (rs.isClosed()) {
+                throw new DataAccessException("No task with such an ID found.");
+            }
+            TaskStatus status = TaskStatus.valueOf(rs.getString("status"));
+            if (status == TaskStatus.APPROVED && !force) {
+                throw new DataAccessException("The task is approved. If you want to proceed add force " +
+                        "as second argument to this command");
+            }
+            rs.close();
+
+            st.setInt(1, id);
+            int affected = st.executeUpdate();
+            if (affected == 0) {
+                throw new DataAccessException("No change. Make sure you choose not returned task yet.");
+            }
+        }
+    }
+
     public synchronized void approveTask(int id, boolean force) throws SQLException, DataAccessException {
         try (Connection connection = DriverManager.getConnection(url);
              PreparedStatement statement = connection.prepareStatement(

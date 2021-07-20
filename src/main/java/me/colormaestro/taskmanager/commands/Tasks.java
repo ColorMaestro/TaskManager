@@ -94,6 +94,7 @@ public class Tasks implements CommandExecutor {
         sender.sendMessage(g + "/addtask <IGN>" + w + " - adds new task");
         sender.sendMessage(g + "/finishtask <id>" + w + " - mark task as finished");
         sender.sendMessage(g + "/approvetask <id> [force]" + w + " - approves the finished task");
+        sender.sendMessage(g + "/returntask <id> [force]" + w + " - returns task back to given (unfinished) state");
         sender.sendMessage(g + "/transfertask <id> <IGN>" + w + " - changes the assignee of the task");
         sender.sendMessage(g + "/settaskplace <id>" + w + " - sets spawning point for this task for more comfort :)");
         sender.sendMessage(g + "/linkdiscord" + w + " - links discord account for notifications");
