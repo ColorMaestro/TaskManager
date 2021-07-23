@@ -35,7 +35,8 @@ public class CustomListener implements Listener {
     @EventHandler
     public void onJoin(PlayerJoinEvent event) {
         Bukkit.getScheduler().runTaskLater(plugin, addPlayerToDB(event, plugin, playerDAO), 30);
-        Bukkit.getScheduler().runTaskLater(plugin, checkHologram(event), 200);
+        Bukkit.getScheduler().runTaskLater(plugin, checkHologram(event), 180);
+        Bukkit.getScheduler().runTaskLater(plugin, checkFinishedTasks(event, plugin, taskDAO, playerDAO), 200);
     }
 
     private static Runnable checkHologram(PlayerJoinEvent event) {
@@ -49,6 +50,41 @@ public class CustomListener implements Listener {
                         " /establish" + ChatColor.DARK_AQUA +" on the place, where you want to have it");
             }
         };
+    }
+
+    /**
+     * Represents job, which checks, whether there are some finished tasks, in which the player figures as assignee
+     * and sends them to the assignee
+     * @param event PlayerJoinEvent
+     * @param plugin under which to run the job
+     * @param playerDAO object for communication with database
+     * @return Runnable (job) for execution
+     */
+    private static Runnable checkFinishedTasks(PlayerJoinEvent event, Plugin plugin, TaskDAO taskDAO, PlayerDAO playerDAO) {
+        return () -> {
+            UUID uuid = event.getPlayer().getUniqueId();
+            Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
+                try {
+                    int id = playerDAO.getPlayerID(uuid);
+                    List<Task> finishedTasks = taskDAO.fetchFinishedTasks(id);
+                    Bukkit.getScheduler().runTask(plugin, () -> {
+                        sendFinishedTasks(event.getPlayer(), finishedTasks);
+                    });
+                } catch (SQLException | DataAccessException ex) {
+                    ex.printStackTrace();
+                }
+            });
+        };
+    }
+
+    private static void sendFinishedTasks(Player p, List<Task> tasks) {
+        if (tasks.isEmpty()) {
+            return;
+        }
+        p.sendMessage(ChatColor.GREEN + "-=-=-=- New finished tasks -=-=-=-");
+        for (Task task : tasks) {
+            p.sendMessage(ChatColor.GREEN + "[" + task.getId() + "] " + ChatColor.WHITE + task.getTitle());
+        }
     }
 
     private static Runnable addPlayerToDB(PlayerJoinEvent event, Plugin plugin, PlayerDAO playerDAO) {

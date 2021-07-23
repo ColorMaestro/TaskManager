@@ -231,6 +231,44 @@ public class TaskDAO {
 
     /**
      *
+     * @param assignee - id of assignee
+     * @return finished tasks, in which the player figures as assignee
+     * @throws SQLException
+     */
+    public synchronized List<Task> fetchFinishedTasks(int assignee) throws SQLException {
+        try (Connection connection = DriverManager.getConnection(url);
+             PreparedStatement st = connection.prepareStatement(
+                     "SELECT id, title, description, assignee_id, advisor_id, x, y, z, yaw, pitch, status, " +
+                             "date_given, date_finished FROM TASKS WHERE assignee_id = ? AND status = 'FINISHED'")) {
+
+            st.setInt(1, assignee);
+            ResultSet rs = st.executeQuery();
+            List<Task> tasks = new ArrayList<>();
+            while (rs.next()) {
+                Task task = new Task(
+                        rs.getString("title"),
+                        rs.getString("description"),
+                        rs.getInt("assignee_id"),
+                        rs.getInt("advisor_id"),
+                        rs.getDouble("x"),
+                        rs.getDouble("y"),
+                        rs.getDouble("z"),
+                        rs.getFloat("yaw"),
+                        rs.getFloat("pitch"),
+                        TaskStatus.valueOf(rs.getString("status")),
+                        rs.getDate("date_given"),
+                        rs.getDate("date_finished")
+                );
+                task.setId(rs.getInt("id"));
+                tasks.add(task);
+            }
+            rs.close();
+            return tasks;
+        }
+    }
+
+    /**
+     *
      * @param advisor id of advisor
      * @return Tasks which were given by this advisor and are not approved yet.
      * @throws SQLException
