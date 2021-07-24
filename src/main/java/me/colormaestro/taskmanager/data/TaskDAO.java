@@ -231,17 +231,17 @@ public class TaskDAO {
 
     /**
      *
-     * @param assignee - id of advisor
+     * @param advisor - id of advisor
      * @return finished tasks, in which the player figures as advisor
      * @throws SQLException
      */
-    public synchronized List<Task> fetchFinishedTasks(int assignee) throws SQLException {
+    public synchronized List<Task> fetchFinishedTasks(int advisor) throws SQLException {
         try (Connection connection = DriverManager.getConnection(url);
              PreparedStatement st = connection.prepareStatement(
                      "SELECT id, title, description, assignee_id, advisor_id, x, y, z, yaw, pitch, status, " +
                              "date_given, date_finished FROM TASKS WHERE advisor_id = ? AND status = 'FINISHED'")) {
 
-            st.setInt(1, assignee);
+            st.setInt(1, advisor);
             ResultSet rs = st.executeQuery();
             List<Task> tasks = new ArrayList<>();
             while (rs.next()) {
