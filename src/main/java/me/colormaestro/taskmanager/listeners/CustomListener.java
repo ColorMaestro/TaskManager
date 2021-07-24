@@ -53,8 +53,8 @@ public class CustomListener implements Listener {
     }
 
     /**
-     * Represents job, which checks, whether there are some finished tasks, in which the player figures as assignee
-     * and sends them to the assignee
+     * Represents job, which checks, whether there are some finished tasks, in which the player figures as advisor
+     * and sends them to the advisor
      * @param event PlayerJoinEvent
      * @param plugin under which to run the job
      * @param playerDAO object for communication with database
