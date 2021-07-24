@@ -56,7 +56,7 @@ public final class TaskManager extends JavaPlugin {
 
     @Override
     public void onDisable() {
-
+        DiscordManager.getInstance().shutdown();
     }
 
     private void loadConfig() {

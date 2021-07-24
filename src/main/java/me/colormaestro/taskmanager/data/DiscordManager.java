@@ -91,6 +91,10 @@ public class DiscordManager {
         }
     }
 
+    public void shutdown() {
+        api.shutdownNow();
+    }
+
     /**
      * Generates authentication code for given UUID and stores it internally for short time.
      * @param uuid of the player to authenticate
