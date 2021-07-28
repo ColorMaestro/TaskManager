@@ -42,4 +42,4 @@ Basically you need to change 2 attributes in project and then recompile again.
   
 As for other things:
 - Hologram plugin needs to be watched for updates. Check github because they may not update info at their spigot page.
-- Discord JDA 4.2.1 is enough. 
+- Discord JDA 4.3.0_277 is enough. (Currently newest 28.7.2021)
