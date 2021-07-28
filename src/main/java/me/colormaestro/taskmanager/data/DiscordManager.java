@@ -92,7 +92,8 @@ public class DiscordManager {
     }
 
     public void shutdown() {
-        api.shutdownNow();
+        if (api != null)
+            api.shutdownNow();
     }
 
     /**
