@@ -5,6 +5,7 @@ import me.colormaestro.taskmanager.model.Task;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
+import net.dv8tion.jda.api.OnlineStatus;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -28,7 +29,8 @@ public class DiscordManager {
 
     private DiscordManager(String token, PlayerDAO playerDAO, JavaPlugin plugin) {
         try {
-            api = JDABuilder.createDefault(token).addEventListeners(new DiscordMessageListener()).build();
+            api = JDABuilder.createDefault(token).addEventListeners(new DiscordMessageListener())
+                    .setStatus(OnlineStatus.ONLINE).build();
         } catch (LoginException e) {
             System.out.println("Cannot login Discord bot - LoginException");
             e.printStackTrace();
