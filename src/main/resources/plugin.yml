@@ -30,6 +30,16 @@ commands:
     usage: Usage /visittask <id>
     permission: taskmanager.visittask
     permission-message: You don't have permission to visit task
+  returntask:
+    description: Returns task back to given (unfinished) state.
+    usage: Usage /returntask <id> [force]
+    permission: taskmanager.returntask
+    permission-message: You don't have permission to return task
+  transfertask:
+    description: Gives selected task to another player.
+    usage: Usage /transfertask <id> <IGN>
+    permission: taskmanager.transfertask
+    permission-message: You don't have permission to transfer task
   taskinfo:
     description: Gets related task info in book.
     usage: Usage /taskinfo <id>
@@ -40,6 +50,11 @@ commands:
     usage: Usage /settaskplace <id>
     permission: taskmanager.settaskplace
     permission-message: You don't have permission to set spawn position for task
+  linkdiscord:
+    description: Links discord account for notifications.
+    usage: Usage /linkdiscord
+    permission: taskmanager.linkdiscord
+    permission-message: You don't have permission to link discord account
   establish:
     description: Establishes the Hologram where is summary of players tasks.
     usage: Usage /establish

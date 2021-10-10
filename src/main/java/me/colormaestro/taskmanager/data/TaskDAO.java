@@ -104,6 +104,34 @@ public class TaskDAO {
         }
     }
 
+    public synchronized void returnTask(int id, boolean force) throws SQLException, DataAccessException {
+        try (Connection connection = DriverManager.getConnection(url);
+             PreparedStatement statement = connection.prepareStatement(
+                     "SELECT status FROM TASKS WHERE id = ?"
+             );
+             PreparedStatement st = connection.prepareStatement(
+                     "UPDATE TASKS SET status = 'DOING' WHERE id = ?")) {
+
+            statement.setInt(1, id);
+            ResultSet rs = statement.executeQuery();
+            if (rs.isClosed()) {
+                throw new DataAccessException("No task with such an ID found.");
+            }
+            TaskStatus status = TaskStatus.valueOf(rs.getString("status"));
+            if (status == TaskStatus.APPROVED && !force) {
+                throw new DataAccessException("The task is approved. If you want to proceed add force " +
+                        "as second argument to this command");
+            }
+            rs.close();
+
+            st.setInt(1, id);
+            int affected = st.executeUpdate();
+            if (affected == 0) {
+                throw new DataAccessException("No change. Make sure you choose not returned task yet.");
+            }
+        }
+    }
+
     public synchronized void approveTask(int id, boolean force) throws SQLException, DataAccessException {
         try (Connection connection = DriverManager.getConnection(url);
              PreparedStatement statement = connection.prepareStatement(
@@ -203,6 +231,44 @@ public class TaskDAO {
 
     /**
      *
+     * @param advisor - id of advisor
+     * @return finished tasks, in which the player figures as advisor
+     * @throws SQLException
+     */
+    public synchronized List<Task> fetchFinishedTasks(int advisor) throws SQLException {
+        try (Connection connection = DriverManager.getConnection(url);
+             PreparedStatement st = connection.prepareStatement(
+                     "SELECT id, title, description, assignee_id, advisor_id, x, y, z, yaw, pitch, status, " +
+                             "date_given, date_finished FROM TASKS WHERE advisor_id = ? AND status = 'FINISHED'")) {
+
+            st.setInt(1, advisor);
+            ResultSet rs = st.executeQuery();
+            List<Task> tasks = new ArrayList<>();
+            while (rs.next()) {
+                Task task = new Task(
+                        rs.getString("title"),
+                        rs.getString("description"),
+                        rs.getInt("assignee_id"),
+                        rs.getInt("advisor_id"),
+                        rs.getDouble("x"),
+                        rs.getDouble("y"),
+                        rs.getDouble("z"),
+                        rs.getFloat("yaw"),
+                        rs.getFloat("pitch"),
+                        TaskStatus.valueOf(rs.getString("status")),
+                        rs.getDate("date_given"),
+                        rs.getDate("date_finished")
+                );
+                task.setId(rs.getInt("id"));
+                tasks.add(task);
+            }
+            rs.close();
+            return tasks;
+        }
+    }
+
+    /**
+     *
      * @param advisor id of advisor
      * @return Tasks which were given by this advisor and are not approved yet.
      * @throws SQLException
@@ -254,6 +320,20 @@ public class TaskDAO {
             int affected = st.executeUpdate();
             if (affected == 0) {
                 throw new DataAccessException("No change. Make sure you choose your existing task.");
+            }
+        }
+    }
+
+    public synchronized void updateTaskAssignee(int id, int assignee) throws SQLException, DataAccessException {
+        try (Connection connection = DriverManager.getConnection(url);
+             PreparedStatement st = connection.prepareStatement(
+                     "UPDATE TASKS SET assignee_id = ? WHERE id = ?")) {
+
+            st.setInt(1, assignee);
+            st.setInt(2, id);
+            int affected = st.executeUpdate();
+            if (affected == 0) {
+                throw new DataAccessException("No change. Make sure you choose valid task.");
             }
         }
     }

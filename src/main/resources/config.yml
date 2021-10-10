@@ -1,3 +1,2 @@
-guild_id: 0
-channel_id: 0
+# login secret for discord bot, if set, plugin will be able to send messages on discord
 token: 0
