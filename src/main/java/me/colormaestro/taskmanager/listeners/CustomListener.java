@@ -36,6 +36,7 @@ public class CustomListener implements Listener {
     public void onJoin(PlayerJoinEvent event) {
         Bukkit.getScheduler().runTaskLater(plugin, addPlayerToDB(event, plugin, playerDAO), 30);
         Bukkit.getScheduler().runTaskLater(plugin, checkHologram(event), 180);
+        Bukkit.getScheduler().runTaskLater(plugin, checkDiscordID(event, plugin, playerDAO), 190);
         Bukkit.getScheduler().runTaskLater(plugin, checkFinishedTasks(event, plugin, taskDAO, playerDAO), 200);
     }
 
@@ -49,6 +50,38 @@ public class CustomListener implements Listener {
                         "⚠ To do so issue command" + ChatColor.GOLD + "" + ChatColor.BOLD +
                         " /establish" + ChatColor.DARK_AQUA +" on the place, where you want to have it");
             }
+        };
+    }
+
+    /**
+     * Represents job, which checks, whether player has set discord_id in database and send notification if discord_id
+     * is not set.
+     * @param event PlayerJoinEvent
+     * @param plugin under which to run the job
+     * @param playerDAO object for communication with database
+     * @return Runnable (job) for execution
+     */
+    private static Runnable checkDiscordID(PlayerJoinEvent event, Plugin plugin, PlayerDAO playerDAO) {
+        return () -> {
+            UUID uuid = event.getPlayer().getUniqueId();
+            Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
+                try {
+                    long id = playerDAO.getDiscordUserID(uuid.toString());
+                    // id == 0 means that discord_id is null in database.
+                    Bukkit.getScheduler().runTask(plugin, () -> {
+                        if (id == 0) {
+                            event.getPlayer().sendMessage(ChatColor.BLUE
+                                    + "ℹ You don't have linked your discord account yet. If you want to receive");
+                            event.getPlayer().sendMessage(ChatColor.BLUE +
+                                    "ℹ  notifications about new or approved tasks issue command "
+                                    + ChatColor.GOLD + "" + ChatColor.BOLD + "/linkdiscord");
+
+                        }
+                    });
+                } catch (SQLException | DataAccessException ex) {
+                    ex.printStackTrace();
+                }
+            });
         };
     }
 
@@ -67,9 +100,7 @@ public class CustomListener implements Listener {
                 try {
                     int id = playerDAO.getPlayerID(uuid);
                     List<Task> finishedTasks = taskDAO.fetchFinishedTasks(id);
-                    Bukkit.getScheduler().runTask(plugin, () -> {
-                        sendFinishedTasks(event.getPlayer(), finishedTasks);
-                    });
+                    Bukkit.getScheduler().runTask(plugin, () -> sendFinishedTasks(event.getPlayer(), finishedTasks));
                 } catch (SQLException | DataAccessException ex) {
                     ex.printStackTrace();
                 }
@@ -95,10 +126,9 @@ public class CustomListener implements Listener {
                 try {
                     if (!playerDAO.playerExists(uuid)) {
                         playerDAO.addPlayer(uuid, ign);
-                        Bukkit.getScheduler().runTask(plugin, () -> {
-                            Bukkit.getServer().broadcastMessage(ChatColor.DARK_GREEN + "" + ChatColor.BOLD + "Player " +
-                                    ign + " has been added to database (first join)");
-                        });
+                        Bukkit.getScheduler().runTask(plugin, () -> Bukkit.getServer().broadcastMessage(
+                                ChatColor.DARK_GREEN + "" + ChatColor.BOLD + "Player " + ign +
+                                        " has been added to database (first join)"));
                     }
                 } catch (SQLException ex) {
                     ex.printStackTrace();
