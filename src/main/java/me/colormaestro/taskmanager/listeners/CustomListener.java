@@ -1,5 +1,6 @@
 package me.colormaestro.taskmanager.listeners;
 
+import com.sun.imageio.plugins.common.SingleTileRenderedImage;
 import me.colormaestro.taskmanager.data.DataAccessException;
 import me.colormaestro.taskmanager.data.DiscordManager;
 import me.colormaestro.taskmanager.data.HologramLayer;
@@ -143,22 +144,15 @@ public class CustomListener implements Listener {
             return;
         }
 
-        String page = event.getNewBookMeta().getPage(1);
-        if (!page.startsWith("*@create")) {
-            return;
-        }
-
         Player p = event.getPlayer();
         UUID uuid = p.getUniqueId();
 
-        String prevDispName = event.getPreviousBookMeta().getDisplayName();
-        String[] tmp = prevDispName.split(":");
-        if (tmp.length != 2) {
-            p.sendMessage(ChatColor.DARK_PURPLE + "Ayyy you, you found the plugin secret :D POG, however, you need "
-                    + "to use /addtask command for creating tasks ;)");
+        List<String> lore = event.getPreviousBookMeta().getLore();
+        String ign;
+        if (lore == null || lore.size() != 2 || !lore.get(0).equals("*@create")) {
             return;
         }
-        String ign = tmp[1];
+        ign = lore.get(1);
 
         String description = event.getNewBookMeta().getPage(2);
         String title = event.getNewBookMeta().getTitle();

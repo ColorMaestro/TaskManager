@@ -10,6 +10,14 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.BookMeta;
+import org.jetbrains.annotations.NotNull;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.List;
+import java.util.ListIterator;
 
 
 public class AddTask implements CommandExecutor {
@@ -37,11 +45,8 @@ public class AddTask implements CommandExecutor {
         ItemStack book = new ItemStack(Material.WRITABLE_BOOK);
         BookMeta bookMeta = (BookMeta) book.getItemMeta();
 
-        BaseComponent[] page = new ComponentBuilder("*@create\n")
-                .append("Do not modify this page!\n")
-                .color(net.md_5.bungee.api.ChatColor.DARK_RED).bold(true)
-                .append("Instructions:\n")
-                .color(net.md_5.bungee.api.ChatColor.BLUE).bold(false)
+        BaseComponent[] page = new ComponentBuilder("Instructions:\n")
+                .color(net.md_5.bungee.api.ChatColor.BLUE)
                 .append("1) Only the second page of this book serves as task description " +
                     "for player what to do in this task.\n")
                 .color(net.md_5.bungee.api.ChatColor.RESET)
@@ -53,7 +58,8 @@ public class AddTask implements CommandExecutor {
 
         bookMeta.spigot().addPage(page);
         bookMeta.spigot().addPage(page2);
-        bookMeta.setDisplayName(ChatColor.GOLD + "Assignment book for:" + ign);
+        bookMeta.setDisplayName(ChatColor.GOLD + "Assignment book for " + ign);
+        bookMeta.setLore(new ArrayList<>(Arrays.asList("*@create", ign)));
         book.setItemMeta(bookMeta);
         return book;
     }
