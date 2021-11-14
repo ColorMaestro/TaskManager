@@ -91,8 +91,9 @@ public class Tasks implements CommandExecutor {
         sender.sendMessage(g + "/tasks [IGN]" + w + " - shows your or other player tasks");
         sender.sendMessage(g + "/visittask <id>" + w + " - teleports to the task workplace");
         sender.sendMessage(g + "/taskinfo <id>" + w + " - obtains info in book for related task");
-        sender.sendMessage(g + "/addtask <IGN>" + w + " - adds new task");
-        sender.sendMessage(g + "/finishtask <id>" + w + " - mark task as finished");
+        sender.sendMessage(g + "/addtask <IGN>" + w + " - creates task assignment book with blank description");
+        sender.sendMessage(g + "/addtask <IGN> [id]" + w + " - creates task assignment book, description is taken from selected task");
+        sender.sendMessage(g + "/finishtask <id>" + w + " - marks task as finished");
         sender.sendMessage(g + "/approvetask <id> [force]" + w + " - approves the finished task");
         sender.sendMessage(g + "/returntask <id> [force]" + w + " - returns task back to given (unfinished) state");
         sender.sendMessage(g + "/transfertask <id> <IGN>" + w + " - changes the assignee of the task");
