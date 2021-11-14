@@ -49,11 +49,12 @@ public class VisitTask implements CommandExecutor {
                 int id = Integer.parseInt(sid);
                 Task task = taskDAO.findTask(id);
                 String advisorName = playerDAO.getPlayerIGN(task.getAdvisorID());
+                String assigneeName = playerDAO.getPlayerIGN(task.getAssigneeID());
                 Bukkit.getScheduler().runTask(plugin,
                         () -> {
                             Location location = new Location(p.getWorld(), task.getX(), task.getY(), task.getZ(),
                                     task.getYaw(), task.getPitch());
-                            ItemStack book = buildBook(task, advisorName);
+                            ItemStack book = buildBook(task, advisorName, assigneeName);
                             p.teleport(location);
                             p.getInventory().addItem(book);
                         });
@@ -66,27 +67,47 @@ public class VisitTask implements CommandExecutor {
         return true;
     }
 
-    public static ItemStack buildBook(Task task, String advisorName) {
+    public static ItemStack buildBook(Task task, String advisorName, String assigneeName) {
         ItemStack book = new ItemStack(Material.WRITTEN_BOOK);
         BookMeta bookMeta = (BookMeta) book.getItemMeta();
 
-        BaseComponent[] page = new ComponentBuilder("   " + task.getTitle() + "\n")
+        ComponentBuilder builder = new ComponentBuilder("   " + task.getTitle() + "\n")
                 .color(net.md_5.bungee.api.ChatColor.BLUE).bold(true)
                 .append("From: ")
                 .color(net.md_5.bungee.api.ChatColor.RESET).bold(false)
                 .append(advisorName + "\n")
                 .color(net.md_5.bungee.api.ChatColor.GOLD)
-                .append("Created: " + task.getDateCreation() + "\n\n")
-                .color(net.md_5.bungee.api.ChatColor.RESET)
-                .append("Turn the page for instructions!\n")
-                .create();
+                .append("For: ")
+                .color(net.md_5.bungee.api.ChatColor.RESET).bold(false)
+                .append(assigneeName + "\n")
+                .color(net.md_5.bungee.api.ChatColor.GOLD)
+                .append("Created: " + task.getDateCreation() + "\n")
+                .color(net.md_5.bungee.api.ChatColor.RESET);
+
+        if (task.getDateCompleted() != null) {
+            builder = builder.append("Finished: " + task.getDateCompleted() + "\n");
+        }
+        builder = builder.append("\nTurn the page for instructions!");
+
+        BaseComponent[] page = builder.create();
 
         BaseComponent[] page2 = new ComponentBuilder(task.getDescription()).create();
 
         bookMeta.spigot().addPage(page);
         bookMeta.spigot().addPage(page2);
         bookMeta.setTitle("blank");
-        bookMeta.setDisplayName(ChatColor.GOLD + "" + ChatColor.BOLD + "Task " + task.getId());
+        ChatColor tittleColor;
+        switch (task.getStatus()) {
+            case DOING:
+                tittleColor = ChatColor.GOLD;
+                break;
+            case FINISHED:
+                tittleColor = ChatColor.GREEN;
+                break;
+            default:
+                tittleColor = ChatColor.AQUA;
+        }
+        bookMeta.setDisplayName(tittleColor + "" + ChatColor.BOLD + "Task " + task.getId());
         bookMeta.setAuthor(advisorName);
         book.setItemMeta(bookMeta);
         return book;

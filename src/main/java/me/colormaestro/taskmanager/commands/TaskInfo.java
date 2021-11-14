@@ -6,7 +6,6 @@ import me.colormaestro.taskmanager.data.TaskDAO;
 import me.colormaestro.taskmanager.model.Task;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
-import org.bukkit.Location;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -45,9 +44,10 @@ public class TaskInfo implements CommandExecutor {
                 int id = Integer.parseInt(sid);
                 Task task = taskDAO.findTask(id);
                 String advisorName = playerDAO.getPlayerIGN(task.getAdvisorID());
+                String assigneeName = playerDAO.getPlayerIGN(task.getAssigneeID());
                 Bukkit.getScheduler().runTask(plugin,
                         () -> {
-                            ItemStack book = VisitTask.buildBook(task, advisorName);
+                            ItemStack book = VisitTask.buildBook(task, advisorName, assigneeName);
                             p.getInventory().addItem(book);
                         });
             } catch (SQLException | DataAccessException | NumberFormatException ex) {
