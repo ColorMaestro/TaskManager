@@ -80,12 +80,12 @@ public class TransferTask implements CommandExecutor {
 
                             // If the assignees are not online, sent them message to discord
                             if (!messageSentOldAssignee) {
-                                DiscordManager.getInstance().taskTransfered(discordOldAssigneeID, p.getName(),
+                                DiscordManager.getInstance().taskTransferred(discordOldAssigneeID, p.getName(),
                                         oldAssigneeIGN, args[1], task,true);
                             }
 
                             if (!messageSentNewAssignee) {
-                                DiscordManager.getInstance().taskTransfered(discordNewAssigneeID, p.getName(),
+                                DiscordManager.getInstance().taskTransferred(discordNewAssigneeID, p.getName(),
                                         oldAssigneeIGN, args[1], task,false);
                             }
                         });
