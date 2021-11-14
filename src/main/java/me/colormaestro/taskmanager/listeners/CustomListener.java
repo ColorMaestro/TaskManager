@@ -1,6 +1,5 @@
 package me.colormaestro.taskmanager.listeners;
 
-import com.sun.imageio.plugins.common.SingleTileRenderedImage;
 import me.colormaestro.taskmanager.data.DataAccessException;
 import me.colormaestro.taskmanager.data.DiscordManager;
 import me.colormaestro.taskmanager.data.HologramLayer;
