@@ -1,5 +1,6 @@
 package me.colormaestro.taskmanager.listeners;
 
+import me.colormaestro.taskmanager.TasksTabCompleter;
 import me.colormaestro.taskmanager.data.DataAccessException;
 import me.colormaestro.taskmanager.data.DiscordManager;
 import me.colormaestro.taskmanager.data.HologramLayer;
@@ -25,16 +26,18 @@ public class CustomListener implements Listener {
     private final Plugin plugin;
     private final TaskDAO taskDAO;
     private final PlayerDAO playerDAO;
+    private final TasksTabCompleter completer;
 
-    public CustomListener(Plugin plugin, TaskDAO taskDAO, PlayerDAO playerDAO) {
+    public CustomListener(Plugin plugin, TaskDAO taskDAO, PlayerDAO playerDAO, TasksTabCompleter completer) {
         this.plugin = plugin;
         this.taskDAO = taskDAO;
         this.playerDAO = playerDAO;
+        this.completer = completer;
     }
 
     @EventHandler
     public void onJoin(PlayerJoinEvent event) {
-        Bukkit.getScheduler().runTaskLater(plugin, addPlayerToDB(event, plugin, playerDAO), 30);
+        Bukkit.getScheduler().runTaskLater(plugin, addPlayerToDB(event, plugin, playerDAO, completer), 30);
         Bukkit.getScheduler().runTaskLater(plugin, checkHologram(event), 180);
         Bukkit.getScheduler().runTaskLater(plugin, checkDiscordID(event, plugin, playerDAO), 190);
         Bukkit.getScheduler().runTaskLater(plugin, checkFinishedTasks(event, plugin, taskDAO, playerDAO), 200);
@@ -118,7 +121,8 @@ public class CustomListener implements Listener {
         }
     }
 
-    private static Runnable addPlayerToDB(PlayerJoinEvent event, Plugin plugin, PlayerDAO playerDAO) {
+    private static Runnable addPlayerToDB(PlayerJoinEvent event, Plugin plugin,
+                                                   PlayerDAO playerDAO, TasksTabCompleter completer) {
         return () -> {
             String uuid = event.getPlayer().getUniqueId().toString();
             String ign = event.getPlayer().getName();
@@ -126,6 +130,7 @@ public class CustomListener implements Listener {
                 try {
                     if (!playerDAO.playerExists(uuid)) {
                         playerDAO.addPlayer(uuid, ign);
+                        completer.reload();
                         Bukkit.getScheduler().runTask(plugin, () -> Bukkit.getServer().broadcastMessage(
                                 ChatColor.DARK_GREEN + "" + ChatColor.BOLD + "Player " + ign +
                                         " has been added to database (first join)"));

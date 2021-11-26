@@ -35,7 +35,11 @@ public final class TaskManager extends JavaPlugin {
     public void onEnable() {
         loadConfig();
         createDAOs();
-        getServer().getPluginManager().registerEvents(new CustomListener(this, taskDAO, playerDAO), this);
+        TasksTabCompleter completer = new TasksTabCompleter(playerDAO);
+        Objects.requireNonNull(this.getCommand("tasks")).setTabCompleter(completer);
+        Objects.requireNonNull(this.getCommand("addtask")).setTabCompleter(completer);
+
+        getServer().getPluginManager().registerEvents(new CustomListener(this, taskDAO, playerDAO, completer), this);
         Objects.requireNonNull(this.getCommand("tasks")).setExecutor(new Tasks(taskDAO, playerDAO));
         Objects.requireNonNull(this.getCommand("addtask")).setExecutor(new AddTask(this, taskDAO));
         Objects.requireNonNull(this.getCommand("finishtask")).setExecutor(new FinishTask(taskDAO, playerDAO));
@@ -48,8 +52,6 @@ public final class TaskManager extends JavaPlugin {
         Objects.requireNonNull(this.getCommand("taskinfo")).setExecutor(new TaskInfo(taskDAO, playerDAO));
         Objects.requireNonNull(this.getCommand("transfertask")).setExecutor(new TransferTask(taskDAO, playerDAO));
 
-        Objects.requireNonNull(this.getCommand("tasks")).setTabCompleter(new TasksTabCompleter(playerDAO));
-        Objects.requireNonNull(this.getCommand("addtask")).setTabCompleter(new TasksTabCompleter(playerDAO));
         HologramLayer.instantiate(JavaPlugin.getPlugin(HologramPlugin.class).getHologramManager());
         DiscordManager.instantiate(config.getString("token"), playerDAO, this);
     }
