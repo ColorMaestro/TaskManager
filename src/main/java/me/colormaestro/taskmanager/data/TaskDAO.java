@@ -223,10 +223,46 @@ public class TaskDAO {
     }
 
     /**
+     * Fetches all tasks from database.
+     * @return list of all tasks
+     * @throws SQLException if SQL error arise
+     */
+    public synchronized List<Task> fetchAllTasks() throws SQLException {
+        try (Connection connection = DriverManager.getConnection(url);
+             PreparedStatement st = connection.prepareStatement(
+                     "SELECT id, title, description, assignee_id, advisor_id, x, y, z, yaw, pitch, status, " +
+                             "date_given, date_finished FROM TASKS")) {
+
+            ResultSet rs = st.executeQuery();
+            List<Task> tasks = new ArrayList<>();
+            while (rs.next()) {
+                Task task = new Task(
+                        rs.getString("title"),
+                        rs.getString("description"),
+                        rs.getInt("assignee_id"),
+                        rs.getInt("advisor_id"),
+                        rs.getDouble("x"),
+                        rs.getDouble("y"),
+                        rs.getDouble("z"),
+                        rs.getFloat("yaw"),
+                        rs.getFloat("pitch"),
+                        TaskStatus.valueOf(rs.getString("status")),
+                        rs.getDate("date_given"),
+                        rs.getDate("date_finished")
+                );
+                task.setId(rs.getInt("id"));
+                tasks.add(task);
+            }
+            rs.close();
+            return tasks;
+        }
+    }
+
+    /**
      * Retrieves all active tasks (status {@link me.colormaestro.taskmanager.enums.TaskStatus#DOING} or
      * {@link me.colormaestro.taskmanager.enums.TaskStatus#FINISHED}) of selected person. Used typically on updating
      * hologram task list.
-     * @param assigneeID - id of assignee
+     * @param assigneeID id of assignee
      * @return active (given and finished, not approved) tasks on which is assignee currently working
      * @throws SQLException if SQL error arise
      */
@@ -265,7 +301,7 @@ public class TaskDAO {
     /**
      * Retrieves all finished tasks whose advisor is selected person. Used typically for checking whether there are some
      * finished tasks to review.
-     * @param advisorID - id of advisor
+     * @param advisorID id of advisor
      * @return finished tasks, in which the player figures as advisor
      * @throws SQLException if SQL error arise
      */

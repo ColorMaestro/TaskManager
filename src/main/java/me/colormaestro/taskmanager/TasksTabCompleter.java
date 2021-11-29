@@ -40,6 +40,7 @@ public class TasksTabCompleter implements TabCompleter {
             // adds 2 special targets (used in /tasks command)
             names.add("help");
             names.add("given");
+            names.add("stats");
         } catch (SQLException e) {
             e.printStackTrace();
             names = new ArrayList<>();

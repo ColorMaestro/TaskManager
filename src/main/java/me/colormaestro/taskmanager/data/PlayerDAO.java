@@ -1,6 +1,6 @@
 package me.colormaestro.taskmanager.data;
 
-import me.colormaestro.taskmanager.model.Task;
+import me.colormaestro.taskmanager.model.MyPlayer;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -11,7 +11,9 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 public class PlayerDAO {
@@ -79,6 +81,27 @@ public class PlayerDAO {
                     ")");
         } catch (SQLException ex) {
             throw new RuntimeException("Failed to create PLAYERS table", ex);
+        }
+    }
+
+    public synchronized Map<Integer, MyPlayer> fetchAllPlayers() throws SQLException {
+        try (Connection connection = DriverManager.getConnection(url);
+             PreparedStatement st = connection.prepareStatement(
+                     "SELECT id, uuid, ign, discord_id FROM PLAYERS"
+             )) {
+            ResultSet rs = st.executeQuery();
+            Map<Integer, MyPlayer> players = new HashMap();
+            while (rs.next()) {
+                MyPlayer player = new MyPlayer(
+                        rs.getString("uuid"),
+                        rs.getString("ign"),
+                        rs.getLong("discord_id")
+                );
+                player.setId(rs.getInt("id"));
+                players.put(player.getId(), player);
+            }
+            rs.close();
+            return players;
         }
     }
 
