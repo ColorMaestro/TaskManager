@@ -57,7 +57,9 @@ public class TaskDAO {
                     "pitch DOUBLE," +
                     "status VARCHAR(10)," +
                     "date_given DATE," +
-                    "date_finished DATE" +
+                    "date_finished DATE," +
+                    "FOREIGN KEY (assignee_id) REFERENCES PLAYERS (id)," +
+                    "FOREIGN KEY (advisor_id) REFERENCES PLAYERS (id)" +
                     ")");
         } catch (SQLException ex) {
             throw new RuntimeException("Failed to create TASKS table", ex);

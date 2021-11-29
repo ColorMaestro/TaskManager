@@ -77,7 +77,7 @@ public final class TaskManager extends JavaPlugin {
     }
 
     private void createDAOs() {
-        taskDAO = new TaskDAO(getDataFolder().getAbsolutePath());
         playerDAO = new PlayerDAO(getDataFolder().getAbsolutePath());
+        taskDAO = new TaskDAO(getDataFolder().getAbsolutePath());
     }
 }
