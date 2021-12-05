@@ -21,17 +21,20 @@ import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 import java.util.UUID;
 
 public class Tasks implements CommandExecutor {
     private final Plugin plugin;
     private final TaskDAO taskDAO;
     private final PlayerDAO playerDAO;
+    private final Random rand;
 
     public Tasks(Plugin plugin, TaskDAO taskDAO, PlayerDAO playerDAO) {
         this.plugin = plugin;
         this.taskDAO = taskDAO;
         this.playerDAO = playerDAO;
+        this.rand = new Random();
     }
 
     @Override
@@ -190,7 +193,11 @@ public class Tasks implements CommandExecutor {
     private ItemStack buildStatsBook(Map<String, int[]> data) {
         ItemStack book = new ItemStack(Material.WRITTEN_BOOK);
         BookMeta bookMeta = (BookMeta) book.getItemMeta();
-        ComponentBuilder builder = new ComponentBuilder();
+        // Generates random headline color in book
+        char[] options = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e'};
+        ChatColor color = ChatColor.getByChar(options[rand.nextInt(15)]);
+        ComponentBuilder builder =
+                new ComponentBuilder(color + "" + ChatColor.BOLD + "Holy grail of all members\n");
         int pageRows = 0;
         for (Map.Entry<String, int[]> entry : data.entrySet()) {
             int[] stats = entry.getValue();
