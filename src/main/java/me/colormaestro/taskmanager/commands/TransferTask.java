@@ -58,8 +58,10 @@ public class TransferTask implements CommandExecutor {
                 Bukkit.getScheduler().runTask(plugin,
                         () -> {
                             p.sendMessage(ChatColor.GREEN + "Task transferred.");
-                            HologramLayer.getInstance().setTasks(oldAssigneeUUID, activeTasksOldAssignee);
-                            HologramLayer.getInstance().setTasks(newAssigneeUUID, activeTasksNewAssignee);
+                            if (Bukkit.getPluginManager().isPluginEnabled("Holograms")) {
+                                HologramLayer.getInstance().setTasks(oldAssigneeUUID, activeTasksOldAssignee);
+                                HologramLayer.getInstance().setTasks(newAssigneeUUID, activeTasksNewAssignee);
+                            }
 
                             // Firstly we try to notify the assignees in game
                             boolean messageSentOldAssignee = false;

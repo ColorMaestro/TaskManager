@@ -54,7 +54,9 @@ public class ApproveTask implements CommandExecutor {
                         Bukkit.getScheduler().runTask(plugin,
                                 () -> {
                                     p.sendMessage(ChatColor.GREEN + "Task approved.");
-                                    HologramLayer.getInstance().setTasks(assigneeUUID, activeTasks);
+                                    if (Bukkit.getPluginManager().isPluginEnabled("Holograms")) {
+                                        HologramLayer.getInstance().setTasks(assigneeUUID, activeTasks);
+                                    }
 
                                     // Firstly we try to notify the assignee in game
                                     boolean messageSent = false;

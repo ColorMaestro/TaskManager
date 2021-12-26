@@ -2,6 +2,7 @@ package me.colormaestro.taskmanager.data;
 
 import com.sainttx.holograms.api.Hologram;
 import com.sainttx.holograms.api.HologramManager;
+import com.sainttx.holograms.api.HologramPlugin;
 import com.sainttx.holograms.api.line.HologramLine;
 import com.sainttx.holograms.api.line.TextLine;
 import me.colormaestro.taskmanager.enums.TaskStatus;
@@ -9,6 +10,7 @@ import me.colormaestro.taskmanager.model.Task;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
+import org.bukkit.plugin.java.JavaPlugin;
 
 import java.util.List;
 import java.util.Map;
@@ -22,9 +24,9 @@ public class HologramLayer {
         this.manager = manager;
     }
 
-    public static void instantiate(HologramManager manager) {
+    public static void instantiate() {
         if (instance == null) {
-            instance = new HologramLayer(manager);
+            instance = new HologramLayer(JavaPlugin.getPlugin(HologramPlugin.class).getHologramManager());
         }
     }
 

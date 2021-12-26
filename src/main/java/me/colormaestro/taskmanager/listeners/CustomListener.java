@@ -38,7 +38,9 @@ public class CustomListener implements Listener {
     @EventHandler
     public void onJoin(PlayerJoinEvent event) {
         Bukkit.getScheduler().runTaskLater(plugin, addPlayerToDB(event, plugin, playerDAO, completer), 30);
-        Bukkit.getScheduler().runTaskLater(plugin, checkHologram(event), 180);
+        if (Bukkit.getPluginManager().isPluginEnabled("Holograms")) {
+            Bukkit.getScheduler().runTaskLater(plugin, checkHologram(event), 180);
+        }
         Bukkit.getScheduler().runTaskLater(plugin, checkDiscordID(event, plugin, playerDAO), 190);
         Bukkit.getScheduler().runTaskLater(plugin, checkFinishedTasks(event, plugin, taskDAO, playerDAO), 200);
     }
@@ -191,7 +193,9 @@ public class CustomListener implements Listener {
 
                                     // Firstly we try to notify the assignee in game
                                     boolean messageSent = false;
-                                    HologramLayer.getInstance().setTasks(assigneeUUID, activeTasks);
+                                    if (Bukkit.getPluginManager().isPluginEnabled("Holograms")) {
+                                        HologramLayer.getInstance().setTasks(assigneeUUID, activeTasks);
+                                    }
                                     for (Player target : Bukkit.getOnlinePlayers()) {
                                         if (target.getUniqueId().toString().equals(assigneeUUID)) {
                                             target.sendMessage(ChatColor.GOLD + "You have new task from " + p.getName());

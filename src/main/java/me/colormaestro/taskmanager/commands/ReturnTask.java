@@ -55,7 +55,9 @@ public class ReturnTask implements CommandExecutor {
                         Bukkit.getScheduler().runTask(plugin,
                                 () -> {
                                     p.sendMessage(ChatColor.GREEN + "Task returned.");
-                                    HologramLayer.getInstance().setTasks(assigneeUUID, activeTasks);
+                                    if (Bukkit.getPluginManager().isPluginEnabled("Holograms")) {
+                                        HologramLayer.getInstance().setTasks(assigneeUUID, activeTasks);
+                                    }
 
                                     // Firstly we try to notify the assignee in game
                                     boolean messageSent = false;
