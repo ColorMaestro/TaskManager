@@ -19,7 +19,7 @@ public class DiscordMessageListener extends ListenerAdapter {
         }
 
         String[] array = content.split(" ");
-        String code = "";
+        String code;
 
         try {
             code = array[1];

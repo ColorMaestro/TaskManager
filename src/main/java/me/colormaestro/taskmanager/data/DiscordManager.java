@@ -5,7 +5,6 @@ import me.colormaestro.taskmanager.model.Task;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
-import net.dv8tion.jda.api.OnlineStatus;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -29,11 +28,10 @@ public class DiscordManager {
 
     private DiscordManager(String token, PlayerDAO playerDAO, JavaPlugin plugin) {
         try {
-            api = JDABuilder.createDefault(token).addEventListeners(new DiscordMessageListener())
-                    .setStatus(OnlineStatus.ONLINE).build();
+            api = JDABuilder.createDefault(token).addEventListeners(new DiscordMessageListener()).build();
+            plugin.getLogger().info("Token provided, bot connection with Discord established");
         } catch (LoginException e) {
-            System.out.println("Cannot login Discord bot - LoginException");
-            e.printStackTrace();
+            plugin.getLogger().info("Cannot login Discord bot: " + e.getMessage());
         }
         codes = Collections.synchronizedMap(new HashMap<>());
         this.playerDAO = playerDAO;
@@ -84,7 +82,7 @@ public class DiscordManager {
         }
     }
 
-    public void taskTransfered(long userID, String advisor, String oldAssignee, String newAssignee, Task task, boolean taken) {
+    public void taskTransferred(long userID, String advisor, String oldAssignee, String newAssignee, Task task, boolean taken) {
         if (api != null) {
             String messageGiven = String.format(":inbox_tray: %s has transferred task [%d] *%s* from %s to you.", advisor, task.getId(), task.getTitle(), oldAssignee);
             String messageTaken = String.format(":outbox_tray: %s has transferred your task [%d] *%s* to %s.", advisor, task.getId(), task.getTitle(), newAssignee);
@@ -93,6 +91,9 @@ public class DiscordManager {
         }
     }
 
+    /**
+     * Shuts down the bot instance.
+     */
     public void shutdown() {
         if (api != null)
             api.shutdownNow();
@@ -101,6 +102,7 @@ public class DiscordManager {
     /**
      * Generates authentication code for given UUID and stores it internally for short time.
      * @param uuid of the player to authenticate
+     * @return generated code
      */
     public String generateCode(UUID uuid) {
         StringBuilder builder = new StringBuilder();
@@ -130,6 +132,7 @@ public class DiscordManager {
      * Verifies, whether given code is present for user authentication. In case it is, the code is removed and
      * discord ID in the record with corresponding UUID is updated in database.
      * @param code code to verify
+     * @param discordID discord user ID from received message
      * @return true, if code was present for user authentication, false otherwise
      */
     public boolean verifyCode(String code, long discordID) {
@@ -140,7 +143,7 @@ public class DiscordManager {
                     codes.remove(code);
                     return true;
                 } catch (SQLException | DataAccessException ex) {
-                    System.out.println(ex);
+                    System.out.println(ex.getMessage());
                     ex.printStackTrace();
                     return false;
                 }

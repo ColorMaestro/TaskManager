@@ -1,6 +1,5 @@
 package me.colormaestro.taskmanager;
 
-import com.sainttx.holograms.api.HologramPlugin;
 import me.colormaestro.taskmanager.commands.AddTask;
 import me.colormaestro.taskmanager.commands.ApproveTask;
 import me.colormaestro.taskmanager.commands.Establish;
@@ -17,6 +16,7 @@ import me.colormaestro.taskmanager.data.HologramLayer;
 import me.colormaestro.taskmanager.data.PlayerDAO;
 import me.colormaestro.taskmanager.data.TaskDAO;
 import me.colormaestro.taskmanager.listeners.CustomListener;
+import org.bukkit.Bukkit;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -35,9 +35,13 @@ public final class TaskManager extends JavaPlugin {
     public void onEnable() {
         loadConfig();
         createDAOs();
-        getServer().getPluginManager().registerEvents(new CustomListener(this, taskDAO, playerDAO), this);
-        Objects.requireNonNull(this.getCommand("tasks")).setExecutor(new Tasks(taskDAO, playerDAO));
-        Objects.requireNonNull(this.getCommand("addtask")).setExecutor(new AddTask());
+        TasksTabCompleter completer = new TasksTabCompleter(playerDAO);
+        Objects.requireNonNull(this.getCommand("tasks")).setTabCompleter(completer);
+        Objects.requireNonNull(this.getCommand("addtask")).setTabCompleter(completer);
+
+        getServer().getPluginManager().registerEvents(new CustomListener(this, taskDAO, playerDAO, completer), this);
+        Objects.requireNonNull(this.getCommand("tasks")).setExecutor(new Tasks(this, taskDAO, playerDAO));
+        Objects.requireNonNull(this.getCommand("addtask")).setExecutor(new AddTask(this, taskDAO));
         Objects.requireNonNull(this.getCommand("finishtask")).setExecutor(new FinishTask(taskDAO, playerDAO));
         Objects.requireNonNull(this.getCommand("approvetask")).setExecutor(new ApproveTask(taskDAO, playerDAO));
         Objects.requireNonNull(this.getCommand("visittask")).setExecutor(new VisitTask(taskDAO, playerDAO));
@@ -48,9 +52,12 @@ public final class TaskManager extends JavaPlugin {
         Objects.requireNonNull(this.getCommand("taskinfo")).setExecutor(new TaskInfo(taskDAO, playerDAO));
         Objects.requireNonNull(this.getCommand("transfertask")).setExecutor(new TransferTask(taskDAO, playerDAO));
 
-        Objects.requireNonNull(this.getCommand("tasks")).setTabCompleter(new TasksTabCompleter(playerDAO));
-        Objects.requireNonNull(this.getCommand("addtask")).setTabCompleter(new TasksTabCompleter(playerDAO));
-        HologramLayer.instantiate(JavaPlugin.getPlugin(HologramPlugin.class).getHologramManager());
+        if (Bukkit.getPluginManager().isPluginEnabled("Holograms")) {
+            HologramLayer.instantiate();
+            this.getLogger().info("Holograms plugin detected, TaskManager will be fully functional");
+        } else {
+            this.getLogger().info("Holograms plugin was not detected, functionality will be limited");
+        }
         DiscordManager.instantiate(config.getString("token"), playerDAO, this);
     }
 
@@ -75,7 +82,7 @@ public final class TaskManager extends JavaPlugin {
     }
 
     private void createDAOs() {
-        taskDAO = new TaskDAO(getDataFolder().getAbsolutePath());
         playerDAO = new PlayerDAO(getDataFolder().getAbsolutePath());
+        taskDAO = new TaskDAO(getDataFolder().getAbsolutePath());
     }
 }

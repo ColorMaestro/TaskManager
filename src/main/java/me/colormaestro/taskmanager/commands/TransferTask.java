@@ -58,8 +58,10 @@ public class TransferTask implements CommandExecutor {
                 Bukkit.getScheduler().runTask(plugin,
                         () -> {
                             p.sendMessage(ChatColor.GREEN + "Task transferred.");
-                            HologramLayer.getInstance().setTasks(oldAssigneeUUID, activeTasksOldAssignee);
-                            HologramLayer.getInstance().setTasks(newAssigneeUUID, activeTasksNewAssignee);
+                            if (Bukkit.getPluginManager().isPluginEnabled("Holograms")) {
+                                HologramLayer.getInstance().setTasks(oldAssigneeUUID, activeTasksOldAssignee);
+                                HologramLayer.getInstance().setTasks(newAssigneeUUID, activeTasksNewAssignee);
+                            }
 
                             // Firstly we try to notify the assignees in game
                             boolean messageSentOldAssignee = false;
@@ -80,12 +82,12 @@ public class TransferTask implements CommandExecutor {
 
                             // If the assignees are not online, sent them message to discord
                             if (!messageSentOldAssignee) {
-                                DiscordManager.getInstance().taskTransfered(discordOldAssigneeID, p.getName(),
+                                DiscordManager.getInstance().taskTransferred(discordOldAssigneeID, p.getName(),
                                         oldAssigneeIGN, args[1], task,true);
                             }
 
                             if (!messageSentNewAssignee) {
-                                DiscordManager.getInstance().taskTransfered(discordNewAssigneeID, p.getName(),
+                                DiscordManager.getInstance().taskTransferred(discordNewAssigneeID, p.getName(),
                                         oldAssigneeIGN, args[1], task,false);
                             }
                         });

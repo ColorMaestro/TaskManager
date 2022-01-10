@@ -1,5 +1,6 @@
 package me.colormaestro.taskmanager.listeners;
 
+import me.colormaestro.taskmanager.TasksTabCompleter;
 import me.colormaestro.taskmanager.data.DataAccessException;
 import me.colormaestro.taskmanager.data.DiscordManager;
 import me.colormaestro.taskmanager.data.HologramLayer;
@@ -25,17 +26,21 @@ public class CustomListener implements Listener {
     private final Plugin plugin;
     private final TaskDAO taskDAO;
     private final PlayerDAO playerDAO;
+    private final TasksTabCompleter completer;
 
-    public CustomListener(Plugin plugin, TaskDAO taskDAO, PlayerDAO playerDAO) {
+    public CustomListener(Plugin plugin, TaskDAO taskDAO, PlayerDAO playerDAO, TasksTabCompleter completer) {
         this.plugin = plugin;
         this.taskDAO = taskDAO;
         this.playerDAO = playerDAO;
+        this.completer = completer;
     }
 
     @EventHandler
     public void onJoin(PlayerJoinEvent event) {
-        Bukkit.getScheduler().runTaskLater(plugin, addPlayerToDB(event, plugin, playerDAO), 30);
-        Bukkit.getScheduler().runTaskLater(plugin, checkHologram(event), 180);
+        Bukkit.getScheduler().runTaskLater(plugin, addPlayerToDB(event, plugin, playerDAO, completer), 30);
+        if (Bukkit.getPluginManager().isPluginEnabled("Holograms")) {
+            Bukkit.getScheduler().runTaskLater(plugin, checkHologram(event), 180);
+        }
         Bukkit.getScheduler().runTaskLater(plugin, checkDiscordID(event, plugin, playerDAO), 190);
         Bukkit.getScheduler().runTaskLater(plugin, checkFinishedTasks(event, plugin, taskDAO, playerDAO), 200);
     }
@@ -118,7 +123,8 @@ public class CustomListener implements Listener {
         }
     }
 
-    private static Runnable addPlayerToDB(PlayerJoinEvent event, Plugin plugin, PlayerDAO playerDAO) {
+    private static Runnable addPlayerToDB(PlayerJoinEvent event, Plugin plugin,
+                                                   PlayerDAO playerDAO, TasksTabCompleter completer) {
         return () -> {
             String uuid = event.getPlayer().getUniqueId().toString();
             String ign = event.getPlayer().getName();
@@ -126,6 +132,7 @@ public class CustomListener implements Listener {
                 try {
                     if (!playerDAO.playerExists(uuid)) {
                         playerDAO.addPlayer(uuid, ign);
+                        completer.reload();
                         Bukkit.getScheduler().runTask(plugin, () -> Bukkit.getServer().broadcastMessage(
                                 ChatColor.DARK_GREEN + "" + ChatColor.BOLD + "Player " + ign +
                                         " has been added to database (first join)"));
@@ -143,22 +150,15 @@ public class CustomListener implements Listener {
             return;
         }
 
-        String page = event.getNewBookMeta().getPage(1);
-        if (!page.startsWith("*@create")) {
-            return;
-        }
-
         Player p = event.getPlayer();
         UUID uuid = p.getUniqueId();
 
-        String prevDispName = event.getPreviousBookMeta().getDisplayName();
-        String[] tmp = prevDispName.split(":");
-        if (tmp.length != 2) {
-            p.sendMessage(ChatColor.DARK_PURPLE + "Ayyy you, you found the plugin secret :D POG, however, you need "
-                    + "to use /addtask command for creating tasks ;)");
+        List<String> lore = event.getPreviousBookMeta().getLore();
+        String ign;
+        if (lore == null || lore.size() != 2 || !lore.get(0).equals("*@create")) {
             return;
         }
-        String ign = tmp[1];
+        ign = lore.get(1);
 
         String description = event.getNewBookMeta().getPage(2);
         String title = event.getNewBookMeta().getTitle();
@@ -193,7 +193,9 @@ public class CustomListener implements Listener {
 
                                     // Firstly we try to notify the assignee in game
                                     boolean messageSent = false;
-                                    HologramLayer.getInstance().setTasks(assigneeUUID, activeTasks);
+                                    if (Bukkit.getPluginManager().isPluginEnabled("Holograms")) {
+                                        HologramLayer.getInstance().setTasks(assigneeUUID, activeTasks);
+                                    }
                                     for (Player target : Bukkit.getOnlinePlayers()) {
                                         if (target.getUniqueId().toString().equals(assigneeUUID)) {
                                             target.sendMessage(ChatColor.GOLD + "You have new task from " + p.getName());
