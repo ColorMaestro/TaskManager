@@ -1,6 +1,7 @@
 package me.colormaestro.taskmanager.listeners;
 
-import me.colormaestro.taskmanager.TasksTabCompleter;
+import me.colormaestro.taskmanager.tabcompleters.AddTaskTabCompleter;
+import me.colormaestro.taskmanager.tabcompleters.TasksTabCompleter;
 import me.colormaestro.taskmanager.data.DataAccessException;
 import me.colormaestro.taskmanager.data.DiscordManager;
 import me.colormaestro.taskmanager.data.HologramLayer;
@@ -26,18 +27,21 @@ public class CustomListener implements Listener {
     private final Plugin plugin;
     private final TaskDAO taskDAO;
     private final PlayerDAO playerDAO;
-    private final TasksTabCompleter completer;
+    private final TasksTabCompleter tasksTabCompleter;
+    private final AddTaskTabCompleter addTaskTabCompleter;
 
-    public CustomListener(Plugin plugin, TaskDAO taskDAO, PlayerDAO playerDAO, TasksTabCompleter completer) {
+    public CustomListener(Plugin plugin, TaskDAO taskDAO, PlayerDAO playerDAO, TasksTabCompleter completer,
+                          AddTaskTabCompleter addTaskTabCompleter) {
         this.plugin = plugin;
         this.taskDAO = taskDAO;
         this.playerDAO = playerDAO;
-        this.completer = completer;
+        this.tasksTabCompleter = completer;
+        this.addTaskTabCompleter = addTaskTabCompleter;
     }
 
     @EventHandler
     public void onJoin(PlayerJoinEvent event) {
-        Bukkit.getScheduler().runTaskLater(plugin, addPlayerToDB(event, plugin, playerDAO, completer), 30);
+        Bukkit.getScheduler().runTaskLater(plugin, addPlayerToDB(event, plugin, playerDAO, tasksTabCompleter, addTaskTabCompleter), 30);
         if (Bukkit.getPluginManager().isPluginEnabled("Holograms")) {
             Bukkit.getScheduler().runTaskLater(plugin, checkHologram(event), 180);
         }
@@ -123,8 +127,8 @@ public class CustomListener implements Listener {
         }
     }
 
-    private static Runnable addPlayerToDB(PlayerJoinEvent event, Plugin plugin,
-                                                   PlayerDAO playerDAO, TasksTabCompleter completer) {
+    private static Runnable addPlayerToDB(PlayerJoinEvent event, Plugin plugin, PlayerDAO playerDAO,
+                                          TasksTabCompleter completer, AddTaskTabCompleter completerA) {
         return () -> {
             String uuid = event.getPlayer().getUniqueId().toString();
             String ign = event.getPlayer().getName();
@@ -133,6 +137,7 @@ public class CustomListener implements Listener {
                     if (!playerDAO.playerExists(uuid)) {
                         playerDAO.addPlayer(uuid, ign);
                         completer.reload();
+                        completerA.reload();
                         Bukkit.getScheduler().runTask(plugin, () -> Bukkit.getServer().broadcastMessage(
                                 ChatColor.DARK_GREEN + "" + ChatColor.BOLD + "Player " + ign +
                                         " has been added to database (first join)"));

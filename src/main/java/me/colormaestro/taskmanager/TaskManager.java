@@ -16,6 +16,8 @@ import me.colormaestro.taskmanager.data.HologramLayer;
 import me.colormaestro.taskmanager.data.PlayerDAO;
 import me.colormaestro.taskmanager.data.TaskDAO;
 import me.colormaestro.taskmanager.listeners.CustomListener;
+import me.colormaestro.taskmanager.tabcompleters.AddTaskTabCompleter;
+import me.colormaestro.taskmanager.tabcompleters.TasksTabCompleter;
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -35,11 +37,12 @@ public final class TaskManager extends JavaPlugin {
     public void onEnable() {
         loadConfig();
         createDAOs();
-        TasksTabCompleter completer = new TasksTabCompleter(playerDAO);
-        Objects.requireNonNull(this.getCommand("tasks")).setTabCompleter(completer);
-        Objects.requireNonNull(this.getCommand("addtask")).setTabCompleter(completer);
+        TasksTabCompleter tasksTabCompleter = new TasksTabCompleter(playerDAO);
+        AddTaskTabCompleter addTaskTabCompleter = new AddTaskTabCompleter(playerDAO);
+        Objects.requireNonNull(this.getCommand("tasks")).setTabCompleter(tasksTabCompleter);
+        Objects.requireNonNull(this.getCommand("addtask")).setTabCompleter(addTaskTabCompleter);
 
-        getServer().getPluginManager().registerEvents(new CustomListener(this, taskDAO, playerDAO, completer), this);
+        getServer().getPluginManager().registerEvents(new CustomListener(this, taskDAO, playerDAO, tasksTabCompleter, addTaskTabCompleter), this);
         Objects.requireNonNull(this.getCommand("tasks")).setExecutor(new Tasks(this, taskDAO, playerDAO));
         Objects.requireNonNull(this.getCommand("addtask")).setExecutor(new AddTask(this, taskDAO));
         Objects.requireNonNull(this.getCommand("finishtask")).setExecutor(new FinishTask(taskDAO, playerDAO));
