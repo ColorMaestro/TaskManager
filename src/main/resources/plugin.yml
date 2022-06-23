@@ -1,7 +1,7 @@
 name: TaskManager
 version: ${project.version}
 main: me.colormaestro.taskmanager.TaskManager
-api-version: 1.15
+api-version: 1.18
 authors: [ColorMaestro]
 softdepend: [Holograms]
 commands:
