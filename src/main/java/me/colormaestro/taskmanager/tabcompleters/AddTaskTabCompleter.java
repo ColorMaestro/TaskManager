@@ -1,4 +1,4 @@
-package me.colormaestro.taskmanager;
+package me.colormaestro.taskmanager.tabcompleters;
 
 import me.colormaestro.taskmanager.data.PlayerDAO;
 import org.bukkit.command.Command;
@@ -11,11 +11,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class TasksTabCompleter implements TabCompleter {
-    private final PlayerDAO playerDAO;
-    private List<String> names;
+public class AddTaskTabCompleter implements TabCompleter {
+    protected final PlayerDAO playerDAO;
+    protected List<String> names;
 
-    public TasksTabCompleter(PlayerDAO playerDAO) {
+    public AddTaskTabCompleter(PlayerDAO playerDAO) {
         this.playerDAO = playerDAO;
         reload();
     }
@@ -37,10 +37,6 @@ public class TasksTabCompleter implements TabCompleter {
     public void reload() {
         try {
             names = playerDAO.getAllIGN();
-            // adds 2 special targets (used in /tasks command)
-            names.add("help");
-            names.add("given");
-            names.add("stats");
         } catch (SQLException e) {
             e.printStackTrace();
             names = new ArrayList<>();
