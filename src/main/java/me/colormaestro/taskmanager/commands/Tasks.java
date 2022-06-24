@@ -162,12 +162,8 @@ public class Tasks implements CommandExecutor {
         p.sendMessage(ChatColor.AQUA + "-=-=-=- " + name + "'s tasks -=-=-=-");
         for (Task task : tasks) {
             switch (task.getStatus()) {
-                case DOING:
-                    p.sendMessage(ChatColor.GOLD + "[" + task.getId() + "] " + ChatColor.WHITE + task.getTitle());
-                    break;
-                case FINISHED:
-                    p.sendMessage(ChatColor.GREEN + "[" + task.getId() + "] " + ChatColor.WHITE + task.getTitle());
-                    break;
+                case DOING -> p.sendMessage(ChatColor.GOLD + "[" + task.getId() + "] " + ChatColor.WHITE + task.getTitle());
+                case FINISHED -> p.sendMessage(ChatColor.GREEN + "[" + task.getId() + "] " + ChatColor.WHITE + task.getTitle());
             }
         }
     }
@@ -180,12 +176,8 @@ public class Tasks implements CommandExecutor {
         p.sendMessage(ChatColor.LIGHT_PURPLE + "-=-=-=- " + p.getName() + "'s supervised tasks -=-=-=-");
         for (Task task : tasks) {
             switch (task.getStatus()) {
-                case DOING:
-                    p.sendMessage(ChatColor.GOLD + "[" + task.getId() + "] " + ChatColor.WHITE + task.getTitle());
-                    break;
-                case FINISHED:
-                    p.sendMessage(ChatColor.GREEN + "[" + task.getId() + "] " + ChatColor.WHITE + task.getTitle());
-                    break;
+                case DOING -> p.sendMessage(ChatColor.GOLD + "[" + task.getId() + "] " + ChatColor.WHITE + task.getTitle());
+                case FINISHED -> p.sendMessage(ChatColor.GREEN + "[" + task.getId() + "] " + ChatColor.WHITE + task.getTitle());
             }
         }
     }
