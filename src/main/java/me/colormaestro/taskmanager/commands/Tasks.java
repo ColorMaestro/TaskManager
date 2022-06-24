@@ -160,12 +160,7 @@ public class Tasks implements CommandExecutor {
             return;
         }
         p.sendMessage(ChatColor.AQUA + "-=-=-=- " + name + "'s tasks -=-=-=-");
-        for (Task task : tasks) {
-            switch (task.getStatus()) {
-                case DOING -> p.sendMessage(ChatColor.GOLD + "[" + task.getId() + "] " + ChatColor.WHITE + task.getTitle());
-                case FINISHED -> p.sendMessage(ChatColor.GREEN + "[" + task.getId() + "] " + ChatColor.WHITE + task.getTitle());
-            }
-        }
+        sendHelpItems(p, tasks);
     }
 
     private void sendAdvisorTasks(Player p, List<Task> tasks) {
@@ -174,6 +169,10 @@ public class Tasks implements CommandExecutor {
             return;
         }
         p.sendMessage(ChatColor.LIGHT_PURPLE + "-=-=-=- " + p.getName() + "'s supervised tasks -=-=-=-");
+        sendHelpItems(p, tasks);
+    }
+
+    private void sendHelpItems(Player p, List<Task> tasks) {
         for (Task task : tasks) {
             switch (task.getStatus()) {
                 case DOING -> p.sendMessage(ChatColor.GOLD + "[" + task.getId() + "] " + ChatColor.WHITE + task.getTitle());
