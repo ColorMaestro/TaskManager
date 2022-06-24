@@ -30,6 +30,24 @@ public class Tasks implements CommandExecutor {
     private final PlayerDAO playerDAO;
     private final Random rand;
 
+    private final String[][] commandsAndDescriptions = {
+            {"/tasks help", "shows this help"},
+            {"/tasks given", "shows tasks, which you are advising"},
+            {"/tasks stats", "shows task statistics"},
+            {"/tasks [IGN]", "shows your or other player tasks"},
+            {"/visittask <id>", "teleports to the task workplace"},
+            {"/taskinfo <id>", "obtains info in book for related task"},
+            {"/addtask <IGN>", "creates task assignment book with blank description"},
+            {"/addtask <IGN> [id]", "creates task assignment book, description is taken from selected task"},
+            {"/finishtask <id>", "marks task as finished"},
+            {"/approvetask <id> [force]", "approves the finished task"},
+            {"/returntask <id> [force]", "returns task back to given (unfinished) state"},
+            {"/transfertask <id> <IGN>", "changes the assignee of the task"},
+            {"/settaskplace <id>", "sets spawning point for this task for more comfort :)"},
+            {"/linkdiscord", "links discord account for notifications"},
+            {"/establish", "establishes the Hologram where is summary of players tasks"}
+    };
+
     public Tasks(Plugin plugin, TaskDAO taskDAO, PlayerDAO playerDAO) {
         this.plugin = plugin;
         this.taskDAO = taskDAO;
@@ -134,24 +152,10 @@ public class Tasks implements CommandExecutor {
     }
 
     private void sendHelp(CommandSender sender) {
-        ChatColor g = ChatColor.GOLD;
-        ChatColor w = ChatColor.WHITE;
         sender.sendMessage(ChatColor.AQUA + "-=-=-=-=-=- TaskManager help -=-=-=-=-=-");
-        sender.sendMessage(g + "/tasks help" + w + " - shows this help");
-        sender.sendMessage(g + "/tasks given" + w + " - shows tasks, which you are advising");
-        sender.sendMessage(g + "/tasks stats" + w + " - shows task statistics");
-        sender.sendMessage(g + "/tasks [IGN]" + w + " - shows your or other player tasks");
-        sender.sendMessage(g + "/visittask <id>" + w + " - teleports to the task workplace");
-        sender.sendMessage(g + "/taskinfo <id>" + w + " - obtains info in book for related task");
-        sender.sendMessage(g + "/addtask <IGN>" + w + " - creates task assignment book with blank description");
-        sender.sendMessage(g + "/addtask <IGN> [id]" + w + " - creates task assignment book, description is taken from selected task");
-        sender.sendMessage(g + "/finishtask <id>" + w + " - marks task as finished");
-        sender.sendMessage(g + "/approvetask <id> [force]" + w + " - approves the finished task");
-        sender.sendMessage(g + "/returntask <id> [force]" + w + " - returns task back to given (unfinished) state");
-        sender.sendMessage(g + "/transfertask <id> <IGN>" + w + " - changes the assignee of the task");
-        sender.sendMessage(g + "/settaskplace <id>" + w + " - sets spawning point for this task for more comfort :)");
-        sender.sendMessage(g + "/linkdiscord" + w + " - links discord account for notifications");
-        sender.sendMessage(g + "/establish" + w + " - establishes the Hologram where is summary of players tasks.");
+        for (var item : commandsAndDescriptions) {
+            sender.sendMessage(ChatColor.GOLD + item[0] + ChatColor.WHITE + " - " + item[1]);
+        }
     }
 
     private void sendTasks(Player p, List<Task> tasks, String name) {
