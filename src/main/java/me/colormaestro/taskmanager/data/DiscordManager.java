@@ -61,24 +61,21 @@ public class DiscordManager {
     public void taskFinished(long userID, String assignee, Task task) {
         if (api != null) {
             String message = String.format(":bellhop: %s finished task [%d] *%s*", assignee, task.getId(), task.getTitle());
-            api.retrieveUserById(userID).flatMap(x -> x.openPrivateChannel()
-                    .flatMap(channel -> channel.sendMessage(message))).queue();
+            sendMessage(userID, message);
         }
     }
 
     public void taskApproved(long userID, String assigner, Task task) {
         if (api != null) {
             String message = String.format(":white_check_mark: %s approved your task [%d] *%s*", assigner, task.getId(), task.getTitle());
-            api.retrieveUserById(userID).flatMap(x -> x.openPrivateChannel()
-                    .flatMap(channel -> channel.sendMessage(message))).queue();
+            sendMessage(userID, message);
         }
     }
 
     public void taskReturned(long userID, String assigner, Task task) {
         if (api != null) {
             String message = String.format(":leftwards_arrow_with_hook: %s has returned your task [%d] *%s*", assigner, task.getId(), task.getTitle());
-            api.retrieveUserById(userID).flatMap(x -> x.openPrivateChannel()
-                    .flatMap(channel -> channel.sendMessage(message))).queue();
+            sendMessage(userID, message);
         }
     }
 
@@ -86,9 +83,13 @@ public class DiscordManager {
         if (api != null) {
             String messageGiven = String.format(":inbox_tray: %s has transferred task [%d] *%s* from %s to you.", advisor, task.getId(), task.getTitle(), oldAssignee);
             String messageTaken = String.format(":outbox_tray: %s has transferred your task [%d] *%s* to %s.", advisor, task.getId(), task.getTitle(), newAssignee);
-            api.retrieveUserById(userID).flatMap(x -> x.openPrivateChannel()
-                    .flatMap(channel -> channel.sendMessage(taken ? messageTaken : messageGiven))).queue();
+            sendMessage(userID, taken ? messageTaken : messageGiven);
         }
+    }
+
+    private void sendMessage(long userID, String message) {
+        api.retrieveUserById(userID).flatMap(x -> x.openPrivateChannel()
+                .flatMap(channel -> channel.sendMessage(message))).queue();
     }
 
     /**
