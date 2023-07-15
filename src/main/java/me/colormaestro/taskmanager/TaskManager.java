@@ -1,5 +1,6 @@
 package me.colormaestro.taskmanager;
 
+import me.colormaestro.taskmanager.commands.AddMember;
 import me.colormaestro.taskmanager.commands.AddTask;
 import me.colormaestro.taskmanager.commands.ApproveTask;
 import me.colormaestro.taskmanager.commands.Establish;
@@ -42,7 +43,8 @@ public final class TaskManager extends JavaPlugin {
         Objects.requireNonNull(this.getCommand("tasks")).setTabCompleter(tasksTabCompleter);
         Objects.requireNonNull(this.getCommand("addtask")).setTabCompleter(addTaskTabCompleter);
 
-        getServer().getPluginManager().registerEvents(new CustomListener(this, taskDAO, playerDAO, tasksTabCompleter, addTaskTabCompleter), this);
+        getServer().getPluginManager().registerEvents(new CustomListener(this, taskDAO, playerDAO), this);
+        Objects.requireNonNull(this.getCommand("addmember")).setExecutor(new AddMember(this, playerDAO, tasksTabCompleter, addTaskTabCompleter));
         Objects.requireNonNull(this.getCommand("tasks")).setExecutor(new Tasks(this, taskDAO, playerDAO));
         Objects.requireNonNull(this.getCommand("addtask")).setExecutor(new AddTask(this, taskDAO));
         Objects.requireNonNull(this.getCommand("finishtask")).setExecutor(new FinishTask(taskDAO, playerDAO));
