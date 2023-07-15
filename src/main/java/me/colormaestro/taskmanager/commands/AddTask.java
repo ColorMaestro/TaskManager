@@ -73,11 +73,14 @@ public class AddTask implements CommandExecutor {
         ItemStack book = new ItemStack(Material.WRITABLE_BOOK);
         BookMeta bookMeta = (BookMeta) book.getItemMeta();
 
-        BaseComponent[] page = new ComponentBuilder("Instructions:\n")
-                .color(net.md_5.bungee.api.ChatColor.BLUE)
-                .append("1) Only the second page of this book serves as task description " +
-                    "for player what to do in this task.\n")
-                .color(net.md_5.bungee.api.ChatColor.RESET)
+        BaseComponent[] page = new ComponentBuilder("Instructions:")
+                .color(net.md_5.bungee.api.ChatColor.BLUE).bold(true)
+                // new line must be in this block, otherwise color continues, seems like a bug in spigot
+                .append("""
+
+                        1) Only the second page of this book serves as task description for player what to do in this task.
+                        """)
+                .color(net.md_5.bungee.api.ChatColor.RESET).bold(false)
                 .append("2) Book title serves as headline for the task - this will be displayed at the hologram.\n")
                 .append("3) Tasks is created immediately after you sign the book.\n")
                 .create();
