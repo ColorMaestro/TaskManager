@@ -49,7 +49,7 @@ public class CustomListener implements Listener {
                         "⚠ Your visual task list has not been established yet");
                 event.getPlayer().sendMessage(ChatColor.DARK_AQUA +
                         "⚠ To do so issue command" + ChatColor.GOLD + "" + ChatColor.BOLD +
-                        " /establish" + ChatColor.DARK_AQUA +" on the place, where you want to have it");
+                        " /establish" + ChatColor.DARK_AQUA + " on the place, where you want to have it");
             }
         };
     }
@@ -57,8 +57,9 @@ public class CustomListener implements Listener {
     /**
      * Represents job, which checks, whether player has set discord_id in database and send notification if discord_id
      * is not set.
-     * @param event PlayerJoinEvent
-     * @param plugin under which to run the job
+     *
+     * @param event     PlayerJoinEvent
+     * @param plugin    under which to run the job
      * @param playerDAO object for communication with database
      * @return Runnable (job) for execution
      */
@@ -91,8 +92,9 @@ public class CustomListener implements Listener {
     /**
      * Represents job, which checks, whether there are some finished tasks, in which the player figures as advisor
      * and sends them to the advisor
-     * @param event PlayerJoinEvent
-     * @param plugin under which to run the job
+     *
+     * @param event     PlayerJoinEvent
+     * @param plugin    under which to run the job
      * @param playerDAO object for communication with database
      * @return Runnable (job) for execution
      */
@@ -150,15 +152,21 @@ public class CustomListener implements Listener {
 
         Bukkit.getScheduler().runTaskAsynchronously(plugin,
                 () -> {
-                    int assigneeID = 0, advisorID = 0;
+                    int assigneeID, advisorID;
                     try {
                         assigneeID = playerDAO.getPlayerID(ign);
                         advisorID = playerDAO.getPlayerID(uuid);
-                    } catch (SQLException | DataAccessException ex) {
-                        Bukkit.getScheduler().runTask(plugin,
-                                () -> p.sendMessage(ChatColor.RED + ex.getMessage()));
+                    } catch (SQLException ex) {
+                        Bukkit.getScheduler().runTask(plugin, () -> p.sendMessage(ChatColor.RED + ex.getMessage()));
                         ex.printStackTrace();
+                        return;
+                    } catch (DataAccessException ignored) {
+                        Bukkit.getScheduler().runTask(plugin, () -> p.sendMessage(ChatColor.GOLD + "Player " + ign +
+                                " is not registered as member. Use" + ChatColor.DARK_AQUA + " /addmember " + ign +
+                                ChatColor.GOLD + " for adding player as member, then you can add tasks."));
+                        return;
                     }
+
                     Task task = new Task(title, description, assigneeID, advisorID, x, y, z, yaw, pitch,
                             TaskStatus.DOING, new Date(System.currentTimeMillis()), null);
                     try {
