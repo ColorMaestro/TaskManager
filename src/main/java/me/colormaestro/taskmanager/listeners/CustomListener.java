@@ -79,8 +79,10 @@ public class CustomListener implements Listener {
 
                         }
                     });
-                } catch (SQLException | DataAccessException ex) {
+                } catch (SQLException ex) {
                     ex.printStackTrace();
+                } catch (DataAccessException ignored) {
+                    // Since this job has purely informative character we can ignore missing record in database.
                 }
             });
         };
@@ -102,8 +104,10 @@ public class CustomListener implements Listener {
                     int id = playerDAO.getPlayerID(uuid);
                     List<Task> finishedTasks = taskDAO.fetchFinishedTasks(id);
                     Bukkit.getScheduler().runTask(plugin, () -> sendFinishedTasks(event.getPlayer(), finishedTasks));
-                } catch (SQLException | DataAccessException ex) {
+                } catch (SQLException ex) {
                     ex.printStackTrace();
+                } catch (DataAccessException ignored) {
+                    // Since this job has purely informative character we can ignore missing record in database.
                 }
             });
         };

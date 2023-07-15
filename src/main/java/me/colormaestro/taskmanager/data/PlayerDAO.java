@@ -96,7 +96,7 @@ public class PlayerDAO {
             st.setString(1, ign);
             ResultSet rs = st.executeQuery();
             if (rs.isClosed()) {
-                throw new DataAccessException("Player with name " + ign + " was not found in the database.");
+                throw new DataAccessException("Failed to get player's ID with name " + ign + ".");
             }
             int id = rs.getInt("id");
             rs.close();
@@ -119,7 +119,7 @@ public class PlayerDAO {
             st.setString(1, uuid.toString());
             ResultSet rs = st.executeQuery();
             if (rs.isClosed()) {
-                throw new DataAccessException("Your uuid was not found in the database. Contact developers!");
+                throw new DataAccessException("Failed to get player's id with uuid " + uuid + ".");
             }
             int id = rs.getInt("id");
             rs.close();
@@ -142,7 +142,7 @@ public class PlayerDAO {
             st.setInt(1, id);
             ResultSet rs = st.executeQuery();
             if (rs.isClosed()) {
-                throw new DataAccessException("Failed to get player IGN according to UUID. Contact developers!");
+                throw new DataAccessException("Failed to get player's ign with id " + id + ".");
             }
             String ign = rs.getString("ign");
             rs.close();
@@ -165,7 +165,7 @@ public class PlayerDAO {
             st.setInt(1, id);
             ResultSet rs = st.executeQuery();
             if (rs.isClosed()) {
-                throw new DataAccessException("Failed to get player UUID according to UUID. Contact developers!");
+                throw new DataAccessException("Failed to get player's uuid with id " + id + ".");
             }
             String ign = rs.getString("uuid");
             rs.close();
@@ -243,7 +243,7 @@ public class PlayerDAO {
             st.setString(1, uuid);
             ResultSet rs = st.executeQuery();
             if (rs.isClosed()) {
-                throw new DataAccessException("Player with uuid " + uuid + " was not found in the database.");
+                throw new DataAccessException("Failed to get discord ID for player with uuid " + uuid + ".");
             }
             long id = rs.getLong("discord_id");
             rs.close();
@@ -266,7 +266,7 @@ public class PlayerDAO {
             st.setString(2, uuid.toString());
             int affected = st.executeUpdate();
             if (affected == 0) {
-                throw new DataAccessException("Your uuid was not found in the database. Contact developers!");
+                throw new DataAccessException("No discord ID change for player with uuid " + uuid + ".");
             }
         }
     }
