@@ -3,7 +3,7 @@ package me.colormaestro.taskmanager.commands;
 import me.colormaestro.taskmanager.data.DataAccessException;
 import me.colormaestro.taskmanager.data.PlayerDAO;
 import me.colormaestro.taskmanager.data.TaskDAO;
-import me.colormaestro.taskmanager.model.MyPlayer;
+import me.colormaestro.taskmanager.model.MemberTaskStats;
 import me.colormaestro.taskmanager.model.Task;
 import net.md_5.bungee.api.chat.ComponentBuilder;
 import org.bukkit.Bukkit;
@@ -18,9 +18,7 @@ import org.bukkit.inventory.meta.BookMeta;
 import org.bukkit.plugin.Plugin;
 
 import java.sql.SQLException;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Random;
 import java.util.UUID;
 
@@ -86,31 +84,11 @@ public class Tasks implements CommandExecutor {
             Player p = (Player) sender;
             Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
                 try {
-                    List<Task> tasks = taskDAO.fetchAllTasks();
-                    Map<Integer, MyPlayer> players = playerDAO.fetchAllPlayers();
-                    Map<Integer, int[]> results = new HashMap<>();  // creates stats structure
-                    for (Integer playerID : players.keySet()) {  // initialize
-                        results.put(playerID, new int[3]);
-                    }
-                    for (Task task : tasks) {  // make stats
-                        int[] stats = results.get(task.getAssigneeID());
-                        switch (task.getStatus()) {
-                            case DOING:
-                                stats[0] += 1;
-                                break;
-                            case FINISHED:
-                                stats[1] += 1;
-                            default:
-                                stats[2] += 1;
-                        }
-                    }
-                    Map<String, int[]> data = new HashMap<>();  // since task has only ID of person, we need to re-map
-                    for (Integer playerID : players.keySet()) {
-                        data.put(players.get(playerID).getIgn(), results.get(playerID));
-                    }
+                    List<MemberTaskStats> stats = taskDAO.fetchTaskStatistics();
+
                     Bukkit.getScheduler().runTask(plugin,
                             () -> {
-                                ItemStack book = buildStatsBook(data);
+                                ItemStack book = buildStatsBook(stats);
                                 p.openBook(book);
                             });
                 } catch (SQLException ex) {
@@ -185,7 +163,7 @@ public class Tasks implements CommandExecutor {
         }
     }
 
-    private ItemStack buildStatsBook(Map<String, int[]> data) {
+    private ItemStack buildStatsBook(List<MemberTaskStats> stats) {
         ItemStack book = new ItemStack(Material.WRITTEN_BOOK);
         BookMeta bookMeta = (BookMeta) book.getItemMeta();
         // Generates random headline color in book
@@ -194,11 +172,10 @@ public class Tasks implements CommandExecutor {
         ComponentBuilder builder =
                 new ComponentBuilder(color + "" + ChatColor.BOLD + "Holy grail of all members\n");
         int pageRows = 0;
-        for (Map.Entry<String, int[]> entry : data.entrySet()) {
-            int[] stats = entry.getValue();
-            String row = entry.getKey() + " " + ChatColor.GOLD + stats[0] +
-                    " " + ChatColor.GREEN + stats[1] +
-                    " " + ChatColor.AQUA + stats[2] + "\n";
+        for (MemberTaskStats data : stats) {
+            String row = data.ign() + " " + ChatColor.GOLD + data.doing() +
+                    " " + ChatColor.GREEN + data.finished() +
+                    " " + ChatColor.AQUA + data.approved() + "\n";
             builder.append(row);
             pageRows += 1;
             if (pageRows == 12) {
