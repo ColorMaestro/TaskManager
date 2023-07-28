@@ -30,6 +30,8 @@ public class Tasks implements CommandExecutor {
 
     private final String[][] commandsAndDescriptions = {
             {"/tasks help", "shows this help"},
+            {"/addmember <IGN>", "adds player as member"},
+            {"/dashboard", "shows tasks dashboard"},
             {"/tasks given", "shows tasks, which you are advising"},
             {"/tasks stats", "shows task statistics"},
             {"/tasks [IGN]", "shows your or other player tasks"},

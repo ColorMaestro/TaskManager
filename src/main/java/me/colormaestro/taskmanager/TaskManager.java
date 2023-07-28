@@ -3,6 +3,7 @@ package me.colormaestro.taskmanager;
 import me.colormaestro.taskmanager.commands.AddMember;
 import me.colormaestro.taskmanager.commands.AddTask;
 import me.colormaestro.taskmanager.commands.ApproveTask;
+import me.colormaestro.taskmanager.commands.Dashboard;
 import me.colormaestro.taskmanager.commands.Establish;
 import me.colormaestro.taskmanager.commands.FinishTask;
 import me.colormaestro.taskmanager.commands.LinkDiscord;
@@ -45,6 +46,7 @@ public final class TaskManager extends JavaPlugin {
 
         getServer().getPluginManager().registerEvents(new CustomListener(this, taskDAO, playerDAO), this);
         Objects.requireNonNull(this.getCommand("addmember")).setExecutor(new AddMember(this, playerDAO, tasksTabCompleter, addTaskTabCompleter));
+        Objects.requireNonNull(this.getCommand("dashboard")).setExecutor(new Dashboard(this, taskDAO));
         Objects.requireNonNull(this.getCommand("tasks")).setExecutor(new Tasks(this, taskDAO, playerDAO));
         Objects.requireNonNull(this.getCommand("addtask")).setExecutor(new AddTask(this, taskDAO));
         Objects.requireNonNull(this.getCommand("finishtask")).setExecutor(new FinishTask(taskDAO, playerDAO));
