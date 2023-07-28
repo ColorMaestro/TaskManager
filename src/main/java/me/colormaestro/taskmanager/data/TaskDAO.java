@@ -451,17 +451,19 @@ public class TaskDAO {
                      """
                              select
                                ign,
+                               uuid,
                                count(tasks.id) filter (where status = 'DOING') as "doing",
                                count(tasks.id) filter (where status = 'FINISHED') as "finished",
                                count(tasks.id) filter (where status = 'APPROVED') as "approved"
                              from players inner join tasks on players.id = tasks.assignee_id
-                             group by ign
+                             group by ign, uuid
                              order by ign""")) {
             ResultSet rs = st.executeQuery();
             List<MemberTaskStats> stats = new ArrayList<>();
             while (rs.next()) {
                 MemberTaskStats memberTaskStats = new MemberTaskStats(
                         rs.getString("ign"),
+                        rs.getString("uuid"),
                         rs.getInt("doing"),
                         rs.getInt("finished"),
                         rs.getInt("approved")
