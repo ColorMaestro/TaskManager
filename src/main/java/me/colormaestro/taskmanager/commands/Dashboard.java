@@ -50,7 +50,7 @@ public class Dashboard implements CommandExecutor {
                 List<MemberTaskStats> finalStats = stats.stream().limit(INVENTORY_SIZE - 9).toList();
                 Bukkit.getScheduler().runTask(plugin,
                         () -> {
-                            String inventoryTitle = ChatColor.BLUE + "" + ChatColor.BOLD + "Tasks Dashboard" + ChatColor.RESET + " (1/" + totalPages + ")";
+                            String inventoryTitle = ChatColor.BLUE + "" + ChatColor.BOLD + "Tasks Dashboard" + ChatColor.RESET + " (1/" + totalPages + ") *-*";
                             Inventory inventory = Bukkit.createInventory(player, INVENTORY_SIZE, inventoryTitle);
 
                             ItemStack stack;
