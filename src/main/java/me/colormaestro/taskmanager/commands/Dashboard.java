@@ -45,7 +45,7 @@ public class Dashboard implements CommandExecutor {
         Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
             try {
                 List<MemberTaskStats> stats = taskDAO.fetchTaskStatistics();
-                int totalPages = stats.size() % (INVENTORY_SIZE - 9);
+                int totalPages = stats.size() / (INVENTORY_SIZE - 9) + 1;
                 // Variable used in lambda should be final or effectively final
                 List<MemberTaskStats> finalStats = stats.stream().limit(INVENTORY_SIZE - 9).toList();
                 Bukkit.getScheduler().runTask(plugin,

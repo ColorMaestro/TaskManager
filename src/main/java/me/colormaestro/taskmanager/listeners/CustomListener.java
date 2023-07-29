@@ -12,6 +12,7 @@ import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.player.PlayerEditBookEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.plugin.Plugin;
@@ -204,5 +205,12 @@ public class CustomListener implements Listener {
                         ex.printStackTrace();
                     }
                 });
+    }
+
+    @EventHandler
+    public void onMenuClick(InventoryClickEvent event) {
+        if (event.getView().getTitle().contains("Tasks Dashboard")) {
+            event.setCancelled(true);
+        }
     }
 }
