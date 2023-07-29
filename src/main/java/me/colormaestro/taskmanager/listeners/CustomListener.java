@@ -7,13 +7,10 @@ import me.colormaestro.taskmanager.data.TaskDAO;
 import me.colormaestro.taskmanager.model.Task;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
-import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
-import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
-import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.Plugin;
 
 import java.sql.SQLException;
@@ -122,32 +119,5 @@ public class CustomListener implements Listener {
         for (Task task : tasks) {
             p.sendMessage(ChatColor.GREEN + "[" + task.getId() + "] " + ChatColor.WHITE + task.getTitle());
         }
-    }
-
-    @EventHandler
-    public void onMenuClick(InventoryClickEvent event) {
-        if (event.getView().getTitle().contains("*-*")) {
-            event.setCancelled(true);
-
-            if (event.getCurrentItem() == null) {
-                return;
-            }
-
-            HumanEntity player = event.getView().getPlayer();
-            switch (event.getCurrentItem().getType()) {
-                case PLAYER_HEAD -> handlePlayerHeadClick(player, event.getCurrentItem());
-                case ARROW -> handleArrowClick();
-            }
-        }
-    }
-
-    private void handlePlayerHeadClick(HumanEntity player, ItemStack stack) {
-        String ign = stack.getItemMeta().getDisplayName().replaceFirst(ChatColor.BLUE + "" + ChatColor.BOLD, "");
-        player.sendMessage(ign);
-        player.openInventory(Bukkit.createInventory(player, 9, "inventoryTitle"));
-    }
-
-    private void handleArrowClick() {
-
     }
 }
