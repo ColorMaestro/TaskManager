@@ -12,6 +12,7 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.SkullMeta;
 import org.bukkit.plugin.Plugin;
 import org.jetbrains.annotations.NotNull;
@@ -25,6 +26,8 @@ public class Dashboard implements CommandExecutor {
     private final Plugin plugin;
     private final TaskDAO taskDAO;
     private static final int INVENTORY_SIZE = 54;
+    private static final int PREVIOUS_PAGE_POSITION = 45;
+    private static final int NEXT_PAGE_POSITION = 53;
 
     public Dashboard(Plugin plugin, TaskDAO taskDAO) {
         this.plugin = plugin;
@@ -34,28 +37,43 @@ public class Dashboard implements CommandExecutor {
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
 
-        if (!(sender instanceof Player)) {
+        if (!(sender instanceof Player player)) {
             sender.sendMessage(ChatColor.RED + "This command can't be run from console.");
             return true;
         }
 
-        Player player = (Player) sender;
         Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
             try {
-                List<MemberTaskStats> stats = taskDAO.fetchTaskStatistics().stream().limit(INVENTORY_SIZE - 9).toList();
-
+                List<MemberTaskStats> stats = taskDAO.fetchTaskStatistics();
+                int totalPages = stats.size() % (INVENTORY_SIZE - 9);
+                // Variable used in lambda should be final or effectively final
+                List<MemberTaskStats> finalStats = stats.stream().limit(INVENTORY_SIZE - 9).toList();
                 Bukkit.getScheduler().runTask(plugin,
                         () -> {
-                            String inventoryTitle = ChatColor.BLUE + "" + ChatColor.BOLD + "Tasks Dashboard" + ChatColor.RESET + " (#1)";
+                            String inventoryTitle = ChatColor.BLUE + "" + ChatColor.BOLD + "Tasks Dashboard" + ChatColor.RESET + " (1/" + totalPages + ")";
                             Inventory inventory = Bukkit.createInventory(player, INVENTORY_SIZE, inventoryTitle);
 
                             ItemStack stack;
                             int position = 0;
-                            for (MemberTaskStats memberStats : stats) {
+                            for (MemberTaskStats memberStats : finalStats) {
                                 stack = getHeadForUUID(memberStats.uuid(), memberStats.ign(), memberStats.doing(), memberStats.finished(), memberStats.approved());
                                 inventory.setItem(position, stack);
                                 position++;
                             }
+
+                            stack = new ItemStack(Material.ARROW, 1);
+                            ItemMeta meta = stack.getItemMeta();
+                            assert meta != null;
+                            meta.setDisplayName("Previous page");
+                            stack.setItemMeta(meta);
+                            inventory.setItem(PREVIOUS_PAGE_POSITION, stack);
+
+                            stack = new ItemStack(Material.ARROW, 1);
+                            meta = stack.getItemMeta();
+                            assert meta != null;
+                            meta.setDisplayName("Next page");
+                            stack.setItemMeta(meta);
+                            inventory.setItem(NEXT_PAGE_POSITION, stack);
 
                             player.openInventory(inventory);
                         });
