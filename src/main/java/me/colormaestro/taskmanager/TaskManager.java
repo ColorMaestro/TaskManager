@@ -18,7 +18,7 @@ import me.colormaestro.taskmanager.data.HologramLayer;
 import me.colormaestro.taskmanager.data.PlayerDAO;
 import me.colormaestro.taskmanager.data.TaskDAO;
 import me.colormaestro.taskmanager.listeners.BookEditListener;
-import me.colormaestro.taskmanager.listeners.CustomListener;
+import me.colormaestro.taskmanager.listeners.PlayerJoinEventListener;
 import me.colormaestro.taskmanager.listeners.InventoryClickListener;
 import me.colormaestro.taskmanager.tabcompleters.AddTaskTabCompleter;
 import me.colormaestro.taskmanager.tabcompleters.TasksTabCompleter;
@@ -46,7 +46,7 @@ public final class TaskManager extends JavaPlugin {
         Objects.requireNonNull(this.getCommand("tasks")).setTabCompleter(tasksTabCompleter);
         Objects.requireNonNull(this.getCommand("addtask")).setTabCompleter(addTaskTabCompleter);
 
-        getServer().getPluginManager().registerEvents(new CustomListener(this, taskDAO, playerDAO), this);
+        getServer().getPluginManager().registerEvents(new PlayerJoinEventListener(this, taskDAO, playerDAO), this);
         getServer().getPluginManager().registerEvents(new BookEditListener(this, taskDAO, playerDAO), this);
         getServer().getPluginManager().registerEvents(new InventoryClickListener(), this);
         Objects.requireNonNull(this.getCommand("addmember")).setExecutor(new AddMember(this, playerDAO, tasksTabCompleter, addTaskTabCompleter));

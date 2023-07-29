@@ -17,12 +17,12 @@ import java.sql.SQLException;
 import java.util.List;
 import java.util.UUID;
 
-public class CustomListener implements Listener {
+public class PlayerJoinEventListener implements Listener {
     private final Plugin plugin;
     private final TaskDAO taskDAO;
     private final PlayerDAO playerDAO;
 
-    public CustomListener(Plugin plugin, TaskDAO taskDAO, PlayerDAO playerDAO) {
+    public PlayerJoinEventListener(Plugin plugin, TaskDAO taskDAO, PlayerDAO playerDAO) {
         this.plugin = plugin;
         this.taskDAO = taskDAO;
         this.playerDAO = playerDAO;
