@@ -1,10 +1,12 @@
 package me.colormaestro.taskmanager.utils;
 
+import me.colormaestro.taskmanager.model.Task;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.SkullMeta;
 
 import java.util.ArrayList;
@@ -12,6 +14,8 @@ import java.util.List;
 import java.util.UUID;
 
 public class ItemStackBuilder {
+    private final static int LORE_WIDTH_LIMIT = 40;
+
     public static ItemStack buildMemberStack(String uuid, String ign, int doing, int finished, int approved) {
         ItemStack is = new ItemStack(Material.PLAYER_HEAD, 1);
         SkullMeta skullMeta = (SkullMeta) is.getItemMeta();
@@ -32,6 +36,48 @@ public class ItemStackBuilder {
         result.add(ChatColor.GRAY + "Opened: " + ChatColor.GOLD + doing);
         result.add(ChatColor.GRAY + "Finished: " + ChatColor.GREEN + finished);
         result.add(ChatColor.GRAY + "Approved: " + ChatColor.AQUA + approved);
+
+        return result;
+    }
+
+    public static ItemStack buildTaskStack(Task task) {
+        Material material = Material.ORANGE_CONCRETE;
+        switch (task.getStatus()) {
+            case FINISHED -> material = Material.GREEN_CONCRETE;
+            case APPROVED -> material = Material.LIGHT_BLUE_CONCRETE;
+        }
+        ItemStack is = new ItemStack(material, 1);
+        ItemMeta itemMeta = is.getItemMeta();
+        if (itemMeta == null) {
+            return null;
+        }
+        itemMeta.setDisplayName(ChatColor.BLUE + "" + ChatColor.BOLD + task.getTitle() + " " + ChatColor.GRAY + "#" + task.getId());
+        itemMeta.setLore(buildTaskDescriptionLore(task.getDescription()));
+        is.setItemMeta(itemMeta);
+        return is;
+    }
+
+    private static List<String> buildTaskDescriptionLore(String input) {
+        List<String> result = new ArrayList<>();
+
+        String[] words = input.split("\\s+");
+        StringBuilder currentString = new StringBuilder();
+
+        for (String word : words) {
+            if (currentString.length() + word.length() + 1 <= LORE_WIDTH_LIMIT) {
+                if (currentString.length() > 0) {
+                    currentString.append(" ");
+                }
+                currentString.append(word);
+            } else {
+                result.add(ChatColor.GRAY + currentString.toString());
+                currentString = new StringBuilder(word);
+            }
+        }
+
+        if (currentString.length() > 0) {
+            result.add(ChatColor.GRAY + currentString.toString());
+        }
 
         return result;
     }
