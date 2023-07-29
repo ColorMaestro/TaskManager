@@ -7,6 +7,7 @@ import me.colormaestro.taskmanager.data.PlayerDAO;
 import me.colormaestro.taskmanager.data.TaskDAO;
 import me.colormaestro.taskmanager.enums.TaskStatus;
 import me.colormaestro.taskmanager.model.Task;
+import me.colormaestro.taskmanager.utils.Directives;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
@@ -42,7 +43,7 @@ public class BookEditListener implements Listener {
 
         List<String> lore = event.getPreviousBookMeta().getLore();
         String ign;
-        if (lore == null || lore.size() != 2 || !lore.get(0).equals("*@create")) {
+        if (lore == null || lore.size() != 2 || !lore.get(0).equals(Directives.CREATE_TASK)) {
             return;
         }
         ign = lore.get(1);

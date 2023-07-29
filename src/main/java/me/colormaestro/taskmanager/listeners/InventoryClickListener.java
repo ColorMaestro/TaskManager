@@ -1,5 +1,6 @@
 package me.colormaestro.taskmanager.listeners;
 
+import me.colormaestro.taskmanager.utils.Directives;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.HumanEntity;
@@ -12,7 +13,7 @@ public class InventoryClickListener implements Listener {
 
     @EventHandler
     public void onMenuClick(InventoryClickEvent event) {
-        if (event.getView().getTitle().contains("*-*")) {
+        if (event.getView().getTitle().contains(Directives.DASHBOARD)) {
             event.setCancelled(true);
 
             if (event.getCurrentItem() == null) {

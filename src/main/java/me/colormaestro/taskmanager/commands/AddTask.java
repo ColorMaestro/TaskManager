@@ -3,6 +3,7 @@ package me.colormaestro.taskmanager.commands;
 import me.colormaestro.taskmanager.data.DataAccessException;
 import me.colormaestro.taskmanager.data.TaskDAO;
 import me.colormaestro.taskmanager.model.Task;
+import me.colormaestro.taskmanager.utils.Directives;
 import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.ComponentBuilder;
 import org.bukkit.Bukkit;
@@ -90,7 +91,7 @@ public class AddTask implements CommandExecutor {
         bookMeta.spigot().addPage(page);
         bookMeta.spigot().addPage(page2);
         bookMeta.setDisplayName(ChatColor.GOLD + "Assignment book for " + ign);
-        bookMeta.setLore(new ArrayList<>(Arrays.asList("*@create", ign)));
+        bookMeta.setLore(new ArrayList<>(Arrays.asList(Directives.CREATE_TASK, ign)));
         book.setItemMeta(bookMeta);
         return book;
     }

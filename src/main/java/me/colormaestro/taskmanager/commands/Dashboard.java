@@ -2,6 +2,7 @@ package me.colormaestro.taskmanager.commands;
 
 import me.colormaestro.taskmanager.data.TaskDAO;
 import me.colormaestro.taskmanager.model.MemberTaskStats;
+import me.colormaestro.taskmanager.utils.Directives;
 import me.colormaestro.taskmanager.utils.ItemStackBuilder;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -51,7 +52,7 @@ public class Dashboard implements CommandExecutor {
                 List<MemberTaskStats> finalStats = stats.stream().limit(INVENTORY_SIZE - 9).toList();
                 Bukkit.getScheduler().runTask(plugin,
                         () -> {
-                            String inventoryTitle = ChatColor.BLUE + "" + ChatColor.BOLD + "Tasks Dashboard" + ChatColor.RESET + " (1/" + totalPages + ") *-*";
+                            String inventoryTitle = ChatColor.BLUE + "" + ChatColor.BOLD + "Tasks Dashboard" + ChatColor.RESET + " (1/" + totalPages + ") " + Directives.DASHBOARD;
                             Inventory inventory = Bukkit.createInventory(player, INVENTORY_SIZE, inventoryTitle);
 
                             ItemStack stack;
