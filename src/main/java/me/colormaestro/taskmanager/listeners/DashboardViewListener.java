@@ -3,7 +3,6 @@ package me.colormaestro.taskmanager.listeners;
 import me.colormaestro.taskmanager.data.DataAccessException;
 import me.colormaestro.taskmanager.data.PlayerDAO;
 import me.colormaestro.taskmanager.data.TaskDAO;
-import me.colormaestro.taskmanager.model.MemberTaskStats;
 import me.colormaestro.taskmanager.model.Task;
 import me.colormaestro.taskmanager.utils.Directives;
 import me.colormaestro.taskmanager.utils.ItemStackBuilder;
@@ -22,14 +21,14 @@ import org.bukkit.plugin.Plugin;
 import java.sql.SQLException;
 import java.util.List;
 
-public class InventoryClickListener implements Listener {
+public class DashboardViewListener implements Listener {
     private final Plugin plugin;
     private final TaskDAO taskDAO;
     private final PlayerDAO playerDAO;
     private static final int INVENTORY_SIZE = 54;
     private static final int SHOW_APPROVED_TASKS_POSITION = 49;
 
-    public InventoryClickListener(Plugin plugin, TaskDAO taskDAO, PlayerDAO playerDAO) {
+    public DashboardViewListener(Plugin plugin, TaskDAO taskDAO, PlayerDAO playerDAO) {
         this.plugin = plugin;
         this.taskDAO = taskDAO;
         this.playerDAO = playerDAO;
