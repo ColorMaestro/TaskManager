@@ -28,8 +28,6 @@ public class Dashboard implements CommandExecutor {
     private final Plugin plugin;
     private final TaskDAO taskDAO;
     private static final int INVENTORY_SIZE = 54;
-    private static final int PREVIOUS_PAGE_POSITION = 45;
-    private static final int NEXT_PAGE_POSITION = 53;
 
     public Dashboard(Plugin plugin, TaskDAO taskDAO) {
         this.plugin = plugin;
@@ -63,19 +61,7 @@ public class Dashboard implements CommandExecutor {
                                 position++;
                             }
 
-                            stack = new ItemStack(Material.ARROW, 1);
-                            ItemMeta meta = stack.getItemMeta();
-                            assert meta != null;
-                            meta.setDisplayName("Previous page");
-                            stack.setItemMeta(meta);
-                            inventory.setItem(PREVIOUS_PAGE_POSITION, stack);
-
-                            stack = new ItemStack(Material.ARROW, 1);
-                            meta = stack.getItemMeta();
-                            assert meta != null;
-                            meta.setDisplayName("Next page");
-                            stack.setItemMeta(meta);
-                            inventory.setItem(NEXT_PAGE_POSITION, stack);
+                            ItemStackBuilder.supplyInventoryWithPaginationArrows(inventory);
 
                             player.openInventory(inventory);
                         });

@@ -9,12 +9,14 @@ import me.colormaestro.taskmanager.utils.Directives;
 import me.colormaestro.taskmanager.utils.ItemStackBuilder;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.Material;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.plugin.Plugin;
 
 import java.sql.SQLException;
@@ -25,8 +27,7 @@ public class InventoryClickListener implements Listener {
     private final TaskDAO taskDAO;
     private final PlayerDAO playerDAO;
     private static final int INVENTORY_SIZE = 54;
-    private static final int PREVIOUS_PAGE_POSITION = 45;
-    private static final int NEXT_PAGE_POSITION = 53;
+    private static final int SHOW_APPROVED_TASKS_POSITION = 49;
 
     public InventoryClickListener(Plugin plugin, TaskDAO taskDAO, PlayerDAO playerDAO) {
         this.plugin = plugin;
@@ -57,18 +58,28 @@ public class InventoryClickListener implements Listener {
             try {
                 int id = playerDAO.getPlayerID(ign);
                 List<Task> tasks = taskDAO.fetchPlayersActiveTasks(id);
+                int totalPages = tasks.size() / (INVENTORY_SIZE - 9) + 1;
                 Bukkit.getScheduler().runTask(plugin,
                         () -> {
-                            String title = ChatColor.BLUE + "" + ChatColor.BOLD + ign + "'s tasks";
+                            String title = ChatColor.BLUE + "" + ChatColor.BOLD + ign + "'s tasks" + ChatColor.RESET + " (1/" + totalPages + ") " + Directives.DASHBOARD;
                             Inventory inventory = Bukkit.createInventory(player, INVENTORY_SIZE, title);
 
-                            ItemStack taskStack;
+                            ItemStack stack;
                             int position = 0;
                             for (Task task : tasks) {
-                                taskStack = ItemStackBuilder.buildTaskStack(task);
-                                inventory.setItem(position, taskStack);
+                                stack = ItemStackBuilder.buildTaskStack(task);
+                                inventory.setItem(position, stack);
                                 position++;
                             }
+
+                            ItemStackBuilder.supplyInventoryWithPaginationArrows(inventory);
+
+                            stack = new ItemStack(Material.LIGHT_BLUE_CONCRETE, 1);
+                            ItemMeta meta = stack.getItemMeta();
+                            assert meta != null;
+                            meta.setDisplayName(ChatColor.AQUA + "Show " + ign + "'s approved tasks");
+                            stack.setItemMeta(meta);
+                            inventory.setItem(SHOW_APPROVED_TASKS_POSITION, stack);
 
                             player.openInventory(inventory);
                         });
