@@ -20,6 +20,7 @@ import me.colormaestro.taskmanager.data.TaskDAO;
 import me.colormaestro.taskmanager.listeners.BookEditListener;
 import me.colormaestro.taskmanager.listeners.PlayerJoinListener;
 import me.colormaestro.taskmanager.listeners.DashboardViewListener;
+import me.colormaestro.taskmanager.listeners.SupervisedTasksViewListener;
 import me.colormaestro.taskmanager.tabcompleters.AddTaskTabCompleter;
 import me.colormaestro.taskmanager.tabcompleters.TasksTabCompleter;
 import org.bukkit.Bukkit;
@@ -49,6 +50,7 @@ public final class TaskManager extends JavaPlugin {
         getServer().getPluginManager().registerEvents(new PlayerJoinListener(this, taskDAO, playerDAO), this);
         getServer().getPluginManager().registerEvents(new BookEditListener(this, taskDAO, playerDAO), this);
         getServer().getPluginManager().registerEvents(new DashboardViewListener(this, taskDAO, playerDAO), this);
+        getServer().getPluginManager().registerEvents(new SupervisedTasksViewListener(this, taskDAO), this);
         Objects.requireNonNull(this.getCommand("addmember")).setExecutor(new AddMember(this, playerDAO, tasksTabCompleter, addTaskTabCompleter));
         Objects.requireNonNull(this.getCommand("dashboard")).setExecutor(new Dashboard(this, taskDAO));
         Objects.requireNonNull(this.getCommand("tasks")).setExecutor(new Tasks(this, taskDAO, playerDAO));
