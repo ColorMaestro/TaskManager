@@ -36,15 +36,14 @@ public class SupervisedTasksViewListener implements Listener {
 
             HumanEntity player = event.getView().getPlayer();
             switch (event.getCurrentItem().getType()) {
-                case ORANGE_CONCRETE -> handlePlayerHeadClick(player, event.getCurrentItem());
-                case LIME_CONCRETE -> handlePlayerHeadClick(player, event.getCurrentItem());
+                case ORANGE_CONCRETE, LIME_CONCRETE -> handleConcreteClick(player, event.getCurrentItem());
                 case SPECTRAL_ARROW -> handleSpectralArrowClick(player);
                 case ARROW -> handleArrowClick();
             }
         }
     }
 
-    private void handlePlayerHeadClick(HumanEntity player, ItemStack headStack) {
+    private void handleConcreteClick(HumanEntity player, ItemStack headStack) {
         String taskId = headStack.getItemMeta().getDisplayName().split("#")[1];
         Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
             try {
