@@ -27,6 +27,7 @@ public class DashboardViewListener implements Listener {
     private final PlayerDAO playerDAO;
     private static final int INVENTORY_SIZE = 54;
     private static final int SHOW_APPROVED_TASKS_POSITION = 49;
+    private static final int SHOW_DASHBOARD_POSITION = 48;
 
     public DashboardViewListener(Plugin plugin, TaskDAO taskDAO, PlayerDAO playerDAO) {
         this.plugin = plugin;
@@ -80,6 +81,13 @@ public class DashboardViewListener implements Listener {
                             meta.setDisplayName(ChatColor.AQUA + "Show " + ign + "'s approved tasks");
                             stack.setItemMeta(meta);
                             inventory.setItem(SHOW_APPROVED_TASKS_POSITION, stack);
+
+                            stack = new ItemStack(Material.SPECTRAL_ARROW, 1);
+                            meta = stack.getItemMeta();
+                            assert meta != null;
+                            meta.setDisplayName(ChatColor.AQUA + "Back to dashboard");
+                            stack.setItemMeta(meta);
+                            inventory.setItem(SHOW_DASHBOARD_POSITION, stack);
 
                             player.openInventory(inventory);
                         });

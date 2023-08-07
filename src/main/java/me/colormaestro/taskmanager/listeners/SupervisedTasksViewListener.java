@@ -45,26 +45,8 @@ public class SupervisedTasksViewListener implements Listener {
 
     private void handleConcreteClick(HumanEntity player, ItemStack headStack) {
         String taskId = headStack.getItemMeta().getDisplayName().split("#")[1];
-        Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
-            try {
-                Task task = taskDAO.findTask(Integer.parseInt(taskId));
-                Bukkit.getScheduler().runTask(plugin,
-                        () -> {
-                            double x = task.getX();
-                            double y = task.getY();
-                            double z = task.getZ();
-                            float yaw = task.getYaw();
-                            float pitch = task.getPitch();
-
-                            player.closeInventory();
-                            player.teleport(new Location(player.getWorld(), x, y, z, yaw, pitch));
-                        });
-            } catch (SQLException | DataAccessException ex) {
-                Bukkit.getScheduler().runTask(plugin,
-                        () -> player.sendMessage(ChatColor.RED + ex.getMessage()));
-                ex.printStackTrace();
-            }
-        });
+        Bukkit.getScheduler().runTaskAsynchronously(plugin,
+                ClickEventRunnables.teleportPlayerToTask(plugin, taskDAO, player, taskId));
     }
 
     private void handleSpectralArrowClick(HumanEntity player) {

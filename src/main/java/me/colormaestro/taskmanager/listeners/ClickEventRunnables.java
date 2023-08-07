@@ -1,11 +1,14 @@
 package me.colormaestro.taskmanager.listeners;
 
+import me.colormaestro.taskmanager.data.DataAccessException;
 import me.colormaestro.taskmanager.data.TaskDAO;
 import me.colormaestro.taskmanager.model.MemberTaskStats;
+import me.colormaestro.taskmanager.model.Task;
 import me.colormaestro.taskmanager.utils.Directives;
 import me.colormaestro.taskmanager.utils.ItemStackBuilder;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.inventory.Inventory;
@@ -52,6 +55,29 @@ public class ClickEventRunnables {
                             player.openInventory(inventory);
                         });
             } catch (SQLException ex) {
+                Bukkit.getScheduler().runTask(plugin,
+                        () -> player.sendMessage(ChatColor.RED + ex.getMessage()));
+                ex.printStackTrace();
+            }
+        };
+    }
+
+    public static Runnable teleportPlayerToTask(Plugin plugin, TaskDAO taskDAO, HumanEntity player, String taskId) {
+        return () -> {
+            try {
+                Task task = taskDAO.findTask(Integer.parseInt(taskId));
+                Bukkit.getScheduler().runTask(plugin,
+                        () -> {
+                            double x = task.getX();
+                            double y = task.getY();
+                            double z = task.getZ();
+                            float yaw = task.getYaw();
+                            float pitch = task.getPitch();
+
+                            player.closeInventory();
+                            player.teleport(new Location(player.getWorld(), x, y, z, yaw, pitch));
+                        });
+            } catch (SQLException | DataAccessException ex) {
                 Bukkit.getScheduler().runTask(plugin,
                         () -> player.sendMessage(ChatColor.RED + ex.getMessage()));
                 ex.printStackTrace();
