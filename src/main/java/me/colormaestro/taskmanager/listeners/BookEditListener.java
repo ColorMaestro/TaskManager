@@ -48,6 +48,12 @@ public class BookEditListener implements Listener {
         }
         ign = lore.get(1);
 
+        if (event.getNewBookMeta().getPageCount() < 2) {
+            p.sendMessage(ChatColor.GOLD + "Task description must not be empty! If you wish omit the description, put at least space char on second page");
+            event.setCancelled(true);
+            return;
+        }
+
         String description = event.getNewBookMeta().getPage(2);
         String title = event.getNewBookMeta().getTitle();
 
