@@ -61,7 +61,7 @@ public class DashboardViewListener implements Listener {
                 int totalPages = tasks.size() / (INVENTORY_SIZE - 9) + 1;
                 Bukkit.getScheduler().runTask(plugin,
                         () -> {
-                            String title = ChatColor.BLUE + "" + ChatColor.BOLD + ign + "'s tasks" + ChatColor.RESET + " (1/" + totalPages + ") " + Directives.DASHBOARD;
+                            String title = ChatColor.BLUE + "" + ChatColor.BOLD + ign + "'s tasks" + ChatColor.RESET + " (1/" + totalPages + ") " + Directives.PLAYER_TASKS;
                             Inventory inventory = Bukkit.createInventory(player, INVENTORY_SIZE, title);
 
                             ItemStack stack;
