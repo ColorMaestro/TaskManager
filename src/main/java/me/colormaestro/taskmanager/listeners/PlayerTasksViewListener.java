@@ -69,7 +69,7 @@ public class PlayerTasksViewListener implements Listener {
                 int totalPages = tasks.size() / (INVENTORY_SIZE - 9) + 1;
                 Bukkit.getScheduler().runTask(plugin,
                         () -> {
-                            String title = ChatColor.AQUA + "" + ChatColor.BOLD + ign + "'s approved tasks" + ChatColor.RESET + " (1/" + totalPages + ") " + Directives.APPROVED_TASKS;
+                            String title = ChatColor.DARK_AQUA + "" + ChatColor.BOLD + ign + "'s approved tasks" + ChatColor.RESET + " (1/" + totalPages + ") " + Directives.APPROVED_TASKS;
                             Inventory inventory = Bukkit.createInventory(player, INVENTORY_SIZE, title);
 
                             ItemStack stack;

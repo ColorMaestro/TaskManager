@@ -55,48 +55,8 @@ public class DashboardViewListener implements Listener {
 
     private void handlePlayerHeadClick(HumanEntity player, ItemStack headStack) {
         String ign = headStack.getItemMeta().getDisplayName().replaceFirst(ChatColor.BLUE + "" + ChatColor.BOLD, "");
-        Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
-            try {
-                int id = playerDAO.getPlayerID(ign);
-                List<Task> tasks = taskDAO.fetchPlayersActiveTasks(id);
-                int totalPages = tasks.size() / (INVENTORY_SIZE - 9) + 1;
-                Bukkit.getScheduler().runTask(plugin,
-                        () -> {
-                            String title = ChatColor.BLUE + "" + ChatColor.BOLD + ign + "'s tasks" + ChatColor.RESET + " (1/" + totalPages + ") " + Directives.PLAYER_TASKS;
-                            Inventory inventory = Bukkit.createInventory(player, INVENTORY_SIZE, title);
-
-                            ItemStack stack;
-                            int position = 0;
-                            for (Task task : tasks) {
-                                stack = ItemStackBuilder.buildTaskStack(task);
-                                inventory.setItem(position, stack);
-                                position++;
-                            }
-
-                            ItemStackBuilder.supplyInventoryWithPaginationArrows(inventory);
-
-                            stack = new ItemStack(Material.LIGHT_BLUE_CONCRETE, 1);
-                            ItemMeta meta = stack.getItemMeta();
-                            assert meta != null;
-                            meta.setDisplayName(ChatColor.AQUA + "Show " + ign + "'s approved tasks");
-                            stack.setItemMeta(meta);
-                            inventory.setItem(SHOW_APPROVED_TASKS_POSITION, stack);
-
-                            stack = new ItemStack(Material.SPECTRAL_ARROW, 1);
-                            meta = stack.getItemMeta();
-                            assert meta != null;
-                            meta.setDisplayName(ChatColor.AQUA + "Back to dashboard");
-                            stack.setItemMeta(meta);
-                            inventory.setItem(SHOW_DASHBOARD_POSITION, stack);
-
-                            player.openInventory(inventory);
-                        });
-            } catch (SQLException | DataAccessException ex) {
-                Bukkit.getScheduler().runTask(plugin,
-                        () -> player.sendMessage(ChatColor.RED + ex.getMessage()));
-                ex.printStackTrace();
-            }
-        });
+        Bukkit.getScheduler().runTaskAsynchronously(plugin,
+                ClickEventRunnables.showActiveTasksView(plugin, taskDAO, playerDAO, player, ign));
     }
 
     private void handleEyeClick(HumanEntity player) {

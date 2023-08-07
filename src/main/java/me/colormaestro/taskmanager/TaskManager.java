@@ -17,6 +17,7 @@ import me.colormaestro.taskmanager.data.DiscordManager;
 import me.colormaestro.taskmanager.data.HologramLayer;
 import me.colormaestro.taskmanager.data.PlayerDAO;
 import me.colormaestro.taskmanager.data.TaskDAO;
+import me.colormaestro.taskmanager.listeners.ApprovedTasksViewListener;
 import me.colormaestro.taskmanager.listeners.BookEditListener;
 import me.colormaestro.taskmanager.listeners.PlayerJoinListener;
 import me.colormaestro.taskmanager.listeners.DashboardViewListener;
@@ -53,6 +54,7 @@ public final class TaskManager extends JavaPlugin {
         getServer().getPluginManager().registerEvents(new DashboardViewListener(this, taskDAO, playerDAO), this);
         getServer().getPluginManager().registerEvents(new SupervisedTasksViewListener(this, taskDAO), this);
         getServer().getPluginManager().registerEvents(new PlayerTasksViewListener(this, taskDAO, playerDAO), this);
+        getServer().getPluginManager().registerEvents(new ApprovedTasksViewListener(this, taskDAO, playerDAO), this);
 
         Objects.requireNonNull(this.getCommand("addmember")).setExecutor(new AddMember(this, playerDAO, tasksTabCompleter, addTaskTabCompleter));
         Objects.requireNonNull(this.getCommand("dashboard")).setExecutor(new Dashboard(this, taskDAO));

@@ -1,6 +1,7 @@
 package me.colormaestro.taskmanager.listeners;
 
 import me.colormaestro.taskmanager.data.DataAccessException;
+import me.colormaestro.taskmanager.data.PlayerDAO;
 import me.colormaestro.taskmanager.data.TaskDAO;
 import me.colormaestro.taskmanager.model.MemberTaskStats;
 import me.colormaestro.taskmanager.model.Task;
@@ -22,6 +23,8 @@ import java.util.List;
 public class ClickEventRunnables {
     private static final int INVENTORY_SIZE = 54;
     private static final int SHOW_SUPERVISED_TASKS_POSITION = 49;
+    private static final int SHOW_APPROVED_TASKS_POSITION = 49;
+    private static final int SHOW_DASHBOARD_POSITION = 48;
 
     public static Runnable showDashboardView(Plugin plugin, TaskDAO taskDAO, HumanEntity player) {
         return () -> {
@@ -55,6 +58,51 @@ public class ClickEventRunnables {
                             player.openInventory(inventory);
                         });
             } catch (SQLException ex) {
+                Bukkit.getScheduler().runTask(plugin,
+                        () -> player.sendMessage(ChatColor.RED + ex.getMessage()));
+                ex.printStackTrace();
+            }
+        };
+    }
+
+    public static Runnable showActiveTasksView(Plugin plugin, TaskDAO taskDAO, PlayerDAO playerDAO, HumanEntity player, String ign) {
+        return () -> {
+            try {
+                int id = playerDAO.getPlayerID(ign);
+                List<Task> tasks = taskDAO.fetchPlayersActiveTasks(id);
+                int totalPages = tasks.size() / (INVENTORY_SIZE - 9) + 1;
+                Bukkit.getScheduler().runTask(plugin,
+                        () -> {
+                            String title = ChatColor.BLUE + "" + ChatColor.BOLD + ign + "'s tasks" + ChatColor.RESET + " (1/" + totalPages + ") " + Directives.PLAYER_TASKS;
+                            Inventory inventory = Bukkit.createInventory(player, INVENTORY_SIZE, title);
+
+                            ItemStack stack;
+                            int position = 0;
+                            for (Task task : tasks) {
+                                stack = ItemStackBuilder.buildTaskStack(task);
+                                inventory.setItem(position, stack);
+                                position++;
+                            }
+
+                            ItemStackBuilder.supplyInventoryWithPaginationArrows(inventory);
+
+                            stack = new ItemStack(Material.LIGHT_BLUE_CONCRETE, 1);
+                            ItemMeta meta = stack.getItemMeta();
+                            assert meta != null;
+                            meta.setDisplayName(ChatColor.AQUA + "Show " + ign + "'s approved tasks");
+                            stack.setItemMeta(meta);
+                            inventory.setItem(SHOW_APPROVED_TASKS_POSITION, stack);
+
+                            stack = new ItemStack(Material.SPECTRAL_ARROW, 1);
+                            meta = stack.getItemMeta();
+                            assert meta != null;
+                            meta.setDisplayName(ChatColor.AQUA + "Back to dashboard");
+                            stack.setItemMeta(meta);
+                            inventory.setItem(SHOW_DASHBOARD_POSITION, stack);
+
+                            player.openInventory(inventory);
+                        });
+            } catch (SQLException | DataAccessException ex) {
                 Bukkit.getScheduler().runTask(plugin,
                         () -> player.sendMessage(ChatColor.RED + ex.getMessage()));
                 ex.printStackTrace();
