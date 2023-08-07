@@ -309,6 +309,46 @@ public class TaskDAO {
     }
 
     /**
+     * Retrieves all approved tasks (status {@link me.colormaestro.taskmanager.enums.TaskStatus#APPROVED}
+     * of selected person. Used typically in dashboard UI.
+     *
+     * @param assigneeID id of assignee
+     * @return tasks of assignee which were approved by project manager
+     * @throws SQLException if SQL error arise
+     */
+    public synchronized List<Task> fetchPlayersApprovedTasks(int assigneeID) throws SQLException {
+        try (Connection connection = DriverManager.getConnection(url);
+             PreparedStatement st = connection.prepareStatement(
+                     "SELECT id, title, description, assignee_id, advisor_id, x, y, z, yaw, pitch, status, " +
+                             "date_given, date_finished FROM TASKS WHERE assignee_id = ? AND status == 'APPROVED'")) {
+
+            st.setInt(1, assigneeID);
+            ResultSet rs = st.executeQuery();
+            List<Task> tasks = new ArrayList<>();
+            while (rs.next()) {
+                Task task = new Task(
+                        rs.getString("title"),
+                        rs.getString("description"),
+                        rs.getInt("assignee_id"),
+                        rs.getInt("advisor_id"),
+                        rs.getDouble("x"),
+                        rs.getDouble("y"),
+                        rs.getDouble("z"),
+                        rs.getFloat("yaw"),
+                        rs.getFloat("pitch"),
+                        TaskStatus.valueOf(rs.getString("status")),
+                        rs.getDate("date_given"),
+                        rs.getDate("date_finished")
+                );
+                task.setId(rs.getInt("id"));
+                tasks.add(task);
+            }
+            rs.close();
+            return tasks;
+        }
+    }
+
+    /**
      * Retrieves all finished tasks whose advisor is selected person. Used typically for checking whether there are some
      * finished tasks to review.
      *

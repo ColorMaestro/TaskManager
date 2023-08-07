@@ -52,7 +52,7 @@ public final class TaskManager extends JavaPlugin {
         getServer().getPluginManager().registerEvents(new BookEditListener(this, taskDAO, playerDAO), this);
         getServer().getPluginManager().registerEvents(new DashboardViewListener(this, taskDAO, playerDAO), this);
         getServer().getPluginManager().registerEvents(new SupervisedTasksViewListener(this, taskDAO), this);
-        getServer().getPluginManager().registerEvents(new PlayerTasksViewListener(this, taskDAO), this);
+        getServer().getPluginManager().registerEvents(new PlayerTasksViewListener(this, taskDAO, playerDAO), this);
 
         Objects.requireNonNull(this.getCommand("addmember")).setExecutor(new AddMember(this, playerDAO, tasksTabCompleter, addTaskTabCompleter));
         Objects.requireNonNull(this.getCommand("dashboard")).setExecutor(new Dashboard(this, taskDAO));

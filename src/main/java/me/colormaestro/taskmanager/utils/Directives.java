@@ -5,4 +5,5 @@ public class Directives {
     public final static String DASHBOARD = "*-*";
     public final static String SUPERVISED_TASKS = "~OwO~";
     public static final String PLAYER_TASKS = "┬──┬◡ﾉ(° ‿°ﾉ)";
+    public static final String APPROVED_TASKS = "✓";
 }
