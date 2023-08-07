@@ -21,14 +21,14 @@ import org.bukkit.plugin.Plugin;
 import java.sql.SQLException;
 import java.util.List;
 
-public class PlayerTasksViewListener implements Listener {
+public class ActiveTasksViewListener implements Listener {
     private final Plugin plugin;
     private final TaskDAO taskDAO;
     private final PlayerDAO playerDAO;
     private static final int INVENTORY_SIZE = 54;
     private static final int SHOW_BACK_POSITION = 49;
 
-    public PlayerTasksViewListener(Plugin plugin, TaskDAO taskDAO, PlayerDAO playerDAO) {
+    public ActiveTasksViewListener(Plugin plugin, TaskDAO taskDAO, PlayerDAO playerDAO) {
         this.plugin = plugin;
         this.taskDAO = taskDAO;
         this.playerDAO = playerDAO;
@@ -36,7 +36,7 @@ public class PlayerTasksViewListener implements Listener {
 
     @EventHandler
     public void onMenuClick(InventoryClickEvent event) {
-        if (event.getView().getTitle().contains(Directives.PLAYER_TASKS)) {
+        if (event.getView().getTitle().contains(Directives.ACTIVE_TASKS)) {
             event.setCancelled(true);
 
             if (event.getCurrentItem() == null) {

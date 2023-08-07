@@ -21,7 +21,7 @@ import me.colormaestro.taskmanager.listeners.ApprovedTasksViewListener;
 import me.colormaestro.taskmanager.listeners.BookEditListener;
 import me.colormaestro.taskmanager.listeners.PlayerJoinListener;
 import me.colormaestro.taskmanager.listeners.DashboardViewListener;
-import me.colormaestro.taskmanager.listeners.PlayerTasksViewListener;
+import me.colormaestro.taskmanager.listeners.ActiveTasksViewListener;
 import me.colormaestro.taskmanager.listeners.SupervisedTasksViewListener;
 import me.colormaestro.taskmanager.tabcompleters.AddTaskTabCompleter;
 import me.colormaestro.taskmanager.tabcompleters.TasksTabCompleter;
@@ -53,7 +53,7 @@ public final class TaskManager extends JavaPlugin {
         getServer().getPluginManager().registerEvents(new BookEditListener(this, taskDAO, playerDAO), this);
         getServer().getPluginManager().registerEvents(new DashboardViewListener(this, taskDAO, playerDAO), this);
         getServer().getPluginManager().registerEvents(new SupervisedTasksViewListener(this, taskDAO), this);
-        getServer().getPluginManager().registerEvents(new PlayerTasksViewListener(this, taskDAO, playerDAO), this);
+        getServer().getPluginManager().registerEvents(new ActiveTasksViewListener(this, taskDAO, playerDAO), this);
         getServer().getPluginManager().registerEvents(new ApprovedTasksViewListener(this, taskDAO, playerDAO), this);
 
         Objects.requireNonNull(this.getCommand("addmember")).setExecutor(new AddMember(this, playerDAO, tasksTabCompleter, addTaskTabCompleter));
