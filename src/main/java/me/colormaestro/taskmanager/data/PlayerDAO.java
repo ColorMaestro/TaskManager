@@ -1,6 +1,6 @@
 package me.colormaestro.taskmanager.data;
 
-import me.colormaestro.taskmanager.model.MyPlayer;
+import me.colormaestro.taskmanager.model.Member;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -60,15 +60,15 @@ public class PlayerDAO {
      * @return Map where key is member ID from DB, value is MyPlayer instance
      * @throws SQLException if SQL error arise
      */
-    public synchronized Map<Integer, MyPlayer> fetchAllPlayers() throws SQLException {
+    public synchronized Map<Integer, Member> fetchAllPlayers() throws SQLException {
         try (Connection connection = DriverManager.getConnection(url);
              PreparedStatement st = connection.prepareStatement(
                      "SELECT id, uuid, ign, discord_id FROM PLAYERS"
              )) {
             ResultSet rs = st.executeQuery();
-            Map<Integer, MyPlayer> players = new HashMap<>();
+            Map<Integer, Member> players = new HashMap<>();
             while (rs.next()) {
-                MyPlayer player = new MyPlayer(
+                Member player = new Member(
                         rs.getString("uuid"),
                         rs.getString("ign"),
                         rs.getLong("discord_id")
