@@ -56,7 +56,7 @@ public class DashboardViewListener implements Listener {
     private void handlePlayerHeadClick(HumanEntity player, ItemStack headStack) {
         String ign = headStack.getItemMeta().getDisplayName().replaceFirst(ChatColor.BLUE + "" + ChatColor.BOLD, "");
         Bukkit.getScheduler().runTaskAsynchronously(plugin,
-                ClickEventRunnables.showActiveTasksView(plugin, taskDAO, playerDAO, player, ign));
+                SharedRunnables.showActiveTasksView(plugin, taskDAO, playerDAO, player, ign));
     }
 
     private void handleEyeClick(HumanEntity player) {

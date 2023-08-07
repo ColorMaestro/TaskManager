@@ -20,7 +20,7 @@ import org.bukkit.plugin.Plugin;
 import java.sql.SQLException;
 import java.util.List;
 
-public class ClickEventRunnables {
+public class SharedRunnables {
     private static final int INVENTORY_SIZE = 54;
     private static final int SHOW_SUPERVISED_TASKS_POSITION = 49;
     private static final int SHOW_APPROVED_TASKS_POSITION = 49;

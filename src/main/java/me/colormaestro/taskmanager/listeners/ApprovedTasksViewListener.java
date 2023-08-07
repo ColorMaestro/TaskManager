@@ -45,13 +45,13 @@ public class ApprovedTasksViewListener implements Listener {
     private void handleConcreteClick(HumanEntity player, ItemStack headStack) {
         String taskId = headStack.getItemMeta().getDisplayName().split("#")[1];
         Bukkit.getScheduler().runTaskAsynchronously(plugin,
-                ClickEventRunnables.teleportPlayerToTask(plugin, taskDAO, player, taskId));
+                SharedRunnables.teleportPlayerToTask(plugin, taskDAO, player, taskId));
     }
 
     private void handleSpectralArrowClick(HumanEntity player, InventoryView view) {
         String ign = view.getTitle().replaceFirst(ChatColor.DARK_AQUA + "" + ChatColor.BOLD, "").split("'")[0];
         Bukkit.getScheduler().runTaskAsynchronously(plugin,
-                ClickEventRunnables.showActiveTasksView(plugin, taskDAO, playerDAO, player, ign));
+                SharedRunnables.showActiveTasksView(plugin, taskDAO, playerDAO, player, ign));
     }
 
     private void handleArrowClick() {

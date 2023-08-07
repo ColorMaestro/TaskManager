@@ -56,7 +56,7 @@ public class PlayerTasksViewListener implements Listener {
     private void handleConcreteClick(HumanEntity player, ItemStack headStack) {
         String taskId = headStack.getItemMeta().getDisplayName().split("#")[1];
         Bukkit.getScheduler().runTaskAsynchronously(plugin,
-                ClickEventRunnables.teleportPlayerToTask(plugin, taskDAO, player, taskId));
+                SharedRunnables.teleportPlayerToTask(plugin, taskDAO, player, taskId));
     }
 
     private void handleShowApprovedTasksClick(HumanEntity player, ItemStack concreteStack) {
@@ -100,7 +100,7 @@ public class PlayerTasksViewListener implements Listener {
     }
 
     private void handleSpectralArrowClick(HumanEntity player) {
-        Bukkit.getScheduler().runTaskAsynchronously(plugin, ClickEventRunnables.showDashboardView(plugin, taskDAO, player));
+        Bukkit.getScheduler().runTaskAsynchronously(plugin, SharedRunnables.showDashboardView(plugin, taskDAO, player));
     }
 
     private void handleArrowClick() {

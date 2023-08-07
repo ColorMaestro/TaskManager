@@ -1,7 +1,7 @@
 package me.colormaestro.taskmanager.commands;
 
 import me.colormaestro.taskmanager.data.TaskDAO;
-import me.colormaestro.taskmanager.listeners.ClickEventRunnables;
+import me.colormaestro.taskmanager.listeners.SharedRunnables;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
@@ -28,7 +28,7 @@ public class Dashboard implements CommandExecutor {
             return true;
         }
 
-        Bukkit.getScheduler().runTaskAsynchronously(plugin, ClickEventRunnables.showDashboardView(plugin, taskDAO, player));
+        Bukkit.getScheduler().runTaskAsynchronously(plugin, SharedRunnables.showDashboardView(plugin, taskDAO, player));
 
         return true;
     }
