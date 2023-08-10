@@ -152,6 +152,44 @@ public class SharedRunnables {
         };
     }
 
+    public static Runnable showSupervisedTasksView(Plugin plugin, TaskDAO taskDAO, PlayerDAO playerDAO, HumanEntity player) {
+        return () -> {
+            try {
+                int id = playerDAO.getPlayerID(player.getName());
+                List<Task> tasks = taskDAO.fetchAdvisorActiveTasks(id);
+                int totalPages = tasks.size() / (INVENTORY_SIZE - 9) + 1;
+                Bukkit.getScheduler().runTask(plugin,
+                        () -> {
+                            String title = ChatColor.DARK_PURPLE + "" + ChatColor.BOLD + "Your supervised tasks" + ChatColor.RESET + " (1/" + totalPages + ") " + Directives.SUPERVISED_TASKS;
+                            Inventory inventory = Bukkit.createInventory(player, INVENTORY_SIZE, title);
+
+                            ItemStack stack;
+                            int position = 0;
+                            for (Task task : tasks) {
+                                stack = ItemStackBuilder.buildTaskStack(task);
+                                inventory.setItem(position, stack);
+                                position++;
+                            }
+
+                            ItemStackBuilder.supplyInventoryWithPaginationArrows(inventory);
+
+                            stack = new ItemStack(Material.SPECTRAL_ARROW, 1);
+                            ItemMeta meta = stack.getItemMeta();
+                            assert meta != null;
+                            meta.setDisplayName(ChatColor.AQUA + "Back to dashboard");
+                            stack.setItemMeta(meta);
+                            inventory.setItem(SHOW_APPROVED_TASKS_POSITION, stack);
+
+                            player.openInventory(inventory);
+                        });
+            } catch (SQLException | DataAccessException ex) {
+                Bukkit.getScheduler().runTask(plugin,
+                        () -> player.sendMessage(ChatColor.RED + ex.getMessage()));
+                ex.printStackTrace();
+            }
+        };
+    }
+
     public static Runnable teleportPlayerToTask(Plugin plugin, TaskDAO taskDAO, HumanEntity player, String taskId) {
         return () -> {
             try {
