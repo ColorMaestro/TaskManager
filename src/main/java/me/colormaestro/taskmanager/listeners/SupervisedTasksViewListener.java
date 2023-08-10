@@ -48,7 +48,8 @@ public class SupervisedTasksViewListener implements Listener {
     }
 
     private void handleSpectralArrowClick(HumanEntity player) {
-        Bukkit.getScheduler().runTaskAsynchronously(plugin, SharedRunnables.showDashboardView(plugin, taskDAO, player, 1));
+        Bukkit.getScheduler().runTaskAsynchronously(plugin,
+                SharedRunnables.showDashboardView(plugin, taskDAO, player, 1));
     }
 
     private void handleArrowClick(HumanEntity player, InventoryView view, ItemStack arrow) {
@@ -68,6 +69,7 @@ public class SupervisedTasksViewListener implements Listener {
             currentPage = totalPages;
         }
 
-        Bukkit.getScheduler().runTaskAsynchronously(plugin, SharedRunnables.showSupervisedTasksView(plugin, taskDAO, playerDAO, player, currentPage));
+        Bukkit.getScheduler().runTaskAsynchronously(plugin,
+                SharedRunnables.showSupervisedTasksView(plugin, taskDAO, playerDAO, player, currentPage));
     }
 }

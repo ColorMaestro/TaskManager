@@ -52,11 +52,13 @@ public class ActiveTasksViewListener implements Listener {
     private void handleShowApprovedTasksClick(HumanEntity player, ItemStack concreteStack) {
         String adjective = concreteStack.getItemMeta().getDisplayName().split(" ")[1];
         String ign = adjective.split("'")[0];
-        Bukkit.getScheduler().runTaskAsynchronously(plugin, SharedRunnables.showApprovedTasksView(plugin, taskDAO, playerDAO, player, ign, 1));
+        Bukkit.getScheduler().runTaskAsynchronously(plugin,
+                SharedRunnables.showApprovedTasksView(plugin, taskDAO, playerDAO, player, ign, 1));
     }
 
     private void handleSpectralArrowClick(HumanEntity player) {
-        Bukkit.getScheduler().runTaskAsynchronously(plugin, SharedRunnables.showDashboardView(plugin, taskDAO, player, 1));
+        Bukkit.getScheduler().runTaskAsynchronously(plugin,
+                SharedRunnables.showDashboardView(plugin, taskDAO, player, 1));
     }
 
     private void handleArrowClick(HumanEntity player, InventoryView view, ItemStack arrow) {
@@ -77,6 +79,7 @@ public class ActiveTasksViewListener implements Listener {
             currentPage = totalPages;
         }
 
-        Bukkit.getScheduler().runTaskAsynchronously(plugin, SharedRunnables.showActiveTasksView(plugin, taskDAO, playerDAO, player, ign, currentPage));
+        Bukkit.getScheduler().runTaskAsynchronously(plugin,
+                SharedRunnables.showActiveTasksView(plugin, taskDAO, playerDAO, player, ign, currentPage));
     }
 }
