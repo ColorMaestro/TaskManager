@@ -22,6 +22,7 @@ import java.util.List;
 
 public class SharedRunnables {
     private static final int INVENTORY_SIZE = 54;
+    private static final int PAGE_SIZE = 45;
     private static final int SHOW_SUPERVISED_TASKS_POSITION = 49;
     private static final int SHOW_APPROVED_TASKS_POSITION = 49;
     private static final int SHOW_DASHBOARD_POSITION = 48;
@@ -111,20 +112,21 @@ public class SharedRunnables {
         };
     }
 
-    public static Runnable showApprovedTasksView(Plugin plugin, TaskDAO taskDAO, PlayerDAO playerDAO, HumanEntity player, String ign) {
+    public static Runnable showApprovedTasksView(Plugin plugin, TaskDAO taskDAO, PlayerDAO playerDAO, HumanEntity player, String ign, long page) {
         return () -> {
             try {
                 int id = playerDAO.getPlayerID(ign);
                 List<Task> tasks = taskDAO.fetchPlayersApprovedTasks(id);
                 int totalPages = tasks.size() / (INVENTORY_SIZE - 9) + 1;
+                List<Task> finalTasks = tasks.stream().skip((page - 1) * PAGE_SIZE).limit(PAGE_SIZE).toList();
                 Bukkit.getScheduler().runTask(plugin,
                         () -> {
-                            String title = ChatColor.DARK_AQUA + "" + ChatColor.BOLD + ign + "'s approved tasks" + ChatColor.RESET + " (1/" + totalPages + ") " + Directives.APPROVED_TASKS;
+                            String title = ChatColor.DARK_AQUA + "" + ChatColor.BOLD + ign + "'s approved tasks" + ChatColor.RESET + " (" + page + "/" + totalPages + ") " + Directives.APPROVED_TASKS;
                             Inventory inventory = Bukkit.createInventory(player, INVENTORY_SIZE, title);
 
                             ItemStack stack;
                             int position = 0;
-                            for (Task task : tasks) {
+                            for (Task task : finalTasks) {
                                 stack = ItemStackBuilder.buildTaskStack(task);
                                 inventory.setItem(position, stack);
                                 position++;

@@ -37,7 +37,7 @@ public class ApprovedTasksViewListener implements Listener {
             switch (event.getCurrentItem().getType()) {
                 case LIGHT_BLUE_CONCRETE -> handleConcreteClick(player, event.getCurrentItem());
                 case SPECTRAL_ARROW -> handleSpectralArrowClick(player, event.getView());
-                case ARROW -> handleArrowClick();
+                case ARROW -> handleArrowClick(player, event.getView(), event.getCurrentItem());
             }
         }
     }
@@ -54,7 +54,25 @@ public class ApprovedTasksViewListener implements Listener {
                 SharedRunnables.showActiveTasksView(plugin, taskDAO, playerDAO, player, ign));
     }
 
-    private void handleArrowClick() {
+    private void handleArrowClick(HumanEntity player, InventoryView view, ItemStack arrow) {
+        var parts = view.getTitle().replaceFirst(ChatColor.DARK_AQUA + "" + ChatColor.BOLD, "").split("['()/]");
+        String ign = parts[0];
+        long currentPage = Long.parseLong(parts[2]);
+        long totalPages = Long.parseLong(parts[3]);
 
+        if (arrow.getItemMeta().getDisplayName().contains("Next")) {
+            currentPage++;
+        } else {
+            currentPage--;
+        }
+
+        if (currentPage > totalPages) {
+            currentPage = 1;
+        } else if (currentPage < 1) {
+            currentPage = totalPages;
+        }
+
+
+        Bukkit.getScheduler().runTaskAsynchronously(plugin, SharedRunnables.showApprovedTasksView(plugin, taskDAO, playerDAO, player, ign, currentPage));
     }
 }

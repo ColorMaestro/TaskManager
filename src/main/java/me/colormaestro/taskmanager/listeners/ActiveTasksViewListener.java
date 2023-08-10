@@ -62,7 +62,7 @@ public class ActiveTasksViewListener implements Listener {
     private void handleShowApprovedTasksClick(HumanEntity player, ItemStack concreteStack) {
         String adjective = concreteStack.getItemMeta().getDisplayName().split(" ")[1];
         String ign = adjective.split("'")[0];
-        Bukkit.getScheduler().runTaskAsynchronously(plugin, SharedRunnables.showApprovedTasksView(plugin, taskDAO, playerDAO, player, ign));
+        Bukkit.getScheduler().runTaskAsynchronously(plugin, SharedRunnables.showApprovedTasksView(plugin, taskDAO, playerDAO, player, ign, 1));
     }
 
     private void handleSpectralArrowClick(HumanEntity player) {
