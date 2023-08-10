@@ -51,7 +51,7 @@ public class ApprovedTasksViewListener implements Listener {
     private void handleSpectralArrowClick(HumanEntity player, InventoryView view) {
         String ign = view.getTitle().replaceFirst(ChatColor.DARK_AQUA + "" + ChatColor.BOLD, "").split("'")[0];
         Bukkit.getScheduler().runTaskAsynchronously(plugin,
-                SharedRunnables.showActiveTasksView(plugin, taskDAO, playerDAO, player, ign));
+                SharedRunnables.showActiveTasksView(plugin, taskDAO, playerDAO, player, ign, 1));
     }
 
     private void handleArrowClick(HumanEntity player, InventoryView view, ItemStack arrow) {

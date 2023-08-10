@@ -14,6 +14,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.InventoryView;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.plugin.Plugin;
@@ -48,7 +49,7 @@ public class ActiveTasksViewListener implements Listener {
                 case ORANGE_CONCRETE, LIME_CONCRETE -> handleConcreteClick(player, event.getCurrentItem());
                 case LIGHT_BLUE_CONCRETE -> handleShowApprovedTasksClick(player, event.getCurrentItem());
                 case SPECTRAL_ARROW -> handleSpectralArrowClick(player);
-                case ARROW -> handleArrowClick();
+                case ARROW -> handleArrowClick(player, event.getView(), event.getCurrentItem());
             }
         }
     }
@@ -69,7 +70,26 @@ public class ActiveTasksViewListener implements Listener {
         Bukkit.getScheduler().runTaskAsynchronously(plugin, SharedRunnables.showDashboardView(plugin, taskDAO, player));
     }
 
-    private void handleArrowClick() {
+    private void handleArrowClick(HumanEntity player, InventoryView view, ItemStack arrow) {
+        var parts = view.getTitle().replaceFirst(ChatColor.BLUE + "" + ChatColor.BOLD, "").split("['()/]");
+        String ign = parts[0];
+        long currentPage = Long.parseLong(parts[2]);
+        long totalPages = Long.parseLong(parts[3]);
+
+        if (arrow.getItemMeta().getDisplayName().contains("Next")) {
+            currentPage++;
+        } else {
+            currentPage--;
+        }
+
+        if (currentPage > totalPages) {
+            currentPage = 1;
+        } else if (currentPage < 1) {
+            currentPage = totalPages;
+        }
+
+
+        Bukkit.getScheduler().runTaskAsynchronously(plugin, SharedRunnables.showActiveTasksView(plugin, taskDAO, playerDAO, player, ign, currentPage));
 
     }
 }
