@@ -152,20 +152,21 @@ public class SharedRunnables {
         };
     }
 
-    public static Runnable showSupervisedTasksView(Plugin plugin, TaskDAO taskDAO, PlayerDAO playerDAO, HumanEntity player) {
+    public static Runnable showSupervisedTasksView(Plugin plugin, TaskDAO taskDAO, PlayerDAO playerDAO, HumanEntity player, long page) {
         return () -> {
             try {
                 int id = playerDAO.getPlayerID(player.getName());
                 List<Task> tasks = taskDAO.fetchAdvisorActiveTasks(id);
-                int totalPages = tasks.size() / (INVENTORY_SIZE - 9) + 1;
+                int totalPages = tasks.size() / PAGE_SIZE + 1;
+                List<Task> finalTasks = tasks.stream().skip((page - 1) * PAGE_SIZE).limit(PAGE_SIZE).toList();
                 Bukkit.getScheduler().runTask(plugin,
                         () -> {
-                            String title = ChatColor.DARK_PURPLE + "" + ChatColor.BOLD + "Your supervised tasks" + ChatColor.RESET + " (1/" + totalPages + ") " + Directives.SUPERVISED_TASKS;
+                            String title = ChatColor.DARK_PURPLE + "" + ChatColor.BOLD + "Your supervised tasks" + ChatColor.RESET + " (" + page + "/" + totalPages + ") " + Directives.SUPERVISED_TASKS;
                             Inventory inventory = Bukkit.createInventory(player, INVENTORY_SIZE, title);
 
                             ItemStack stack;
                             int position = 0;
-                            for (Task task : tasks) {
+                            for (Task task : finalTasks) {
                                 stack = ItemStackBuilder.buildTaskStack(task);
                                 inventory.setItem(position, stack);
                                 position++;

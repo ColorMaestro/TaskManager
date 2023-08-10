@@ -49,7 +49,7 @@ public class DashboardViewListener implements Listener {
     }
 
     private void handleEyeClick(HumanEntity player) {
-        Bukkit.getScheduler().runTaskAsynchronously(plugin, SharedRunnables.showSupervisedTasksView(plugin, taskDAO, playerDAO, player));
+        Bukkit.getScheduler().runTaskAsynchronously(plugin, SharedRunnables.showSupervisedTasksView(plugin, taskDAO, playerDAO, player, 1));
     }
 
     private void handleArrowClick(HumanEntity player, InventoryView view, ItemStack arrow) {
