@@ -28,7 +28,7 @@ public class Dashboard implements CommandExecutor {
             return true;
         }
 
-        Bukkit.getScheduler().runTaskAsynchronously(plugin, SharedRunnables.showDashboardView(plugin, taskDAO, player));
+        Bukkit.getScheduler().runTaskAsynchronously(plugin, SharedRunnables.showDashboardView(plugin, taskDAO, player, 1));
 
         return true;
     }

@@ -44,7 +44,7 @@ public class SupervisedTasksViewListener implements Listener {
     }
 
     private void handleSpectralArrowClick(HumanEntity player) {
-        Bukkit.getScheduler().runTaskAsynchronously(plugin, SharedRunnables.showDashboardView(plugin, taskDAO, player));
+        Bukkit.getScheduler().runTaskAsynchronously(plugin, SharedRunnables.showDashboardView(plugin, taskDAO, player, 1));
     }
 
     private void handleArrowClick() {

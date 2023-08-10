@@ -67,7 +67,7 @@ public class ActiveTasksViewListener implements Listener {
     }
 
     private void handleSpectralArrowClick(HumanEntity player) {
-        Bukkit.getScheduler().runTaskAsynchronously(plugin, SharedRunnables.showDashboardView(plugin, taskDAO, player));
+        Bukkit.getScheduler().runTaskAsynchronously(plugin, SharedRunnables.showDashboardView(plugin, taskDAO, player, 1));
     }
 
     private void handleArrowClick(HumanEntity player, InventoryView view, ItemStack arrow) {
@@ -88,8 +88,6 @@ public class ActiveTasksViewListener implements Listener {
             currentPage = totalPages;
         }
 
-
         Bukkit.getScheduler().runTaskAsynchronously(plugin, SharedRunnables.showActiveTasksView(plugin, taskDAO, playerDAO, player, ign, currentPage));
-
     }
 }

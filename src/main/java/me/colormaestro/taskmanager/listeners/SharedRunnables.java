@@ -28,16 +28,16 @@ public class SharedRunnables {
     private static final int SHOW_DASHBOARD_POSITION = 48;
     private static final int SHOW_BACK_POSITION = 49;
 
-    public static Runnable showDashboardView(Plugin plugin, TaskDAO taskDAO, HumanEntity player) {
+    public static Runnable showDashboardView(Plugin plugin, TaskDAO taskDAO, HumanEntity player, long page) {
         return () -> {
             try {
                 List<MemberTaskStats> stats = taskDAO.fetchTaskStatistics();
-                int totalPages = stats.size() / (INVENTORY_SIZE - 9) + 1;
+                int totalPages = stats.size() / PAGE_SIZE + 1;
                 // Variable used in lambda should be final or effectively final
-                List<MemberTaskStats> finalStats = stats.stream().limit(INVENTORY_SIZE - 9).toList();
+                List<MemberTaskStats> finalStats = stats.stream().skip((page - 1) * PAGE_SIZE).limit(PAGE_SIZE).toList();
                 Bukkit.getScheduler().runTask(plugin,
                         () -> {
-                            String inventoryTitle = ChatColor.BLUE + "" + ChatColor.BOLD + "Tasks Dashboard" + ChatColor.RESET + " (1/" + totalPages + ") " + Directives.DASHBOARD;
+                            String inventoryTitle = ChatColor.BLUE + "" + ChatColor.BOLD + "Tasks Dashboard" + ChatColor.RESET + " (" + page + "/" + totalPages + ") " + Directives.DASHBOARD;
                             Inventory inventory = Bukkit.createInventory(player, INVENTORY_SIZE, inventoryTitle);
 
                             ItemStack stack;

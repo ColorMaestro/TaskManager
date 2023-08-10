@@ -72,7 +72,6 @@ public class ApprovedTasksViewListener implements Listener {
             currentPage = totalPages;
         }
 
-
         Bukkit.getScheduler().runTaskAsynchronously(plugin, SharedRunnables.showApprovedTasksView(plugin, taskDAO, playerDAO, player, ign, currentPage));
     }
 }

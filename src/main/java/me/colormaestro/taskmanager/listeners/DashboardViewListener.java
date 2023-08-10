@@ -14,6 +14,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.InventoryView;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.plugin.Plugin;
@@ -48,7 +49,7 @@ public class DashboardViewListener implements Listener {
             switch (event.getCurrentItem().getType()) {
                 case PLAYER_HEAD -> handlePlayerHeadClick(player, event.getCurrentItem());
                 case ENDER_EYE -> handleEyeClick(player);
-                case ARROW -> handleArrowClick();
+                case ARROW -> handleArrowClick(player, event.getView(), event.getCurrentItem());
             }
         }
     }
@@ -97,7 +98,23 @@ public class DashboardViewListener implements Listener {
         });
     }
 
-    private void handleArrowClick() {
+    private void handleArrowClick(HumanEntity player, InventoryView view, ItemStack arrow) {
+        var parts = view.getTitle().split("[()/]");
+        long currentPage = Long.parseLong(parts[1]);
+        long totalPages = Long.parseLong(parts[2]);
 
+        if (arrow.getItemMeta().getDisplayName().contains("Next")) {
+            currentPage++;
+        } else {
+            currentPage--;
+        }
+
+        if (currentPage > totalPages) {
+            currentPage = 1;
+        } else if (currentPage < 1) {
+            currentPage = totalPages;
+        }
+
+        Bukkit.getScheduler().runTaskAsynchronously(plugin, SharedRunnables.showDashboardView(plugin, taskDAO, player, currentPage));
     }
 }
