@@ -62,41 +62,7 @@ public class ActiveTasksViewListener implements Listener {
     private void handleShowApprovedTasksClick(HumanEntity player, ItemStack concreteStack) {
         String adjective = concreteStack.getItemMeta().getDisplayName().split(" ")[1];
         String ign = adjective.split("'")[0];
-        Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
-            try {
-                int id = playerDAO.getPlayerID(ign);
-                List<Task> tasks = taskDAO.fetchPlayersApprovedTasks(id);
-                int totalPages = tasks.size() / (INVENTORY_SIZE - 9) + 1;
-                Bukkit.getScheduler().runTask(plugin,
-                        () -> {
-                            String title = ChatColor.DARK_AQUA + "" + ChatColor.BOLD + ign + "'s approved tasks" + ChatColor.RESET + " (1/" + totalPages + ") " + Directives.APPROVED_TASKS;
-                            Inventory inventory = Bukkit.createInventory(player, INVENTORY_SIZE, title);
-
-                            ItemStack stack;
-                            int position = 0;
-                            for (Task task : tasks) {
-                                stack = ItemStackBuilder.buildTaskStack(task);
-                                inventory.setItem(position, stack);
-                                position++;
-                            }
-
-                            ItemStackBuilder.supplyInventoryWithPaginationArrows(inventory);
-
-                            stack = new ItemStack(Material.SPECTRAL_ARROW, 1);
-                            ItemMeta meta = stack.getItemMeta();
-                            assert meta != null;
-                            meta.setDisplayName(ChatColor.AQUA + "Back to active tasks");
-                            stack.setItemMeta(meta);
-                            inventory.setItem(SHOW_BACK_POSITION, stack);
-
-                            player.openInventory(inventory);
-                        });
-            } catch (SQLException | DataAccessException ex) {
-                Bukkit.getScheduler().runTask(plugin,
-                        () -> player.sendMessage(ChatColor.RED + ex.getMessage()));
-                ex.printStackTrace();
-            }
-        });
+        Bukkit.getScheduler().runTaskAsynchronously(plugin, SharedRunnables.showApprovedTasksView(plugin, taskDAO, playerDAO, player, ign));
     }
 
     private void handleSpectralArrowClick(HumanEntity player) {
