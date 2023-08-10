@@ -23,10 +23,8 @@ import java.util.List;
 public class SharedRunnables {
     private static final int INVENTORY_SIZE = 54;
     private static final int PAGE_SIZE = 45;
-    private static final int SHOW_SUPERVISED_TASKS_POSITION = 49;
-    private static final int SHOW_APPROVED_TASKS_POSITION = 49;
-    private static final int SHOW_DASHBOARD_POSITION = 48;
-    private static final int SHOW_BACK_POSITION = 49;
+    private static final int LAST_ROW_MIDDLE = 49;
+    private static final int LAST_ROW_LEFT_FROM_MIDDLE = 48;
 
     public static Runnable showDashboardView(Plugin plugin, TaskDAO taskDAO, HumanEntity player, long page) {
         return () -> {
@@ -55,7 +53,7 @@ public class SharedRunnables {
                             assert meta != null;
                             meta.setDisplayName(ChatColor.DARK_PURPLE + "Show supervised tasks");
                             stack.setItemMeta(meta);
-                            inventory.setItem(SHOW_SUPERVISED_TASKS_POSITION, stack);
+                            inventory.setItem(LAST_ROW_MIDDLE, stack);
 
                             player.openInventory(inventory);
                         });
@@ -94,14 +92,14 @@ public class SharedRunnables {
                             assert meta != null;
                             meta.setDisplayName(ChatColor.AQUA + "Show " + ign + "'s approved tasks");
                             stack.setItemMeta(meta);
-                            inventory.setItem(SHOW_APPROVED_TASKS_POSITION, stack);
+                            inventory.setItem(LAST_ROW_MIDDLE, stack);
 
                             stack = new ItemStack(Material.SPECTRAL_ARROW, 1);
                             meta = stack.getItemMeta();
                             assert meta != null;
                             meta.setDisplayName(ChatColor.AQUA + "Back to dashboard");
                             stack.setItemMeta(meta);
-                            inventory.setItem(SHOW_DASHBOARD_POSITION, stack);
+                            inventory.setItem(LAST_ROW_LEFT_FROM_MIDDLE, stack);
 
                             player.openInventory(inventory);
                         });
@@ -140,7 +138,7 @@ public class SharedRunnables {
                             assert meta != null;
                             meta.setDisplayName(ChatColor.AQUA + "Back to active tasks");
                             stack.setItemMeta(meta);
-                            inventory.setItem(SHOW_BACK_POSITION, stack);
+                            inventory.setItem(LAST_ROW_MIDDLE, stack);
 
                             player.openInventory(inventory);
                         });
@@ -179,7 +177,7 @@ public class SharedRunnables {
                             assert meta != null;
                             meta.setDisplayName(ChatColor.AQUA + "Back to dashboard");
                             stack.setItemMeta(meta);
-                            inventory.setItem(SHOW_APPROVED_TASKS_POSITION, stack);
+                            inventory.setItem(LAST_ROW_MIDDLE, stack);
 
                             player.openInventory(inventory);
                         });

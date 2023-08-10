@@ -1,33 +1,22 @@
 package me.colormaestro.taskmanager.listeners;
 
-import me.colormaestro.taskmanager.data.DataAccessException;
 import me.colormaestro.taskmanager.data.PlayerDAO;
 import me.colormaestro.taskmanager.data.TaskDAO;
-import me.colormaestro.taskmanager.model.Task;
 import me.colormaestro.taskmanager.utils.Directives;
-import me.colormaestro.taskmanager.utils.ItemStackBuilder;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
-import org.bukkit.Material;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
-import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryView;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.plugin.Plugin;
-
-import java.sql.SQLException;
-import java.util.List;
 
 public class ActiveTasksViewListener implements Listener {
     private final Plugin plugin;
     private final TaskDAO taskDAO;
     private final PlayerDAO playerDAO;
-    private static final int INVENTORY_SIZE = 54;
-    private static final int SHOW_BACK_POSITION = 49;
 
     public ActiveTasksViewListener(Plugin plugin, TaskDAO taskDAO, PlayerDAO playerDAO) {
         this.plugin = plugin;
