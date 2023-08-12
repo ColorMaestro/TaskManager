@@ -2,6 +2,7 @@ package me.colormaestro.taskmanager.data;
 
 import eu.decentsoftware.holograms.api.DHAPI;
 import eu.decentsoftware.holograms.api.holograms.Hologram;
+import eu.decentsoftware.holograms.api.holograms.HologramLine;
 import me.colormaestro.taskmanager.enums.TaskStatus;
 import me.colormaestro.taskmanager.model.Task;
 import org.bukkit.ChatColor;
@@ -53,12 +54,14 @@ public class HologramLayer {
         if (hologram == null) {
             return;
         }
-        List<String> lines = new LinkedList<>();
+        // We remove all lines except of first one to keep member's name on hologram
+        while (hologram.getPage(0).getLine(1) != null) {
+            DHAPI.removeHologramLine(hologram, 1);
+        }
         for (Task task : tasks) {
             ChatColor color = task.getStatus() == TaskStatus.FINISHED ? ChatColor.GREEN : ChatColor.GOLD;
             String line = color + "[" + task.getId() + "] " + ChatColor.WHITE + task.getTitle();
-            lines.add(line);
+            DHAPI.addHologramLine(hologram, line);
         }
-        DHAPI.setHologramLines(hologram, lines);
     }
 }
