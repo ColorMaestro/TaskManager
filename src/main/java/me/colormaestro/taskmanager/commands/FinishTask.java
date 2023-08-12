@@ -55,7 +55,7 @@ public class FinishTask implements CommandExecutor {
                 Bukkit.getScheduler().runTask(plugin,
                         () -> {
                             p.sendMessage(ChatColor.GREEN + "Task finished.");
-                            if (Bukkit.getPluginManager().isPluginEnabled("Holograms")) {
+                            if (Bukkit.getPluginManager().isPluginEnabled("DecentHolograms")) {
                                 HologramLayer.getInstance().setTasks(assigneeUUID, activeTasks);
                             }
 

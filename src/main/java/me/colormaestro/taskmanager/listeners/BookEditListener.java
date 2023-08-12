@@ -93,7 +93,7 @@ public class BookEditListener implements Listener {
 
                                     // Firstly we try to notify the assignee in game
                                     boolean messageSent = false;
-                                    if (Bukkit.getPluginManager().isPluginEnabled("Holograms")) {
+                                    if (Bukkit.getPluginManager().isPluginEnabled("DecentHolograms")) {
                                         HologramLayer.getInstance().setTasks(assigneeUUID, activeTasks);
                                     }
                                     for (Player target : Bukkit.getOnlinePlayers()) {

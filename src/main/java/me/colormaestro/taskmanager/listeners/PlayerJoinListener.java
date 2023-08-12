@@ -30,7 +30,7 @@ public class PlayerJoinListener implements Listener {
 
     @EventHandler
     public void onJoin(PlayerJoinEvent event) {
-        if (Bukkit.getPluginManager().isPluginEnabled("Holograms")) {
+        if (Bukkit.getPluginManager().isPluginEnabled("DecentHolograms")) {
             Bukkit.getScheduler().runTaskLater(plugin, checkHologram(event), 180);
         }
         Bukkit.getScheduler().runTaskLater(plugin, checkDiscordID(event, plugin, playerDAO), 190);

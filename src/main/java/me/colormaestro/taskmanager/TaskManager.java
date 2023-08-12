@@ -70,11 +70,11 @@ public final class TaskManager extends JavaPlugin {
         Objects.requireNonNull(this.getCommand("taskinfo")).setExecutor(new TaskInfo(taskDAO, playerDAO));
         Objects.requireNonNull(this.getCommand("transfertask")).setExecutor(new TransferTask(taskDAO, playerDAO));
 
-        if (Bukkit.getPluginManager().isPluginEnabled("Holograms")) {
+        if (Bukkit.getPluginManager().isPluginEnabled("DecentHolograms")) {
             HologramLayer.instantiate();
-            this.getLogger().info("Holograms plugin detected, TaskManager will be fully functional");
+            this.getLogger().info("DecentHolograms plugin detected, TaskManager will be fully functional");
         } else {
-            this.getLogger().info("Holograms plugin was not detected, functionality will be limited");
+            this.getLogger().info("DecentHolograms plugin was not detected, functionality will be limited");
         }
         DiscordManager.instantiate(config.getString("token"), playerDAO, this);
     }

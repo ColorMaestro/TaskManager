@@ -17,15 +17,15 @@ public class Establish implements CommandExecutor {
             return true;
         }
 
-        if (!Bukkit.getPluginManager().isPluginEnabled("Holograms")) {
-            sender.sendMessage(ChatColor.RED + "✖ This command works only if Holograms plugin is installed on the server.");
+        if (!Bukkit.getPluginManager().isPluginEnabled("DecentHolograms")) {
+            sender.sendMessage(ChatColor.RED + "✖ This command works only if DecentHolograms plugin is installed on the server.");
             return true;
         }
 
         Player player = (Player) sender;
         String uuid = player.getUniqueId().toString();
         if (HologramLayer.getInstance().hologramExists(uuid)) {
-            HologramLayer.getInstance().teleportHologram(player, uuid);
+            HologramLayer.getInstance().teleportHologram(player);
         } else {
             HologramLayer.getInstance().establishTasksHologram(player);
         }

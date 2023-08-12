@@ -55,7 +55,7 @@ public class ReturnTask implements CommandExecutor {
                         Bukkit.getScheduler().runTask(plugin,
                                 () -> {
                                     p.sendMessage(ChatColor.GREEN + "Task returned.");
-                                    if (Bukkit.getPluginManager().isPluginEnabled("Holograms")) {
+                                    if (Bukkit.getPluginManager().isPluginEnabled("DecentHolograms")) {
                                         HologramLayer.getInstance().setTasks(assigneeUUID, activeTasks);
                                     }
 
