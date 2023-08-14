@@ -4,6 +4,7 @@ import me.colormaestro.taskmanager.enums.TaskStatus;
 import me.colormaestro.taskmanager.model.MemberTaskStats;
 import me.colormaestro.taskmanager.model.Task;
 import org.bukkit.Location;
+import org.jetbrains.annotations.NotNull;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -245,29 +246,7 @@ public class TaskDAO {
                      "SELECT id, title, description, assignee_id, advisor_id, x, y, z, yaw, pitch, status, " +
                              "date_given, date_finished FROM TASKS WHERE assignee_id = ? AND status != 'APPROVED'")) {
 
-            st.setInt(1, assigneeID);
-            ResultSet rs = st.executeQuery();
-            List<Task> tasks = new ArrayList<>();
-            while (rs.next()) {
-                Task task = new Task(
-                        rs.getString("title"),
-                        rs.getString("description"),
-                        rs.getInt("assignee_id"),
-                        rs.getInt("advisor_id"),
-                        rs.getDouble("x"),
-                        rs.getDouble("y"),
-                        rs.getDouble("z"),
-                        rs.getFloat("yaw"),
-                        rs.getFloat("pitch"),
-                        TaskStatus.valueOf(rs.getString("status")),
-                        rs.getDate("date_given"),
-                        rs.getDate("date_finished")
-                );
-                task.setId(rs.getInt("id"));
-                tasks.add(task);
-            }
-            rs.close();
-            return tasks;
+            return executeStatement(assigneeID, st);
         }
     }
 
@@ -285,29 +264,7 @@ public class TaskDAO {
                      "SELECT id, title, description, assignee_id, advisor_id, x, y, z, yaw, pitch, status, " +
                              "date_given, date_finished FROM TASKS WHERE assignee_id = ? AND status == 'APPROVED'")) {
 
-            st.setInt(1, assigneeID);
-            ResultSet rs = st.executeQuery();
-            List<Task> tasks = new ArrayList<>();
-            while (rs.next()) {
-                Task task = new Task(
-                        rs.getString("title"),
-                        rs.getString("description"),
-                        rs.getInt("assignee_id"),
-                        rs.getInt("advisor_id"),
-                        rs.getDouble("x"),
-                        rs.getDouble("y"),
-                        rs.getDouble("z"),
-                        rs.getFloat("yaw"),
-                        rs.getFloat("pitch"),
-                        TaskStatus.valueOf(rs.getString("status")),
-                        rs.getDate("date_given"),
-                        rs.getDate("date_finished")
-                );
-                task.setId(rs.getInt("id"));
-                tasks.add(task);
-            }
-            rs.close();
-            return tasks;
+            return executeStatement(assigneeID, st);
         }
     }
 
@@ -325,29 +282,7 @@ public class TaskDAO {
                      "SELECT id, title, description, assignee_id, advisor_id, x, y, z, yaw, pitch, status, " +
                              "date_given, date_finished FROM TASKS WHERE advisor_id = ? AND status = 'FINISHED'")) {
 
-            st.setInt(1, advisorID);
-            ResultSet rs = st.executeQuery();
-            List<Task> tasks = new ArrayList<>();
-            while (rs.next()) {
-                Task task = new Task(
-                        rs.getString("title"),
-                        rs.getString("description"),
-                        rs.getInt("assignee_id"),
-                        rs.getInt("advisor_id"),
-                        rs.getDouble("x"),
-                        rs.getDouble("y"),
-                        rs.getDouble("z"),
-                        rs.getFloat("yaw"),
-                        rs.getFloat("pitch"),
-                        TaskStatus.valueOf(rs.getString("status")),
-                        rs.getDate("date_given"),
-                        rs.getDate("date_finished")
-                );
-                task.setId(rs.getInt("id"));
-                tasks.add(task);
-            }
-            rs.close();
-            return tasks;
+            return executeStatement(advisorID, st);
         }
     }
 
@@ -366,29 +301,7 @@ public class TaskDAO {
                      "SELECT id, title, description, assignee_id, advisor_id, x, y, z, yaw, pitch, status, " +
                              "date_given, date_finished FROM TASKS WHERE advisor_id = ? AND status != 'APPROVED'")) {
 
-            st.setInt(1, advisorID);
-            ResultSet rs = st.executeQuery();
-            List<Task> tasks = new ArrayList<>();
-            while (rs.next()) {
-                Task task = new Task(
-                        rs.getString("title"),
-                        rs.getString("description"),
-                        rs.getInt("assignee_id"),
-                        rs.getInt("advisor_id"),
-                        rs.getDouble("x"),
-                        rs.getDouble("y"),
-                        rs.getDouble("z"),
-                        rs.getFloat("yaw"),
-                        rs.getFloat("pitch"),
-                        TaskStatus.valueOf(rs.getString("status")),
-                        rs.getDate("date_given"),
-                        rs.getDate("date_finished")
-                );
-                task.setId(rs.getInt("id"));
-                tasks.add(task);
-            }
-            rs.close();
-            return tasks;
+            return executeStatement(advisorID, st);
         }
     }
 
@@ -476,5 +389,40 @@ public class TaskDAO {
             rs.close();
             return stats;
         }
+    }
+
+    /**
+     * Executes given statement with memberID parameter
+     *
+     * @param memberID ID of member which to set in the statement
+     * @param statement SQL statement to execute
+     * @return List of tasks collected by statement
+     * @throws SQLException if SQL error arise
+     */
+    @NotNull
+    private List<Task> executeStatement(int memberID, PreparedStatement statement) throws SQLException {
+        statement.setInt(1, memberID);
+        ResultSet rs = statement.executeQuery();
+        List<Task> tasks = new ArrayList<>();
+        while (rs.next()) {
+            Task task = new Task(
+                    rs.getString("title"),
+                    rs.getString("description"),
+                    rs.getInt("assignee_id"),
+                    rs.getInt("advisor_id"),
+                    rs.getDouble("x"),
+                    rs.getDouble("y"),
+                    rs.getDouble("z"),
+                    rs.getFloat("yaw"),
+                    rs.getFloat("pitch"),
+                    TaskStatus.valueOf(rs.getString("status")),
+                    rs.getDate("date_given"),
+                    rs.getDate("date_finished")
+            );
+            task.setId(rs.getInt("id"));
+            tasks.add(task);
+        }
+        rs.close();
+        return tasks;
     }
 }
