@@ -66,7 +66,7 @@ public final class TaskManager extends JavaPlugin {
         Objects.requireNonNull(this.getCommand("returntask")).setExecutor(new ReturnTask(taskDAO, playerDAO));
         Objects.requireNonNull(this.getCommand("settaskplace")).setExecutor(new SetTaskPlace(taskDAO, playerDAO));
         Objects.requireNonNull(this.getCommand("linkdiscord")).setExecutor(new LinkDiscord());
-        Objects.requireNonNull(this.getCommand("establish")).setExecutor(new Establish());
+        Objects.requireNonNull(this.getCommand("establish")).setExecutor(new Establish(taskDAO, playerDAO));
         Objects.requireNonNull(this.getCommand("taskinfo")).setExecutor(new TaskInfo(taskDAO, playerDAO));
         Objects.requireNonNull(this.getCommand("transfertask")).setExecutor(new TransferTask(taskDAO, playerDAO));
 

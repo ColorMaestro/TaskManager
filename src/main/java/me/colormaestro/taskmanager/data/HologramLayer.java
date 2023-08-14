@@ -2,14 +2,12 @@ package me.colormaestro.taskmanager.data;
 
 import eu.decentsoftware.holograms.api.DHAPI;
 import eu.decentsoftware.holograms.api.holograms.Hologram;
-import eu.decentsoftware.holograms.api.holograms.HologramLine;
 import me.colormaestro.taskmanager.enums.TaskStatus;
 import me.colormaestro.taskmanager.model.Task;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 
-import java.util.LinkedList;
 import java.util.List;
 
 public class HologramLayer {
