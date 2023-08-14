@@ -54,7 +54,7 @@ public class ItemStackBuilder {
         if (itemMeta == null) {
             return null;
         }
-        itemMeta.setDisplayName(ChatColor.BLUE + "" + ChatColor.BOLD + task.getTitle() + " " + ChatColor.GRAY + "#" + task.getId());
+        itemMeta.setDisplayName(ChatColor.BLUE + "" + ChatColor.BOLD + task.getTitle() + " " + ChatColor.DARK_GRAY + "#" + task.getId());
         itemMeta.setLore(buildTaskDescriptionLore(task.getDescription()));
         is.setItemMeta(itemMeta);
         return is;
