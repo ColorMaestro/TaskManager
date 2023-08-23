@@ -6,7 +6,7 @@
 
     <groupId>me.ColorMaestro</groupId>
     <artifactId>TaskManager</artifactId>
-    <version>1.4</version>
+    <version>1.5</version>
     <packaging>jar</packaging>
 
     <name>TaskManager</name>
@@ -66,6 +66,10 @@
             <name>m2-dv8tion</name>
             <url>https://m2.dv8tion.net/releases</url>
         </repository>
+        <repository>
+            <id>jitpack.io</id>
+            <url>https://jitpack.io</url>
+        </repository>
     </repositories>
 
     <dependencies>
@@ -76,16 +80,15 @@
             <scope>provided</scope>
         </dependency>
         <dependency>
-            <groupId>com.sainttx.holograms</groupId>
-            <artifactId>holograms-api</artifactId>
-            <version>2.13</version>
-            <scope>system</scope>
-            <systemPath>${project.basedir}/lib/holograms-api-2.13.jar</systemPath>
-        </dependency>
-        <dependency>
             <groupId>net.dv8tion</groupId>
             <artifactId>JDA</artifactId>
             <version>4.3.0_277</version>
+        </dependency>
+        <dependency>
+            <groupId>com.github.decentsoftware-eu</groupId>
+            <artifactId>decentholograms</artifactId>
+            <version>2.8.3</version>
+            <scope>provided</scope>
         </dependency>
     </dependencies>
 </project>

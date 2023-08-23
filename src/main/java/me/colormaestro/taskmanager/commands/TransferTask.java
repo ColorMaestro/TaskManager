@@ -58,7 +58,7 @@ public class TransferTask implements CommandExecutor {
                 Bukkit.getScheduler().runTask(plugin,
                         () -> {
                             p.sendMessage(ChatColor.GREEN + "Task transferred.");
-                            if (Bukkit.getPluginManager().isPluginEnabled("Holograms")) {
+                            if (Bukkit.getPluginManager().isPluginEnabled("DecentHolograms")) {
                                 HologramLayer.getInstance().setTasks(oldAssigneeUUID, activeTasksOldAssignee);
                                 HologramLayer.getInstance().setTasks(newAssigneeUUID, activeTasksNewAssignee);
                             }
@@ -91,10 +91,16 @@ public class TransferTask implements CommandExecutor {
                                         oldAssigneeIGN, args[1], task,false);
                             }
                         });
-            } catch (SQLException | DataAccessException | NumberFormatException ex) {
+            } catch (SQLException ex) {
                 Bukkit.getScheduler().runTask(plugin,
                         () -> p.sendMessage(ChatColor.RED + ex.getMessage()));
                 ex.printStackTrace();
+            } catch (NumberFormatException ignored) {
+                Bukkit.getScheduler().runTask(plugin,
+                        () -> p.sendMessage(ChatColor.RED + "Tasks are marked with numerical values!"));
+            } catch (DataAccessException ignored) {
+                Bukkit.getScheduler().runTask(plugin,
+                        () -> p.sendMessage(ChatColor.RED + "Invalid task ID or new assignee!"));
             }
         });
         return true;

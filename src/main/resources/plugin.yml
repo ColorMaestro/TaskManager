@@ -3,13 +3,23 @@ version: ${project.version}
 main: me.colormaestro.taskmanager.TaskManager
 api-version: 1.18
 authors: [ColorMaestro]
-softdepend: [Holograms]
+softdepend: [DecentHolograms]
 commands:
+  addmember:
+    description: Adds new member to system.
+    usage: Usage /<command> [player]
+    permission: taskmanager.addmember
+    permission-message: You don't have permission to add member
+  dashboard:
+    description: Shows tasks dashboard.
+    usage: Usage /dashboard
+    permission: taskmanager.dashboard
+    permission-message: You don't have permission to view dashboard
   tasks:
     description: Shows your or other player tasks.
     usage: Usage /<command> [player] or /<command> help
     permission: taskmanager.tasks
-    permission-message: You don't have permission to viev tasks
+    permission-message: You don't have permission to view tasks
   addtask:
     description: Adds new task.
     usage: Usage /addtask <IGN> <description>

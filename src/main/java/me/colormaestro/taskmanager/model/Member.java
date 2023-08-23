@@ -1,15 +1,12 @@
 package me.colormaestro.taskmanager.model;
 
-/**
- * Represents player from database point of view, not Bukkit.
- */
-public class MyPlayer {
+public class Member {
     private Integer id;
     private final String uuid;
     private final String ign;
     private final long discordID;
 
-    public MyPlayer(String uuid, String ign, long discordID) {
+    public Member(String uuid, String ign, long discordID) {
         this.uuid = uuid;
         this.ign = ign;
         this.discordID = discordID;

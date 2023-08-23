@@ -1,7 +1,5 @@
 package me.colormaestro.taskmanager.data;
 
-import me.colormaestro.taskmanager.model.MyPlayer;
-
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.sql.Connection;
@@ -11,9 +9,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 
 public class PlayerDAO {
@@ -55,27 +51,13 @@ public class PlayerDAO {
         }
     }
 
-    public synchronized Map<Integer, MyPlayer> fetchAllPlayers() throws SQLException {
-        try (Connection connection = DriverManager.getConnection(url);
-             PreparedStatement st = connection.prepareStatement(
-                     "SELECT id, uuid, ign, discord_id FROM PLAYERS"
-             )) {
-            ResultSet rs = st.executeQuery();
-            Map<Integer, MyPlayer> players = new HashMap<>();
-            while (rs.next()) {
-                MyPlayer player = new MyPlayer(
-                        rs.getString("uuid"),
-                        rs.getString("ign"),
-                        rs.getLong("discord_id")
-                );
-                player.setId(rs.getInt("id"));
-                players.put(player.getId(), player);
-            }
-            rs.close();
-            return players;
-        }
-    }
-
+    /**
+     * Gets member ID according to given ign.
+     * @param ign according to which to seek
+     * @return ID of matched member
+     * @throws SQLException if SQL error arise
+     * @throws DataAccessException if there's no matching record for member
+     */
     public synchronized int getPlayerID(String ign) throws SQLException, DataAccessException {
         try (Connection connection = DriverManager.getConnection(url);
              PreparedStatement st = connection.prepareStatement(
@@ -84,7 +66,7 @@ public class PlayerDAO {
             st.setString(1, ign);
             ResultSet rs = st.executeQuery();
             if (rs.isClosed()) {
-                throw new DataAccessException("Player with name " + ign + " was not found in the database.");
+                throw new DataAccessException("Failed to get player's ID with name " + ign + ".");
             }
             int id = rs.getInt("id");
             rs.close();
@@ -92,6 +74,13 @@ public class PlayerDAO {
         }
     }
 
+    /**
+     * Gets member ID according to given uuid.
+     * @param uuid according to which to seek
+     * @return ID of matched member
+     * @throws SQLException if SQL error arise
+     * @throws DataAccessException if there's no matching record for member
+     */
     public synchronized int getPlayerID(UUID uuid) throws SQLException, DataAccessException {
         try (Connection connection = DriverManager.getConnection(url);
              PreparedStatement st = connection.prepareStatement(
@@ -100,7 +89,7 @@ public class PlayerDAO {
             st.setString(1, uuid.toString());
             ResultSet rs = st.executeQuery();
             if (rs.isClosed()) {
-                throw new DataAccessException("Your uuid was not found in the database. Contact developers!");
+                throw new DataAccessException("Failed to get player's id with uuid " + uuid + ".");
             }
             int id = rs.getInt("id");
             rs.close();
@@ -108,6 +97,13 @@ public class PlayerDAO {
         }
     }
 
+    /**
+     * Gets member ign according to his ID.
+     * @param id according to which to seek
+     * @return ign of player
+     * @throws SQLException if SQL error arise
+     * @throws DataAccessException if there's no matching record for member
+     */
     public synchronized String getPlayerIGN(int id) throws SQLException, DataAccessException {
         try (Connection connection = DriverManager.getConnection(url);
              PreparedStatement st = connection.prepareStatement(
@@ -116,7 +112,7 @@ public class PlayerDAO {
             st.setInt(1, id);
             ResultSet rs = st.executeQuery();
             if (rs.isClosed()) {
-                throw new DataAccessException("Failed to get player IGN according to UUID. Contact developers!");
+                throw new DataAccessException("Failed to get player's ign with id " + id + ".");
             }
             String ign = rs.getString("ign");
             rs.close();
@@ -124,6 +120,13 @@ public class PlayerDAO {
         }
     }
 
+    /**
+     * Gets member uuid according to his ID.
+     * @param id according to which to seek
+     * @return uuid of player
+     * @throws SQLException if SQL error arise
+     * @throws DataAccessException if there's no matching record for member
+     */
     public synchronized String getPlayerUUID(int id) throws SQLException, DataAccessException {
         try (Connection connection = DriverManager.getConnection(url);
              PreparedStatement st = connection.prepareStatement(
@@ -132,7 +135,7 @@ public class PlayerDAO {
             st.setInt(1, id);
             ResultSet rs = st.executeQuery();
             if (rs.isClosed()) {
-                throw new DataAccessException("Failed to get player UUID according to UUID. Contact developers!");
+                throw new DataAccessException("Failed to get player's uuid with id " + id + ".");
             }
             String ign = rs.getString("uuid");
             rs.close();
@@ -140,6 +143,11 @@ public class PlayerDAO {
         }
     }
 
+    /**
+     * Gets all member in game names
+     * @return list of all members' in game names
+     * @throws SQLException if SQL error arise
+     */
     public synchronized List<String> getAllIGN() throws SQLException {
         try (Connection connection = DriverManager.getConnection(url);
              PreparedStatement st = connection.prepareStatement(
@@ -154,6 +162,12 @@ public class PlayerDAO {
         }
     }
 
+    /**
+     * Checks whether there is record about player in DB.
+     * @param uuid according to which to seek
+     * @return true if there's matching record, false otherwise
+     * @throws SQLException if SQL error arise
+     */
     public synchronized boolean playerExists(String uuid) throws SQLException {
         try (Connection connection = DriverManager.getConnection(url);
              PreparedStatement st = connection.prepareStatement(
@@ -168,6 +182,12 @@ public class PlayerDAO {
         }
     }
 
+    /**
+     * Creates record about player.
+     * @param uuid player's uuid
+     * @param ign player's ign
+     * @throws SQLException if SQL error arise
+     */
     public synchronized void addPlayer(String uuid, String ign) throws SQLException {
         try (Connection connection = DriverManager.getConnection(url);
              PreparedStatement st = connection.prepareStatement(
@@ -178,6 +198,13 @@ public class PlayerDAO {
         }
     }
 
+    /**
+     * Gets members discord ID
+     * @param uuid according to which to seek
+     * @return discord ID of member
+     * @throws SQLException if SQL error arise
+     * @throws DataAccessException if there's no matching record for member
+     */
     public synchronized long getDiscordUserID(String uuid) throws SQLException, DataAccessException {
         try (Connection connection = DriverManager.getConnection(url);
              PreparedStatement st = connection.prepareStatement(
@@ -186,7 +213,7 @@ public class PlayerDAO {
             st.setString(1, uuid);
             ResultSet rs = st.executeQuery();
             if (rs.isClosed()) {
-                throw new DataAccessException("Player with uuid " + uuid + " was not found in the database.");
+                throw new DataAccessException("Failed to get discord ID for player with uuid " + uuid + ".");
             }
             long id = rs.getLong("discord_id");
             rs.close();
@@ -194,6 +221,13 @@ public class PlayerDAO {
         }
     }
 
+    /**
+     * Sets member's discord ID.
+     * @param uuid player's uuid
+     * @param discordID ID of player's discord account
+     * @throws SQLException if SQL error arise
+     * @throws DataAccessException if there's no matching record for member
+     */
     public synchronized void setDiscordUserID(UUID uuid, long discordID) throws SQLException, DataAccessException {
         try (Connection connection = DriverManager.getConnection(url);
              PreparedStatement st = connection.prepareStatement(
@@ -202,7 +236,7 @@ public class PlayerDAO {
             st.setString(2, uuid.toString());
             int affected = st.executeUpdate();
             if (affected == 0) {
-                throw new DataAccessException("Your uuid was not found in the database. Contact developers!");
+                throw new DataAccessException("No discord ID change for player with uuid " + uuid + ".");
             }
         }
     }
