@@ -48,6 +48,7 @@ public final class TaskManager extends JavaPlugin {
         AddTaskTabCompleter addTaskTabCompleter = new AddTaskTabCompleter(playerDAO);
         Objects.requireNonNull(this.getCommand("tasks")).setTabCompleter(tasksTabCompleter);
         Objects.requireNonNull(this.getCommand("addtask")).setTabCompleter(addTaskTabCompleter);
+        Objects.requireNonNull(this.getCommand("dashboard")).setTabCompleter(addTaskTabCompleter);
 
         getServer().getPluginManager().registerEvents(new PlayerJoinListener(this, taskDAO, playerDAO), this);
         getServer().getPluginManager().registerEvents(new BookEditListener(this, taskDAO, playerDAO), this);
@@ -57,7 +58,7 @@ public final class TaskManager extends JavaPlugin {
         getServer().getPluginManager().registerEvents(new ApprovedTasksViewListener(this, taskDAO, playerDAO), this);
 
         Objects.requireNonNull(this.getCommand("addmember")).setExecutor(new AddMember(this, playerDAO, tasksTabCompleter, addTaskTabCompleter));
-        Objects.requireNonNull(this.getCommand("dashboard")).setExecutor(new Dashboard(this, taskDAO));
+        Objects.requireNonNull(this.getCommand("dashboard")).setExecutor(new Dashboard(this, taskDAO, playerDAO));
         Objects.requireNonNull(this.getCommand("tasks")).setExecutor(new Tasks(this, taskDAO, playerDAO));
         Objects.requireNonNull(this.getCommand("addtask")).setExecutor(new AddTask(this, taskDAO));
         Objects.requireNonNull(this.getCommand("finishtask")).setExecutor(new FinishTask(taskDAO, playerDAO));

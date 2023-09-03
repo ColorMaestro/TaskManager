@@ -1,5 +1,6 @@
 package me.colormaestro.taskmanager.commands;
 
+import me.colormaestro.taskmanager.data.PlayerDAO;
 import me.colormaestro.taskmanager.data.TaskDAO;
 import me.colormaestro.taskmanager.listeners.SharedRunnables;
 import org.bukkit.Bukkit;
@@ -14,10 +15,12 @@ import org.jetbrains.annotations.NotNull;
 public class Dashboard implements CommandExecutor {
     private final Plugin plugin;
     private final TaskDAO taskDAO;
+    private final PlayerDAO playerDAO;
 
-    public Dashboard(Plugin plugin, TaskDAO taskDAO) {
+    public Dashboard(Plugin plugin, TaskDAO taskDAO, PlayerDAO playerDAO) {
         this.plugin = plugin;
         this.taskDAO = taskDAO;
+        this.playerDAO = playerDAO;
     }
 
     @Override
@@ -25,6 +28,11 @@ public class Dashboard implements CommandExecutor {
 
         if (!(sender instanceof Player player)) {
             sender.sendMessage(ChatColor.RED + "This command can't be run from console.");
+            return true;
+        }
+
+        if (args.length > 0) {
+            Bukkit.getScheduler().runTaskAsynchronously(plugin, SharedRunnables.showActiveTasksView(plugin, taskDAO, playerDAO, player, args[0], 1));
             return true;
         }
 
