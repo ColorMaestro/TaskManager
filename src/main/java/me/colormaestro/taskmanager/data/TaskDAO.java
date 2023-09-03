@@ -244,7 +244,8 @@ public class TaskDAO {
         try (Connection connection = DriverManager.getConnection(url);
              PreparedStatement st = connection.prepareStatement(
                      "SELECT id, title, description, assignee_id, advisor_id, x, y, z, yaw, pitch, status, " +
-                             "date_given, date_finished FROM TASKS WHERE assignee_id = ? AND status != 'APPROVED'")) {
+                             "date_given, date_finished FROM TASKS WHERE assignee_id = ? AND status != 'APPROVED' " +
+                             "order by id desc")) {
 
             return executeStatement(assigneeID, st);
         }
@@ -262,7 +263,8 @@ public class TaskDAO {
         try (Connection connection = DriverManager.getConnection(url);
              PreparedStatement st = connection.prepareStatement(
                      "SELECT id, title, description, assignee_id, advisor_id, x, y, z, yaw, pitch, status, " +
-                             "date_given, date_finished FROM TASKS WHERE assignee_id = ? AND status == 'APPROVED'")) {
+                             "date_given, date_finished FROM TASKS WHERE assignee_id = ? AND status == 'APPROVED' " +
+                             "order by id desc")) {
 
             return executeStatement(assigneeID, st);
         }
