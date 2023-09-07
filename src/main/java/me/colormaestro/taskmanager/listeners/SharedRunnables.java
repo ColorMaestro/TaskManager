@@ -6,22 +6,20 @@ import me.colormaestro.taskmanager.data.TaskDAO;
 import me.colormaestro.taskmanager.model.MemberTaskStats;
 import me.colormaestro.taskmanager.model.Task;
 import me.colormaestro.taskmanager.utils.Directives;
+import me.colormaestro.taskmanager.utils.InventoryBuilder;
 import me.colormaestro.taskmanager.utils.ItemStackCreator;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.entity.HumanEntity;
-import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.plugin.Plugin;
 
 import java.sql.SQLException;
 import java.util.List;
 
 public class SharedRunnables {
-    private static final int INVENTORY_SIZE = 54;
     private static final int PAGE_SIZE = 45;
     private static final int LAST_ROW_MIDDLE = 49;
     private static final int LAST_ROW_LEFT_FROM_MIDDLE = 48;
@@ -33,30 +31,24 @@ public class SharedRunnables {
                 int totalPages = stats.size() / PAGE_SIZE + 1;
                 // Variable used in lambda should be final or effectively final
                 List<MemberTaskStats> finalStats = stats.stream().skip((page - 1) * PAGE_SIZE).limit(PAGE_SIZE).toList();
-                Bukkit.getScheduler().runTask(plugin,
-                        () -> {
-                            String inventoryTitle = ChatColor.BLUE + "" + ChatColor.BOLD + "Tasks Dashboard" + ChatColor.RESET + " (" + page + "/" + totalPages + ") " + Directives.DASHBOARD;
-                            Inventory inventory = Bukkit.createInventory(player, INVENTORY_SIZE, inventoryTitle);
+                Bukkit.getScheduler().runTask(plugin, () -> {
+                    String inventoryTitle = ChatColor.BLUE + "" + ChatColor.BOLD + "Tasks Dashboard" + ChatColor.RESET + " (" + page + "/" + totalPages + ") " + Directives.DASHBOARD;
+                    InventoryBuilder builder = new InventoryBuilder(player, inventoryTitle);
 
-                            ItemStack stack;
-                            int position = 0;
-                            for (MemberTaskStats memberStats : finalStats) {
-                                stack = ItemStackCreator.createMemberStack(memberStats.uuid(), memberStats.ign(), memberStats.doing(), memberStats.finished(), memberStats.approved());
-                                inventory.setItem(position, stack);
-                                position++;
-                            }
+                    ItemStack stack;
+                    int position = 0;
+                    for (MemberTaskStats memberStats : finalStats) {
+                        stack = ItemStackCreator.createMemberStack(memberStats.uuid(), memberStats.ign(), memberStats.doing(), memberStats.finished(), memberStats.approved());
+                        builder.addItemStack(position, stack);
+                        position++;
+                    }
 
-                            ItemStackCreator.supplyInventoryWithPaginationArrows(inventory);
+                    builder.addPaginationArrows()
+                            .addItemStack(LAST_ROW_MIDDLE, Material.ENDER_EYE,
+                                    ChatColor.DARK_PURPLE + "Show supervised tasks");
 
-                            stack = new ItemStack(Material.ENDER_EYE, 1);
-                            ItemMeta meta = stack.getItemMeta();
-                            assert meta != null;
-                            meta.setDisplayName(ChatColor.DARK_PURPLE + "Show supervised tasks");
-                            stack.setItemMeta(meta);
-                            inventory.setItem(LAST_ROW_MIDDLE, stack);
-
-                            player.openInventory(inventory);
-                        });
+                    player.openInventory(builder.build());
+                });
             } catch (SQLException ex) {
                 Bukkit.getScheduler().runTask(plugin,
                         () -> player.sendMessage(ChatColor.RED + ex.getMessage()));
@@ -72,37 +64,26 @@ public class SharedRunnables {
                 List<Task> tasks = taskDAO.fetchPlayersActiveTasks(id);
                 int totalPages = tasks.size() / PAGE_SIZE + 1;
                 List<Task> finalTasks = tasks.stream().skip((page - 1) * PAGE_SIZE).limit(PAGE_SIZE).toList();
-                Bukkit.getScheduler().runTask(plugin,
-                        () -> {
-                            String title = ChatColor.BLUE + "" + ChatColor.BOLD + ign + "'s tasks" + ChatColor.RESET + " (" + page + "/" + totalPages + ") " + Directives.ACTIVE_TASKS;
-                            Inventory inventory = Bukkit.createInventory(player, INVENTORY_SIZE, title);
+                Bukkit.getScheduler().runTask(plugin, () -> {
+                    String title = ChatColor.BLUE + "" + ChatColor.BOLD + ign + "'s tasks" + ChatColor.RESET + " (" + page + "/" + totalPages + ") " + Directives.ACTIVE_TASKS;
+                    InventoryBuilder builder = new InventoryBuilder(player, title);
 
-                            ItemStack stack;
-                            int position = 0;
-                            for (Task task : finalTasks) {
-                                stack = ItemStackCreator.createTaskStack(task);
-                                inventory.setItem(position, stack);
-                                position++;
-                            }
+                    ItemStack stack;
+                    int position = 0;
+                    for (Task task : finalTasks) {
+                        stack = ItemStackCreator.createTaskStack(task);
+                        builder.addItemStack(position, stack);
+                        position++;
+                    }
 
-                            ItemStackCreator.supplyInventoryWithPaginationArrows(inventory);
+                    builder.addPaginationArrows()
+                            .addItemStack(LAST_ROW_MIDDLE, Material.LIGHT_BLUE_CONCRETE,
+                                    ChatColor.AQUA + "Show " + ign + "'s approved tasks")
+                            .addItemStack(LAST_ROW_LEFT_FROM_MIDDLE, Material.SPECTRAL_ARROW,
+                                    ChatColor.AQUA + "Back to dashboard");
 
-                            stack = new ItemStack(Material.LIGHT_BLUE_CONCRETE, 1);
-                            ItemMeta meta = stack.getItemMeta();
-                            assert meta != null;
-                            meta.setDisplayName(ChatColor.AQUA + "Show " + ign + "'s approved tasks");
-                            stack.setItemMeta(meta);
-                            inventory.setItem(LAST_ROW_MIDDLE, stack);
-
-                            stack = new ItemStack(Material.SPECTRAL_ARROW, 1);
-                            meta = stack.getItemMeta();
-                            assert meta != null;
-                            meta.setDisplayName(ChatColor.AQUA + "Back to dashboard");
-                            stack.setItemMeta(meta);
-                            inventory.setItem(LAST_ROW_LEFT_FROM_MIDDLE, stack);
-
-                            player.openInventory(inventory);
-                        });
+                    player.openInventory(builder.build());
+                });
             } catch (SQLException | DataAccessException ex) {
                 Bukkit.getScheduler().runTask(plugin,
                         () -> player.sendMessage(ChatColor.RED + ex.getMessage()));
@@ -118,30 +99,24 @@ public class SharedRunnables {
                 List<Task> tasks = taskDAO.fetchPlayersApprovedTasks(id);
                 int totalPages = tasks.size() / PAGE_SIZE + 1;
                 List<Task> finalTasks = tasks.stream().skip((page - 1) * PAGE_SIZE).limit(PAGE_SIZE).toList();
-                Bukkit.getScheduler().runTask(plugin,
-                        () -> {
-                            String title = ChatColor.DARK_AQUA + "" + ChatColor.BOLD + ign + "'s approved tasks" + ChatColor.RESET + " (" + page + "/" + totalPages + ") " + Directives.APPROVED_TASKS;
-                            Inventory inventory = Bukkit.createInventory(player, INVENTORY_SIZE, title);
+                Bukkit.getScheduler().runTask(plugin, () -> {
+                    String title = ChatColor.DARK_AQUA + "" + ChatColor.BOLD + ign + "'s approved tasks" + ChatColor.RESET + " (" + page + "/" + totalPages + ") " + Directives.APPROVED_TASKS;
+                    InventoryBuilder builder = new InventoryBuilder(player, title);
 
-                            ItemStack stack;
-                            int position = 0;
-                            for (Task task : finalTasks) {
-                                stack = ItemStackCreator.createTaskStack(task);
-                                inventory.setItem(position, stack);
-                                position++;
-                            }
+                    ItemStack stack;
+                    int position = 0;
+                    for (Task task : finalTasks) {
+                        stack = ItemStackCreator.createTaskStack(task);
+                        builder.addItemStack(position, stack);
+                        position++;
+                    }
 
-                            ItemStackCreator.supplyInventoryWithPaginationArrows(inventory);
+                    builder.addPaginationArrows()
+                            .addItemStack(LAST_ROW_MIDDLE, Material.SPECTRAL_ARROW,
+                                    ChatColor.AQUA + "Back to active tasks");
 
-                            stack = new ItemStack(Material.SPECTRAL_ARROW, 1);
-                            ItemMeta meta = stack.getItemMeta();
-                            assert meta != null;
-                            meta.setDisplayName(ChatColor.AQUA + "Back to active tasks");
-                            stack.setItemMeta(meta);
-                            inventory.setItem(LAST_ROW_MIDDLE, stack);
-
-                            player.openInventory(inventory);
-                        });
+                    player.openInventory(builder.build());
+                });
             } catch (SQLException | DataAccessException ex) {
                 Bukkit.getScheduler().runTask(plugin,
                         () -> player.sendMessage(ChatColor.RED + ex.getMessage()));
@@ -157,30 +132,24 @@ public class SharedRunnables {
                 List<Task> tasks = taskDAO.fetchAdvisorActiveTasks(id);
                 int totalPages = tasks.size() / PAGE_SIZE + 1;
                 List<Task> finalTasks = tasks.stream().skip((page - 1) * PAGE_SIZE).limit(PAGE_SIZE).toList();
-                Bukkit.getScheduler().runTask(plugin,
-                        () -> {
-                            String title = ChatColor.DARK_PURPLE + "" + ChatColor.BOLD + "Your supervised tasks" + ChatColor.RESET + " (" + page + "/" + totalPages + ") " + Directives.SUPERVISED_TASKS;
-                            Inventory inventory = Bukkit.createInventory(player, INVENTORY_SIZE, title);
+                Bukkit.getScheduler().runTask(plugin, () -> {
+                    String title = ChatColor.DARK_PURPLE + "" + ChatColor.BOLD + "Your supervised tasks" + ChatColor.RESET + " (" + page + "/" + totalPages + ") " + Directives.SUPERVISED_TASKS;
+                    InventoryBuilder builder = new InventoryBuilder(player, title);
 
-                            ItemStack stack;
-                            int position = 0;
-                            for (Task task : finalTasks) {
-                                stack = ItemStackCreator.createTaskStack(task);
-                                inventory.setItem(position, stack);
-                                position++;
-                            }
+                    ItemStack stack;
+                    int position = 0;
+                    for (Task task : finalTasks) {
+                        stack = ItemStackCreator.createTaskStack(task);
+                        builder.addItemStack(position, stack);
+                        position++;
+                    }
 
-                            ItemStackCreator.supplyInventoryWithPaginationArrows(inventory);
+                    builder.addPaginationArrows()
+                            .addItemStack(LAST_ROW_MIDDLE, Material.SPECTRAL_ARROW,
+                                    ChatColor.AQUA + "Back to dashboard");
 
-                            stack = new ItemStack(Material.SPECTRAL_ARROW, 1);
-                            ItemMeta meta = stack.getItemMeta();
-                            assert meta != null;
-                            meta.setDisplayName(ChatColor.AQUA + "Back to dashboard");
-                            stack.setItemMeta(meta);
-                            inventory.setItem(LAST_ROW_MIDDLE, stack);
-
-                            player.openInventory(inventory);
-                        });
+                    player.openInventory(builder.build());
+                });
             } catch (SQLException | DataAccessException ex) {
                 Bukkit.getScheduler().runTask(plugin,
                         () -> player.sendMessage(ChatColor.RED + ex.getMessage()));
