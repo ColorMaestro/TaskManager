@@ -6,7 +6,7 @@ import me.colormaestro.taskmanager.data.TaskDAO;
 import me.colormaestro.taskmanager.model.MemberTaskStats;
 import me.colormaestro.taskmanager.model.Task;
 import me.colormaestro.taskmanager.utils.Directives;
-import me.colormaestro.taskmanager.utils.ItemStackBuilder;
+import me.colormaestro.taskmanager.utils.ItemStackCreator;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
@@ -41,12 +41,12 @@ public class SharedRunnables {
                             ItemStack stack;
                             int position = 0;
                             for (MemberTaskStats memberStats : finalStats) {
-                                stack = ItemStackBuilder.buildMemberStack(memberStats.uuid(), memberStats.ign(), memberStats.doing(), memberStats.finished(), memberStats.approved());
+                                stack = ItemStackCreator.createMemberStack(memberStats.uuid(), memberStats.ign(), memberStats.doing(), memberStats.finished(), memberStats.approved());
                                 inventory.setItem(position, stack);
                                 position++;
                             }
 
-                            ItemStackBuilder.supplyInventoryWithPaginationArrows(inventory);
+                            ItemStackCreator.supplyInventoryWithPaginationArrows(inventory);
 
                             stack = new ItemStack(Material.ENDER_EYE, 1);
                             ItemMeta meta = stack.getItemMeta();
@@ -80,12 +80,12 @@ public class SharedRunnables {
                             ItemStack stack;
                             int position = 0;
                             for (Task task : finalTasks) {
-                                stack = ItemStackBuilder.buildTaskStack(task);
+                                stack = ItemStackCreator.createTaskStack(task);
                                 inventory.setItem(position, stack);
                                 position++;
                             }
 
-                            ItemStackBuilder.supplyInventoryWithPaginationArrows(inventory);
+                            ItemStackCreator.supplyInventoryWithPaginationArrows(inventory);
 
                             stack = new ItemStack(Material.LIGHT_BLUE_CONCRETE, 1);
                             ItemMeta meta = stack.getItemMeta();
@@ -126,12 +126,12 @@ public class SharedRunnables {
                             ItemStack stack;
                             int position = 0;
                             for (Task task : finalTasks) {
-                                stack = ItemStackBuilder.buildTaskStack(task);
+                                stack = ItemStackCreator.createTaskStack(task);
                                 inventory.setItem(position, stack);
                                 position++;
                             }
 
-                            ItemStackBuilder.supplyInventoryWithPaginationArrows(inventory);
+                            ItemStackCreator.supplyInventoryWithPaginationArrows(inventory);
 
                             stack = new ItemStack(Material.SPECTRAL_ARROW, 1);
                             ItemMeta meta = stack.getItemMeta();
@@ -165,12 +165,12 @@ public class SharedRunnables {
                             ItemStack stack;
                             int position = 0;
                             for (Task task : finalTasks) {
-                                stack = ItemStackBuilder.buildTaskStack(task);
+                                stack = ItemStackCreator.createTaskStack(task);
                                 inventory.setItem(position, stack);
                                 position++;
                             }
 
-                            ItemStackBuilder.supplyInventoryWithPaginationArrows(inventory);
+                            ItemStackCreator.supplyInventoryWithPaginationArrows(inventory);
 
                             stack = new ItemStack(Material.SPECTRAL_ARROW, 1);
                             ItemMeta meta = stack.getItemMeta();

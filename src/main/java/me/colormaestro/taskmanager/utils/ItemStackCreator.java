@@ -14,12 +14,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-public class ItemStackBuilder {
+public class ItemStackCreator {
     private final static int LORE_WIDTH_LIMIT = 40;
     private static final int PREVIOUS_PAGE_POSITION = 45;
     private static final int NEXT_PAGE_POSITION = 53;
 
-    public static ItemStack buildMemberStack(String uuid, String ign, int doing, int finished, int approved) {
+    public static ItemStack createMemberStack(String uuid, String ign, int doing, int finished, int approved) {
         ItemStack is = new ItemStack(Material.PLAYER_HEAD, 1);
         SkullMeta skullMeta = (SkullMeta) is.getItemMeta();
         if (skullMeta == null) {
@@ -28,12 +28,12 @@ public class ItemStackBuilder {
         OfflinePlayer op = Bukkit.getOfflinePlayer(UUID.fromString(uuid));
         skullMeta.setOwningPlayer(op);
         skullMeta.setDisplayName(ChatColor.BLUE + "" + ChatColor.BOLD + ign);
-        skullMeta.setLore(buildHeadStatsLore(doing, finished, approved));
+        skullMeta.setLore(createHeadStatsLore(doing, finished, approved));
         is.setItemMeta(skullMeta);
         return is;
     }
 
-    private static List<String> buildHeadStatsLore(int doing, int finished, int approved) {
+    private static List<String> createHeadStatsLore(int doing, int finished, int approved) {
         List<String> result = new ArrayList<>();
 
         result.add(ChatColor.GRAY + "Opened: " + ChatColor.GOLD + doing);
@@ -43,7 +43,7 @@ public class ItemStackBuilder {
         return result;
     }
 
-    public static ItemStack buildTaskStack(Task task) {
+    public static ItemStack createTaskStack(Task task) {
         Material material = Material.ORANGE_CONCRETE;
         switch (task.getStatus()) {
             case FINISHED -> material = Material.LIME_CONCRETE;
@@ -55,12 +55,12 @@ public class ItemStackBuilder {
             return null;
         }
         itemMeta.setDisplayName(ChatColor.BLUE + "" + ChatColor.BOLD + task.getTitle() + " " + ChatColor.DARK_GRAY + "#" + task.getId());
-        itemMeta.setLore(buildTaskDescriptionLore(task.getDescription()));
+        itemMeta.setLore(createTaskDescriptionLore(task.getDescription()));
         is.setItemMeta(itemMeta);
         return is;
     }
 
-    private static List<String> buildTaskDescriptionLore(String input) {
+    private static List<String> createTaskDescriptionLore(String input) {
         List<String> result = new ArrayList<>();
 
         String[] words = input.split("\\s+");
