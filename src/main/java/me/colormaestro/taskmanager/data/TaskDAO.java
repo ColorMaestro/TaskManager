@@ -375,7 +375,7 @@ public class TaskDAO {
                                count(tasks.id) filter (where status = 'APPROVED') as "approved"
                              from players left join tasks on players.id = tasks.assignee_id
                              group by ign, uuid
-                             order by ign""")) {
+                             order by upper(ign)""")) {
             ResultSet rs = st.executeQuery();
             List<MemberTaskStats> stats = new ArrayList<>();
             while (rs.next()) {
