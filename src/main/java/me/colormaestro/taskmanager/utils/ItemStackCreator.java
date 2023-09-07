@@ -5,7 +5,6 @@ import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
-import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.SkullMeta;
@@ -16,8 +15,6 @@ import java.util.UUID;
 
 public class ItemStackCreator {
     private final static int LORE_WIDTH_LIMIT = 40;
-    private static final int PREVIOUS_PAGE_POSITION = 45;
-    private static final int NEXT_PAGE_POSITION = 53;
 
     public static ItemStack createMemberStack(String uuid, String ign, int doing, int finished, int approved) {
         ItemStack is = new ItemStack(Material.PLAYER_HEAD, 1);
@@ -95,21 +92,5 @@ public class ItemStackCreator {
         }
 
         return result;
-    }
-
-    public static void supplyInventoryWithPaginationArrows(Inventory inventory) {
-        ItemStack stack = new ItemStack(Material.ARROW, 1);
-        ItemMeta meta = stack.getItemMeta();
-        assert meta != null;
-        meta.setDisplayName("Previous page");
-        stack.setItemMeta(meta);
-        inventory.setItem(PREVIOUS_PAGE_POSITION, stack);
-
-        stack = new ItemStack(Material.ARROW, 1);
-        meta = stack.getItemMeta();
-        assert meta != null;
-        meta.setDisplayName("Next page");
-        stack.setItemMeta(meta);
-        inventory.setItem(NEXT_PAGE_POSITION, stack);
     }
 }
