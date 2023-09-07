@@ -1,7 +1,6 @@
 package me.colormaestro.taskmanager.utils;
 
 import me.colormaestro.taskmanager.enums.TaskStatus;
-import me.colormaestro.taskmanager.model.Task;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
@@ -81,7 +80,7 @@ public class ItemStackCreator {
 
         for (String word : words) {
             if (currentString.length() + word.length() + 1 <= LORE_WIDTH_LIMIT) {
-                if (currentString.length() > 0) {
+                if (!currentString.isEmpty()) {
                     currentString.append(" ");
                 }
                 currentString.append(word);
@@ -91,7 +90,7 @@ public class ItemStackCreator {
             }
         }
 
-        if (currentString.length() > 0) {
+        if (!currentString.isEmpty()) {
             result.add(ChatColor.GRAY + currentString.toString());
         }
 
