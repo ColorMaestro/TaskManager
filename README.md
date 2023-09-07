@@ -54,6 +54,7 @@ This is the list of all commands. It can be obtained also in game with `/tasks h
 - `/tasks help` - shows this help
 - `/addmember <IGN>` - adds player as member
 - `/dashboard` - shows tasks dashboard
+- `/dashboard <IGN>` - jumps directly in dashboard to active tasks of selected member
 - `/tasks given` - shows tasks, which you are advising
 - `/tasks stats` - shows task statistics
 - `/tasks [IGN]` - shows your or other player tasks

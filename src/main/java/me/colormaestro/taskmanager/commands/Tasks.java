@@ -33,9 +33,10 @@ public class Tasks implements CommandExecutor {
             {"/tasks help", "shows this help"},
             {"/addmember <IGN>", "adds player as member"},
             {"/dashboard", "shows tasks dashboard"},
+            {"/dashboard <IGN>", "jumps directly in dashboard to selected member tasks"},
             {"/tasks given", "shows tasks, which you are advising"},
             {"/tasks stats", "shows task statistics"},
-            {"/tasks [IGN]", "shows your or other player tasks"},
+            {"/tasks [IGN]", "shows your or other member's tasks"},
             {"/visittask <id>", "teleports to the task workplace"},
             {"/taskinfo <id>", "obtains info in book for related task"},
             {"/addtask <IGN>", "creates task assignment book with blank description"},
@@ -46,7 +47,7 @@ public class Tasks implements CommandExecutor {
             {"/transfertask <id> <IGN>", "changes the assignee of the task"},
             {"/settaskplace <id>", "sets spawning point for this task for more comfort :)"},
             {"/linkdiscord", "links discord account for notifications"},
-            {"/establish", "establishes the Hologram where is summary of players tasks"}
+            {"/establish", "establishes the Hologram where is summary of member's tasks"}
     };
 
     public Tasks(Plugin plugin, TaskDAO taskDAO, PlayerDAO playerDAO) {

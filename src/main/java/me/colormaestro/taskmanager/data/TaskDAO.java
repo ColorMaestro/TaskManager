@@ -292,9 +292,9 @@ public class TaskDAO {
     /**
      * Retrieves all active tasks (status {@link me.colormaestro.taskmanager.enums.TaskStatus#DOING} or
      * {@link me.colormaestro.taskmanager.enums.TaskStatus#FINISHED}) whose advisor is selected person.
-     * This help advisors to check which tasks are still active.
-     * param advisor id of advisor
+     * Also adds assignee's name to the task. This help advisors to check which tasks are still active.
      *
+     * @param advisorID id of advisor
      * @return Tasks which were given by this advisor and are not approved yet.
      * @throws SQLException if SQL error arise
      */
