@@ -1,5 +1,6 @@
 package me.colormaestro.taskmanager.utils;
 
+import me.colormaestro.taskmanager.enums.TaskStatus;
 import me.colormaestro.taskmanager.model.Task;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -43,9 +44,15 @@ public class ItemStackCreator {
         return result;
     }
 
-    public static ItemStack createTaskStack(Task task) {
+    public static ItemStack createTaskStack(
+            Integer taskId,
+            String title,
+            String description,
+            TaskStatus status,
+            String assigneeIgn
+    ) {
         Material material = Material.ORANGE_CONCRETE;
-        switch (task.getStatus()) {
+        switch (status) {
             case FINISHED -> material = Material.LIME_CONCRETE;
             case APPROVED -> material = Material.LIGHT_BLUE_CONCRETE;
         }
@@ -54,8 +61,14 @@ public class ItemStackCreator {
         if (itemMeta == null) {
             return null;
         }
-        itemMeta.setDisplayName(ChatColor.BLUE + "" + ChatColor.BOLD + task.getTitle() + " " + ChatColor.DARK_GRAY + "#" + task.getId());
-        itemMeta.setLore(createTaskDescriptionLore(task.getDescription()));
+        itemMeta.setDisplayName(ChatColor.BLUE + "" + ChatColor.BOLD + title + " " + ChatColor.DARK_GRAY + "#" + taskId);
+
+        List<String> taskDescriptionLore = createTaskDescriptionLore(description);
+        if (assigneeIgn != null) {
+            taskDescriptionLore.add(0, ChatColor.GRAY + "Assignee: " + ChatColor.GOLD + assigneeIgn);
+        }
+
+        itemMeta.setLore(taskDescriptionLore);
         is.setItemMeta(itemMeta);
         return is;
     }

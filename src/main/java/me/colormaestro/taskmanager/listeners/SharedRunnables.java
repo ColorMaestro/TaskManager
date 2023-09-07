@@ -3,6 +3,7 @@ package me.colormaestro.taskmanager.listeners;
 import me.colormaestro.taskmanager.data.DataAccessException;
 import me.colormaestro.taskmanager.data.PlayerDAO;
 import me.colormaestro.taskmanager.data.TaskDAO;
+import me.colormaestro.taskmanager.model.AdvisedTask;
 import me.colormaestro.taskmanager.model.MemberTaskStats;
 import me.colormaestro.taskmanager.model.Task;
 import me.colormaestro.taskmanager.utils.Directives;
@@ -71,7 +72,12 @@ public class SharedRunnables {
                     ItemStack stack;
                     int position = 0;
                     for (Task task : finalTasks) {
-                        stack = ItemStackCreator.createTaskStack(task);
+                        stack = ItemStackCreator.createTaskStack(
+                                task.getId(),
+                                task.getTitle(),
+                                task.getDescription(),
+                                task.getStatus(),
+                                null);
                         builder.addItemStack(position, stack);
                         position++;
                     }
@@ -106,7 +112,12 @@ public class SharedRunnables {
                     ItemStack stack;
                     int position = 0;
                     for (Task task : finalTasks) {
-                        stack = ItemStackCreator.createTaskStack(task);
+                        stack = ItemStackCreator.createTaskStack(
+                                task.getId(),
+                                task.getTitle(),
+                                task.getDescription(),
+                                task.getStatus(),
+                                null);
                         builder.addItemStack(position, stack);
                         position++;
                     }
@@ -129,17 +140,22 @@ public class SharedRunnables {
         return () -> {
             try {
                 int id = playerDAO.getPlayerID(player.getName());
-                List<Task> tasks = taskDAO.fetchAdvisorActiveTasks(id);
+                List<AdvisedTask> tasks = taskDAO.fetchAdvisorActiveTasks(id);
                 int totalPages = tasks.size() / PAGE_SIZE + 1;
-                List<Task> finalTasks = tasks.stream().skip((page - 1) * PAGE_SIZE).limit(PAGE_SIZE).toList();
+                List<AdvisedTask> finalTasks = tasks.stream().skip((page - 1) * PAGE_SIZE).limit(PAGE_SIZE).toList();
                 Bukkit.getScheduler().runTask(plugin, () -> {
                     String title = ChatColor.DARK_PURPLE + "" + ChatColor.BOLD + "Your supervised tasks" + ChatColor.RESET + " (" + page + "/" + totalPages + ") " + Directives.SUPERVISED_TASKS;
                     InventoryBuilder builder = new InventoryBuilder(player, title);
 
                     ItemStack stack;
                     int position = 0;
-                    for (Task task : finalTasks) {
-                        stack = ItemStackCreator.createTaskStack(task);
+                    for (AdvisedTask task : finalTasks) {
+                        stack = ItemStackCreator.createTaskStack(
+                                task.id(),
+                                task.title(),
+                                task.description(),
+                                task.status(),
+                                task.ign());
                         builder.addItemStack(position, stack);
                         position++;
                     }

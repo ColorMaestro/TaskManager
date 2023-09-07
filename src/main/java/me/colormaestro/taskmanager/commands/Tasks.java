@@ -3,6 +3,7 @@ package me.colormaestro.taskmanager.commands;
 import me.colormaestro.taskmanager.data.DataAccessException;
 import me.colormaestro.taskmanager.data.PlayerDAO;
 import me.colormaestro.taskmanager.data.TaskDAO;
+import me.colormaestro.taskmanager.model.AdvisedTask;
 import me.colormaestro.taskmanager.model.MemberTaskStats;
 import me.colormaestro.taskmanager.model.Task;
 import net.md_5.bungee.api.chat.ComponentBuilder;
@@ -69,7 +70,7 @@ public class Tasks implements CommandExecutor {
             Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
                 try {
                     int id = playerDAO.getPlayerID(uuid);
-                    List<Task> tasks = taskDAO.fetchAdvisorActiveTasks(id);
+                    List<AdvisedTask> tasks = taskDAO.fetchAdvisorActiveTasks(id);
                     Bukkit.getScheduler().runTask(plugin,
                             () -> sendAdvisorTasks(p, tasks));
                 } catch (SQLException | DataAccessException ex) {
@@ -144,23 +145,26 @@ public class Tasks implements CommandExecutor {
             return;
         }
         p.sendMessage(ChatColor.AQUA + "-=-=-=- " + name + "'s tasks -=-=-=-");
-        sendHelpItems(p, tasks);
+        for (Task task : tasks) {
+            switch (task.getStatus()) {
+                case DOING -> p.sendMessage(ChatColor.GOLD + "[" + task.getId() + "] " + ChatColor.WHITE + task.getTitle());
+                case FINISHED -> p.sendMessage(ChatColor.GREEN + "[" + task.getId() + "] " + ChatColor.WHITE + task.getTitle());
+            }
+        }
     }
 
-    private void sendAdvisorTasks(Player p, List<Task> tasks) {
+    private void sendAdvisorTasks(Player p, List<AdvisedTask> tasks) {
         if (tasks.isEmpty()) {
             p.sendMessage(ChatColor.GREEN + "No active supervised tasks");
             return;
         }
         p.sendMessage(ChatColor.LIGHT_PURPLE + "-=-=-=- " + p.getName() + "'s supervised tasks -=-=-=-");
-        sendHelpItems(p, tasks);
-    }
-
-    private void sendHelpItems(Player p, List<Task> tasks) {
-        for (Task task : tasks) {
-            switch (task.getStatus()) {
-                case DOING -> p.sendMessage(ChatColor.GOLD + "[" + task.getId() + "] " + ChatColor.WHITE + task.getTitle());
-                case FINISHED -> p.sendMessage(ChatColor.GREEN + "[" + task.getId() + "] " + ChatColor.WHITE + task.getTitle());
+        for (AdvisedTask task : tasks) {
+            switch (task.status()) {
+                case DOING -> p.sendMessage(ChatColor.GOLD + "[" + task.id() + "] " + ChatColor.WHITE + task.title() +
+                        ChatColor.ITALIC + " (" + task.ign() + ")");
+                case FINISHED -> p.sendMessage(ChatColor.GREEN + "[" + task.id() + "] " + ChatColor.WHITE + task.title() +
+                        ChatColor.ITALIC + " (" + task.ign() + ")");
             }
         }
     }

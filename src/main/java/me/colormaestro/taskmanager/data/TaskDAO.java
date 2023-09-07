@@ -1,6 +1,7 @@
 package me.colormaestro.taskmanager.data;
 
 import me.colormaestro.taskmanager.enums.TaskStatus;
+import me.colormaestro.taskmanager.model.AdvisedTask;
 import me.colormaestro.taskmanager.model.MemberTaskStats;
 import me.colormaestro.taskmanager.model.Task;
 import org.bukkit.Location;
@@ -297,13 +298,28 @@ public class TaskDAO {
      * @return Tasks which were given by this advisor and are not approved yet.
      * @throws SQLException if SQL error arise
      */
-    public synchronized List<Task> fetchAdvisorActiveTasks(int advisorID) throws SQLException {
+    public synchronized List<AdvisedTask> fetchAdvisorActiveTasks(int advisorID) throws SQLException {
         try (Connection connection = DriverManager.getConnection(url);
              PreparedStatement st = connection.prepareStatement(
-                     "SELECT id, title, description, assignee_id, advisor_id, x, y, z, yaw, pitch, status, " +
-                             "date_given, date_finished FROM TASKS WHERE advisor_id = ? AND status != 'APPROVED'")) {
+                     "SELECT tasks.id AS task_id, title, description, status, players.ign AS ign " +
+                             "FROM PLAYERS JOIN TASKS ON PLAYERS.id = TASKS.advisor_id " +
+                             "WHERE advisor_id = ? AND status != 'APPROVED'")) {
 
-            return executeStatement(advisorID, st);
+            st.setInt(1, advisorID);
+            ResultSet rs = st.executeQuery();
+            List<AdvisedTask> stats = new ArrayList<>();
+            while (rs.next()) {
+                AdvisedTask advisedTask = new AdvisedTask(
+                        rs.getInt("task_id"),
+                        rs.getString("title"),
+                        rs.getString("description"),
+                        TaskStatus.valueOf(rs.getString("status")),
+                        rs.getString("ign")
+                );
+                stats.add(advisedTask);
+            }
+            rs.close();
+            return stats;
         }
     }
 
