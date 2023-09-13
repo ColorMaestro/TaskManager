@@ -24,6 +24,7 @@ import me.colormaestro.taskmanager.listeners.DashboardViewListener;
 import me.colormaestro.taskmanager.listeners.ActiveTasksViewListener;
 import me.colormaestro.taskmanager.listeners.SupervisedTasksViewListener;
 import me.colormaestro.taskmanager.tabcompleters.AddTaskTabCompleter;
+import me.colormaestro.taskmanager.tabcompleters.ReloadableTabCompleter;
 import me.colormaestro.taskmanager.tabcompleters.TasksTabCompleter;
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.InvalidConfigurationException;
@@ -44,8 +45,8 @@ public final class TaskManager extends JavaPlugin {
     public void onEnable() {
         loadConfig();
         createDAOs();
-        TasksTabCompleter tasksTabCompleter = new TasksTabCompleter(playerDAO);
-        AddTaskTabCompleter addTaskTabCompleter = new AddTaskTabCompleter(playerDAO);
+        ReloadableTabCompleter tasksTabCompleter = new TasksTabCompleter(playerDAO);
+        ReloadableTabCompleter addTaskTabCompleter = new AddTaskTabCompleter(playerDAO);
         Objects.requireNonNull(this.getCommand("tasks")).setTabCompleter(tasksTabCompleter);
         Objects.requireNonNull(this.getCommand("addtask")).setTabCompleter(addTaskTabCompleter);
         Objects.requireNonNull(this.getCommand("dashboard")).setTabCompleter(addTaskTabCompleter);

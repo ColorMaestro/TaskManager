@@ -11,7 +11,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class AddTaskTabCompleter implements TabCompleter {
+public class AddTaskTabCompleter implements ReloadableTabCompleter {
     protected final PlayerDAO playerDAO;
     protected List<String> names;
 
