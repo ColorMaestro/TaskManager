@@ -5,7 +5,7 @@ import me.colormaestro.taskmanager.data.PlayerDAO;
 import java.sql.SQLException;
 import java.util.ArrayList;
 
-public class TasksTabCompleter extends AddTaskTabCompleter {
+public class TasksTabCompleter extends MembersTabCompleter {
 
     public TasksTabCompleter(PlayerDAO playerDAO) {
         super(playerDAO);

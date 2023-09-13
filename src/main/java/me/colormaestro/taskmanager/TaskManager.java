@@ -23,7 +23,7 @@ import me.colormaestro.taskmanager.listeners.PlayerJoinListener;
 import me.colormaestro.taskmanager.listeners.DashboardViewListener;
 import me.colormaestro.taskmanager.listeners.ActiveTasksViewListener;
 import me.colormaestro.taskmanager.listeners.SupervisedTasksViewListener;
-import me.colormaestro.taskmanager.tabcompleters.AddTaskTabCompleter;
+import me.colormaestro.taskmanager.tabcompleters.MembersTabCompleter;
 import me.colormaestro.taskmanager.tabcompleters.ReloadableTabCompleter;
 import me.colormaestro.taskmanager.tabcompleters.TasksTabCompleter;
 import org.bukkit.Bukkit;
@@ -46,10 +46,10 @@ public final class TaskManager extends JavaPlugin {
         loadConfig();
         createDAOs();
         ReloadableTabCompleter tasksTabCompleter = new TasksTabCompleter(playerDAO);
-        ReloadableTabCompleter addTaskTabCompleter = new AddTaskTabCompleter(playerDAO);
+        ReloadableTabCompleter membersTabCompleter = new MembersTabCompleter(playerDAO);
         Objects.requireNonNull(this.getCommand("tasks")).setTabCompleter(tasksTabCompleter);
-        Objects.requireNonNull(this.getCommand("addtask")).setTabCompleter(addTaskTabCompleter);
-        Objects.requireNonNull(this.getCommand("dashboard")).setTabCompleter(addTaskTabCompleter);
+        Objects.requireNonNull(this.getCommand("addtask")).setTabCompleter(membersTabCompleter);
+        Objects.requireNonNull(this.getCommand("dashboard")).setTabCompleter(membersTabCompleter);
 
         getServer().getPluginManager().registerEvents(new PlayerJoinListener(this, taskDAO, playerDAO), this);
         getServer().getPluginManager().registerEvents(new BookEditListener(this, taskDAO, playerDAO), this);
@@ -58,7 +58,7 @@ public final class TaskManager extends JavaPlugin {
         getServer().getPluginManager().registerEvents(new ActiveTasksViewListener(this, taskDAO, playerDAO), this);
         getServer().getPluginManager().registerEvents(new ApprovedTasksViewListener(this, taskDAO, playerDAO), this);
 
-        Objects.requireNonNull(this.getCommand("addmember")).setExecutor(new AddMember(this, playerDAO, tasksTabCompleter, addTaskTabCompleter));
+        Objects.requireNonNull(this.getCommand("addmember")).setExecutor(new AddMember(this, playerDAO, tasksTabCompleter, membersTabCompleter));
         Objects.requireNonNull(this.getCommand("dashboard")).setExecutor(new Dashboard(this, taskDAO, playerDAO));
         Objects.requireNonNull(this.getCommand("tasks")).setExecutor(new Tasks(this, taskDAO, playerDAO));
         Objects.requireNonNull(this.getCommand("addtask")).setExecutor(new AddTask(this, taskDAO));

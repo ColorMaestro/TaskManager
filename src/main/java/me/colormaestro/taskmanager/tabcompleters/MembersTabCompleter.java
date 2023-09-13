@@ -3,7 +3,6 @@ package me.colormaestro.taskmanager.tabcompleters;
 import me.colormaestro.taskmanager.data.PlayerDAO;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
-import org.bukkit.command.TabCompleter;
 import org.bukkit.entity.Player;
 
 import java.sql.SQLException;
@@ -11,11 +10,15 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class AddTaskTabCompleter implements ReloadableTabCompleter {
+public class MembersTabCompleter implements ReloadableTabCompleter {
     protected final PlayerDAO playerDAO;
     protected List<String> names;
 
-    public AddTaskTabCompleter(PlayerDAO playerDAO) {
+    /**
+     * Provides names of members as suggested command completion.
+     * @param playerDAO
+     */
+    public MembersTabCompleter(PlayerDAO playerDAO) {
         this.playerDAO = playerDAO;
         reload();
     }
