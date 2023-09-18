@@ -27,9 +27,11 @@ import me.colormaestro.taskmanager.tabcompleters.MembersTabCompleter;
 import me.colormaestro.taskmanager.tabcompleters.ReloadableTabCompleter;
 import me.colormaestro.taskmanager.tabcompleters.TasksTabCompleter;
 import org.bukkit.Bukkit;
+import org.bukkit.command.CommandExecutor;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.event.Listener;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.File;
@@ -51,26 +53,26 @@ public final class TaskManager extends JavaPlugin {
         Objects.requireNonNull(this.getCommand("addtask")).setTabCompleter(membersTabCompleter);
         Objects.requireNonNull(this.getCommand("dashboard")).setTabCompleter(membersTabCompleter);
 
-        getServer().getPluginManager().registerEvents(new PlayerJoinListener(this, taskDAO, playerDAO), this);
-        getServer().getPluginManager().registerEvents(new BookEditListener(this, taskDAO, playerDAO), this);
-        getServer().getPluginManager().registerEvents(new DashboardViewListener(this, taskDAO, playerDAO), this);
-        getServer().getPluginManager().registerEvents(new SupervisedTasksViewListener(this, taskDAO, playerDAO), this);
-        getServer().getPluginManager().registerEvents(new ActiveTasksViewListener(this, taskDAO, playerDAO), this);
-        getServer().getPluginManager().registerEvents(new ApprovedTasksViewListener(this, taskDAO, playerDAO), this);
+        registerEventListener(new PlayerJoinListener(this, taskDAO, playerDAO));
+        registerEventListener(new BookEditListener(this, taskDAO, playerDAO));
+        registerEventListener(new DashboardViewListener(this, taskDAO, playerDAO));
+        registerEventListener(new SupervisedTasksViewListener(this, taskDAO, playerDAO));
+        registerEventListener(new ActiveTasksViewListener(this, taskDAO, playerDAO));
+        registerEventListener(new ApprovedTasksViewListener(this, taskDAO, playerDAO));
 
-        Objects.requireNonNull(this.getCommand("addmember")).setExecutor(new AddMember(this, playerDAO, tasksTabCompleter, membersTabCompleter));
-        Objects.requireNonNull(this.getCommand("dashboard")).setExecutor(new Dashboard(this, taskDAO, playerDAO));
-        Objects.requireNonNull(this.getCommand("tasks")).setExecutor(new Tasks(this, taskDAO, playerDAO));
-        Objects.requireNonNull(this.getCommand("addtask")).setExecutor(new AddTask(this, taskDAO));
-        Objects.requireNonNull(this.getCommand("finishtask")).setExecutor(new FinishTask(taskDAO, playerDAO));
-        Objects.requireNonNull(this.getCommand("approvetask")).setExecutor(new ApproveTask(taskDAO, playerDAO));
-        Objects.requireNonNull(this.getCommand("visittask")).setExecutor(new VisitTask(taskDAO, playerDAO));
-        Objects.requireNonNull(this.getCommand("returntask")).setExecutor(new ReturnTask(taskDAO, playerDAO));
-        Objects.requireNonNull(this.getCommand("settaskplace")).setExecutor(new SetTaskPlace(taskDAO, playerDAO));
-        Objects.requireNonNull(this.getCommand("linkdiscord")).setExecutor(new LinkDiscord());
-        Objects.requireNonNull(this.getCommand("establish")).setExecutor(new Establish(taskDAO, playerDAO));
-        Objects.requireNonNull(this.getCommand("taskinfo")).setExecutor(new TaskInfo(taskDAO, playerDAO));
-        Objects.requireNonNull(this.getCommand("transfertask")).setExecutor(new TransferTask(taskDAO, playerDAO));
+        setCommandExecutor("addmember", new AddMember(this, playerDAO, tasksTabCompleter, membersTabCompleter));
+        setCommandExecutor("dashboard", new Dashboard(this, taskDAO, playerDAO));
+        setCommandExecutor("tasks", new Tasks(this, taskDAO, playerDAO));
+        setCommandExecutor("addtask", new AddTask(this, taskDAO));
+        setCommandExecutor("finishtask", new FinishTask(taskDAO, playerDAO));
+        setCommandExecutor("approvetask", new ApproveTask(taskDAO, playerDAO));
+        setCommandExecutor("visittask", new VisitTask(taskDAO, playerDAO));
+        setCommandExecutor("returntask", new ReturnTask(taskDAO, playerDAO));
+        setCommandExecutor("settaskplace", new SetTaskPlace(taskDAO, playerDAO));
+        setCommandExecutor("linkdiscord", new LinkDiscord());
+        setCommandExecutor("establish", new Establish(taskDAO, playerDAO));
+        setCommandExecutor("taskinfo", new TaskInfo(taskDAO, playerDAO));
+        setCommandExecutor("transfertask", new TransferTask(taskDAO, playerDAO));
 
         if (Bukkit.getPluginManager().isPluginEnabled("DecentHolograms")) {
             HologramLayer.instantiate();
@@ -104,5 +106,13 @@ public final class TaskManager extends JavaPlugin {
     private void createDAOs() {
         playerDAO = new PlayerDAO(getDataFolder().getAbsolutePath());
         taskDAO = new TaskDAO(getDataFolder().getAbsolutePath());
+    }
+
+    private void registerEventListener(Listener listener) {
+        getServer().getPluginManager().registerEvents(listener, this);
+    }
+
+    private void setCommandExecutor(String command, CommandExecutor executor) {
+        Objects.requireNonNull(this.getCommand(command)).setExecutor(executor);
     }
 }
