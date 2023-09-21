@@ -16,6 +16,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.sql.Types;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -51,14 +52,14 @@ public class TaskDAO {
                     "id INTEGER PRIMARY KEY," +
                     "title VARCHAR(40) NOT NULL," +
                     "description VARCHAR(200) NOT NULL," +
-                    "assignee_id INT NOT NULL," +
-                    "advisor_id INT NOT NULL," +
-                    "x DOUBLE," +
-                    "y DOUBLE," +
-                    "z DOUBLE," +
-                    "yaw DOUBLE," +
-                    "pitch DOUBLE," +
-                    "status VARCHAR(10)," +
+                    "assignee_id INT," +
+                    "advisor_id INT," +
+                    "x DOUBLE NOT NULL," +
+                    "y DOUBLE NOT NULL," +
+                    "z DOUBLE NOT NULL," +
+                    "yaw DOUBLE NOT NULL," +
+                    "pitch DOUBLE NOT NULL," +
+                    "status VARCHAR(10) NOT NULL," +
                     "date_given DATE," +
                     "date_finished DATE," +
                     "FOREIGN KEY (assignee_id) REFERENCES PLAYERS (id)," +
@@ -85,8 +86,8 @@ public class TaskDAO {
                              "status, date_given, date_finished) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)")) {
             st.setString(1, task.getTitle());
             st.setString(2, task.getDescription());
-            st.setInt(3, task.getAssigneeID());
-            st.setInt(4, task.getAdvisorID());
+            setIntOrNull(st, 3, task.getAssigneeID());
+            setIntOrNull(st, 4, task.getAdvisorID());
             st.setDouble(5, task.getX());
             st.setDouble(6, task.getY());
             st.setDouble(7, task.getZ());
@@ -215,8 +216,8 @@ public class TaskDAO {
             Task task = new Task(
                     rs.getString("title"),
                     rs.getString("description"),
-                    rs.getInt("assignee_id"),
-                    rs.getInt("advisor_id"),
+                    getIntOrNull(rs, "assignee_id"),
+                    getIntOrNull(rs, "advisor_id"),
                     rs.getDouble("x"),
                     rs.getDouble("y"),
                     rs.getDouble("z"),
@@ -248,7 +249,7 @@ public class TaskDAO {
                              "date_given, date_finished FROM TASKS WHERE assignee_id = ? AND status != 'APPROVED' " +
                              "order by id desc")) {
 
-            return executeStatement(assigneeID, st);
+            return executeStatementWithMemberId(st, assigneeID);
         }
     }
 
@@ -267,7 +268,7 @@ public class TaskDAO {
                              "date_given, date_finished FROM TASKS WHERE assignee_id = ? AND status == 'APPROVED' " +
                              "order by id desc")) {
 
-            return executeStatement(assigneeID, st);
+            return executeStatementWithMemberId(st, assigneeID);
         }
     }
 
@@ -285,7 +286,23 @@ public class TaskDAO {
                      "SELECT id, title, description, assignee_id, advisor_id, x, y, z, yaw, pitch, status, " +
                              "date_given, date_finished FROM TASKS WHERE advisor_id = ? AND status = 'FINISHED'")) {
 
-            return executeStatement(advisorID, st);
+            return executeStatementWithMemberId(st, advisorID);
+        }
+    }
+
+    /**
+     * Retrieves all prepared tasks.
+     *
+     * @return prepared tasks
+     * @throws SQLException if SQL error arise
+     */
+    public synchronized List<Task> fetchPreparedTasks() throws SQLException {
+        try (Connection connection = DriverManager.getConnection(url);
+             PreparedStatement st = connection.prepareStatement(
+                     "SELECT id, title, description, assignee_id, advisor_id, x, y, z, yaw, pitch, status, " +
+                             "date_given, date_finished FROM TASKS WHERE status = 'PREPARED'")) {
+
+            return executeStatement(st);
         }
     }
 
@@ -410,7 +427,7 @@ public class TaskDAO {
     }
 
     /**
-     * Executes given statement with memberID parameter
+     * Executes given statement with one binding of member ID
      *
      * @param memberID ID of member which to set in the statement
      * @param statement SQL statement to execute
@@ -418,8 +435,20 @@ public class TaskDAO {
      * @throws SQLException if SQL error arise
      */
     @NotNull
-    private List<Task> executeStatement(int memberID, PreparedStatement statement) throws SQLException {
+    private List<Task> executeStatementWithMemberId(PreparedStatement statement, int memberID) throws SQLException {
         statement.setInt(1, memberID);
+        return executeStatement(statement);
+    }
+
+    /**
+     * Executes given statement, all bindings must be priorly resolved!
+     *
+     * @param statement SQL statement to execute
+     * @return List of tasks collected by statement
+     * @throws SQLException if SQL error arise
+     */
+    @NotNull
+    private List<Task> executeStatement(PreparedStatement statement) throws SQLException {
         ResultSet rs = statement.executeQuery();
         List<Task> tasks = new ArrayList<>();
         while (rs.next()) {
@@ -442,5 +471,37 @@ public class TaskDAO {
         }
         rs.close();
         return tasks;
+    }
+
+    /**
+     * Sets integer or null value at given index for prepared statement
+     *
+     * @param statement in which to set value
+     * @param index numbered from 1
+     * @param value to set
+     */
+    private void setIntOrNull(PreparedStatement statement, int index, Integer value) throws SQLException {
+        if (value != null) {
+            statement.setInt(index, value);
+        } else {
+            statement.setNull(index, Types.INTEGER);
+        }
+    }
+
+    /**
+     * Gets integer value or null for given column
+     *
+     * @param resultSet describing returned records from query
+     * @param columnName column from which to extract value
+     * @return Integer instance
+     * @throws SQLException if SQL error arise
+     */
+    private Integer getIntOrNull(ResultSet resultSet, String columnName) throws SQLException {
+        int value = resultSet.getInt(columnName);
+        if (resultSet.wasNull()) {
+            return null;
+        } else {
+            return value;
+        }
     }
 }

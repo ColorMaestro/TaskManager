@@ -3,23 +3,17 @@ package me.colormaestro.taskmanager.commands;
 import me.colormaestro.taskmanager.data.DataAccessException;
 import me.colormaestro.taskmanager.data.TaskDAO;
 import me.colormaestro.taskmanager.model.Task;
-import me.colormaestro.taskmanager.utils.Directives;
-import net.md_5.bungee.api.chat.BaseComponent;
-import net.md_5.bungee.api.chat.ComponentBuilder;
+import me.colormaestro.taskmanager.utils.ItemStackCreator;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
-import org.bukkit.Material;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.BookMeta;
 import org.bukkit.plugin.Plugin;
 
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Arrays;
 
 
 public class AddTask implements CommandExecutor {
@@ -47,7 +41,7 @@ public class AddTask implements CommandExecutor {
         Player p = (Player) sender;
         String ign = args[0];
         if (args.length == 1) {  // Empty description
-            ItemStack book = buildBook(ign, "");
+            ItemStack book = ItemStackCreator.createAssignmentBook(ign, "");
             p.getInventory().addItem(book);
         } else {  // Description taken from selected task
             String sid = args[1];
@@ -57,7 +51,7 @@ public class AddTask implements CommandExecutor {
                     Task task = taskDAO.findTask(id);
                     Bukkit.getScheduler().runTask(plugin,
                             () -> {
-                                ItemStack book = buildBook(ign, task.getDescription());
+                                ItemStack book = ItemStackCreator.createAssignmentBook(ign, task.getDescription());
                                 p.getInventory().addItem(book);
                             });
                 } catch (SQLException | DataAccessException | NumberFormatException ex) {
@@ -68,31 +62,5 @@ public class AddTask implements CommandExecutor {
             });
         }
         return true;
-    }
-
-    private ItemStack buildBook(String ign, String description) {
-        ItemStack book = new ItemStack(Material.WRITABLE_BOOK);
-        BookMeta bookMeta = (BookMeta) book.getItemMeta();
-
-        BaseComponent[] page = new ComponentBuilder("Instructions:")
-                .color(net.md_5.bungee.api.ChatColor.BLUE).bold(true)
-                // new line must be in this block, otherwise color continues, seems like a bug in spigot
-                .append("""
-
-                        1) Only the second page of this book serves as task description for player what to do in this task.
-                        """)
-                .color(net.md_5.bungee.api.ChatColor.RESET).bold(false)
-                .append("2) Book title serves as headline for the task - this will be displayed at the hologram.\n")
-                .append("3) Tasks is created immediately after you sign the book.\n")
-                .create();
-
-        BaseComponent[] page2 = new ComponentBuilder(description).create();
-
-        bookMeta.spigot().addPage(page);
-        bookMeta.spigot().addPage(page2);
-        bookMeta.setDisplayName(ChatColor.GOLD + "Assignment book for " + ign);
-        bookMeta.setLore(new ArrayList<>(Arrays.asList(Directives.CREATE_TASK, ign)));
-        book.setItemMeta(bookMeta);
-        return book;
     }
 }

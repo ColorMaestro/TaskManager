@@ -25,6 +25,16 @@ commands:
     usage: Usage /addtask <IGN> <description>
     permission: taskmanager.addtask
     permission-message: You don't have permission to add task
+  preparetask:
+    description: Prepares new task.
+    usage: Usage /preparetask
+    permission: taskmanager.preparetask
+    permission-message: You don't have permission to prepare task
+  assigntask:
+    description: Assigns prepared task.
+    usage: Usage /assigntask <IGN> <id>
+    permission: taskmanager.assigntask
+    permission-message: You don't have permission to assigntask task
   finishtask:
     description: Mark task as finished.
     usage: Usage /finishtask <id>

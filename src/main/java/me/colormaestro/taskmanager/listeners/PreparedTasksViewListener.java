@@ -4,7 +4,6 @@ import me.colormaestro.taskmanager.data.PlayerDAO;
 import me.colormaestro.taskmanager.data.TaskDAO;
 import me.colormaestro.taskmanager.utils.Directives;
 import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -13,12 +12,12 @@ import org.bukkit.inventory.InventoryView;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.Plugin;
 
-public class DashboardViewListener implements Listener {
+public class PreparedTasksViewListener implements Listener {
     private final Plugin plugin;
     private final TaskDAO taskDAO;
     private final PlayerDAO playerDAO;
 
-    public DashboardViewListener(Plugin plugin, TaskDAO taskDAO, PlayerDAO playerDAO) {
+    public PreparedTasksViewListener(Plugin plugin, TaskDAO taskDAO, PlayerDAO playerDAO) {
         this.plugin = plugin;
         this.taskDAO = taskDAO;
         this.playerDAO = playerDAO;
@@ -26,7 +25,7 @@ public class DashboardViewListener implements Listener {
 
     @EventHandler
     public void onMenuClick(InventoryClickEvent event) {
-        if (event.getView().getTitle().contains(Directives.DASHBOARD)) {
+        if (event.getView().getTitle().contains(Directives.PREPARED_TASKS)) {
             event.setCancelled(true);
 
             if (event.getCurrentItem() == null) {
@@ -35,23 +34,22 @@ public class DashboardViewListener implements Listener {
 
             HumanEntity player = event.getView().getPlayer();
             switch (event.getCurrentItem().getType()) {
-                case PLAYER_HEAD -> handlePlayerHeadClick(player, event.getCurrentItem());
-                case ENDER_EYE -> handleEyeClick(player);
+                case LIGHT_GRAY_CONCRETE -> handleConcreteClick(player, event.getCurrentItem());
+                case SPECTRAL_ARROW -> handleSpectralArrowClick(player);
                 case ARROW -> handleArrowClick(player, event.getView(), event.getCurrentItem());
-                case LIGHT_GRAY_CONCRETE -> handleConcreteClick(player);
             }
         }
     }
 
-    private void handlePlayerHeadClick(HumanEntity player, ItemStack headStack) {
-        String ign = headStack.getItemMeta().getDisplayName().replaceFirst(ChatColor.BLUE + "" + ChatColor.BOLD, "");
+    private void handleConcreteClick(HumanEntity player, ItemStack headStack) {
+        String taskId = headStack.getItemMeta().getDisplayName().split("#")[1];
         Bukkit.getScheduler().runTaskAsynchronously(plugin,
-                SharedRunnables.showActiveTasksView(plugin, taskDAO, playerDAO, player, ign, 1));
+                SharedRunnables.teleportPlayerToTask(plugin, taskDAO, player, taskId));
     }
 
-    private void handleEyeClick(HumanEntity player) {
+    private void handleSpectralArrowClick(HumanEntity player) {
         Bukkit.getScheduler().runTaskAsynchronously(plugin,
-                SharedRunnables.showSupervisedTasksView(plugin, taskDAO, playerDAO, player, 1));
+                SharedRunnables.showDashboardView(plugin, taskDAO, player, 1));
     }
 
     private void handleArrowClick(HumanEntity player, InventoryView view, ItemStack arrow) {
@@ -72,11 +70,6 @@ public class DashboardViewListener implements Listener {
         }
 
         Bukkit.getScheduler().runTaskAsynchronously(plugin,
-                SharedRunnables.showDashboardView(plugin, taskDAO, player, currentPage));
-    }
-
-    private void handleConcreteClick(HumanEntity player) {
-        Bukkit.getScheduler().runTaskAsynchronously(plugin,
-                SharedRunnables.showPreparedTasksView(plugin, taskDAO, player, 1));
+                SharedRunnables.showSupervisedTasksView(plugin, taskDAO, playerDAO, player, currentPage));
     }
 }

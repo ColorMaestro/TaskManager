@@ -8,8 +8,8 @@ public class Task {
     private Integer id;
     private final String title;
     private final String description;
-    private final int assigneeID;
-    private final int advisorID;
+    private final Integer assigneeID;
+    private final Integer advisorID;
     private final double x;
     private final double y;
     private final double z;
@@ -19,7 +19,7 @@ public class Task {
     private final Date dateCreation;
     private final Date dateCompleted;
 
-    public Task(String title, String description, int assigneeID, int advisorID,
+    public Task(String title, String description, Integer assigneeID, Integer advisorID,
                 double x, double y, double z, float yaw, float pitch,
                 TaskStatus status, Date dateCreation, Date dateCompleted) {
         this.title = title;
@@ -52,11 +52,11 @@ public class Task {
         return description;
     }
 
-    public int getAssigneeID() {
+    public Integer getAssigneeID() {
         return assigneeID;
     }
 
-    public int getAdvisorID() {
+    public Integer getAdvisorID() {
         return advisorID;
     }
 

@@ -34,20 +34,12 @@ public class BookEditListener implements Listener {
 
     @EventHandler
     public void onBookEdit(PlayerEditBookEvent event) {
-        if (!event.getNewBookMeta().hasAuthor()) {
+        List<String> lore = event.getPreviousBookMeta().getLore();
+        if (!event.getNewBookMeta().hasAuthor() || lore == null) {
             return;
         }
 
         Player p = event.getPlayer();
-        UUID uuid = p.getUniqueId();
-
-        List<String> lore = event.getPreviousBookMeta().getLore();
-        String ign;
-        if (lore == null || lore.size() != 2 || !lore.get(0).equals(Directives.CREATE_TASK)) {
-            return;
-        }
-        ign = lore.get(1);
-
         if (event.getNewBookMeta().getPageCount() < 2) {
             p.sendMessage(ChatColor.GOLD + "Task description must not be empty! If you wish omit the description, put at least space char on second page");
             event.setCancelled(true);
@@ -63,59 +55,124 @@ public class BookEditListener implements Listener {
         float yaw = p.getLocation().getYaw();
         float pitch = p.getLocation().getPitch();
 
-        Bukkit.getScheduler().runTaskAsynchronously(plugin,
-                () -> {
-                    int assigneeID, advisorID;
-                    try {
-                        assigneeID = playerDAO.getPlayerID(ign);
-                        advisorID = playerDAO.getPlayerID(uuid);
-                    } catch (SQLException ex) {
-                        Bukkit.getScheduler().runTask(plugin, () -> p.sendMessage(ChatColor.RED + ex.getMessage()));
-                        ex.printStackTrace();
-                        return;
-                    } catch (DataAccessException ignored) {
-                        Bukkit.getScheduler().runTask(plugin, () -> p.sendMessage(ChatColor.GOLD + "Player " + ign +
-                                " is not registered as member. Use" + ChatColor.DARK_AQUA + " /addmember " + ign +
-                                ChatColor.GOLD + " for adding player as member, then you can add tasks."));
-                        return;
+        String directive = lore.get(0);
+
+        if (directive.equals(Directives.CREATE_TASK)) {
+            Bukkit.getScheduler().runTaskAsynchronously(plugin,
+                    createDoingTask(p, lore.get(1), p.getUniqueId(), title, description, x, y, z, yaw, pitch));
+        }
+
+        if (directive.equals(Directives.PREPARE_TASK)) {
+            Bukkit.getScheduler().runTaskAsynchronously(plugin,
+                    createPreparedTask(p, p.getUniqueId(), title, description, x, y, z, yaw, pitch));
+        }
+    }
+
+    /**
+     * Creates job for creation of task in {@link me.colormaestro.taskmanager.enums.TaskStatus#DOING} state
+     *
+     * @return Runnable (job) for execution
+     */
+    private Runnable createDoingTask(
+            Player p,
+            String ign,
+            UUID uuid,
+            String title,
+            String description,
+            double x,
+            double y,
+            double z,
+            float yaw,
+            float pitch) {
+        return () -> {
+            int assigneeID, advisorID;
+            try {
+                assigneeID = playerDAO.getPlayerID(ign);
+                advisorID = playerDAO.getPlayerID(uuid);
+            } catch (SQLException ex) {
+                Bukkit.getScheduler().runTask(plugin, () -> p.sendMessage(ChatColor.RED + ex.getMessage()));
+                ex.printStackTrace();
+                return;
+            } catch (DataAccessException ignored) {
+                Bukkit.getScheduler().runTask(plugin, () -> p.sendMessage(ChatColor.GOLD + "Player " + ign +
+                        " is not registered as member. Use" + ChatColor.DARK_AQUA + " /addmember " + ign +
+                        ChatColor.GOLD + " for adding player as member, then you can add tasks."));
+                return;
+            }
+
+            Task task = new Task(title, description, assigneeID, advisorID, x, y, z, yaw, pitch,
+                    TaskStatus.DOING, new Date(System.currentTimeMillis()), null);
+            try {
+                taskDAO.createTask(task);
+                List<Task> activeTasks = taskDAO.fetchPlayersActiveTasks(assigneeID);
+                String assigneeUUID = playerDAO.getPlayerUUID(assigneeID);
+                long discordUserID = playerDAO.getDiscordUserID(assigneeUUID);
+                Bukkit.getScheduler().runTask(plugin, () -> {
+                    p.sendMessage(ChatColor.GREEN + "Task added.");
+
+                    // Firstly we try to notify the assignee in game
+                    boolean messageSent = false;
+                    if (Bukkit.getPluginManager().isPluginEnabled("DecentHolograms")) {
+                        HologramLayer.getInstance().setTasks(assigneeUUID, activeTasks);
+                    }
+                    for (Player target : Bukkit.getOnlinePlayers()) {
+                        if (target.getUniqueId().toString().equals(assigneeUUID)) {
+                            target.sendMessage(ChatColor.GOLD + "You have new task from " + p.getName());
+                            target.playSound(target.getLocation(),
+                                    "minecraft:record.newtask", 10, 1);
+                            messageSent = true;
+                            break;
+                        }
                     }
 
-                    Task task = new Task(title, description, assigneeID, advisorID, x, y, z, yaw, pitch,
-                            TaskStatus.DOING, new Date(System.currentTimeMillis()), null);
-                    try {
-                        taskDAO.createTask(task);
-                        List<Task> activeTasks = taskDAO.fetchPlayersActiveTasks(assigneeID);
-                        String assigneeUUID = playerDAO.getPlayerUUID(assigneeID);
-                        long discordUserID = playerDAO.getDiscordUserID(assigneeUUID);
-                        Bukkit.getScheduler().runTask(plugin,
-                                () -> {
-                                    p.sendMessage(ChatColor.GREEN + "Task added.");
-
-                                    // Firstly we try to notify the assignee in game
-                                    boolean messageSent = false;
-                                    if (Bukkit.getPluginManager().isPluginEnabled("DecentHolograms")) {
-                                        HologramLayer.getInstance().setTasks(assigneeUUID, activeTasks);
-                                    }
-                                    for (Player target : Bukkit.getOnlinePlayers()) {
-                                        if (target.getUniqueId().toString().equals(assigneeUUID)) {
-                                            target.sendMessage(ChatColor.GOLD + "You have new task from " + p.getName());
-                                            target.playSound(target.getLocation(),
-                                                    "minecraft:record.newtask", 10, 1);
-                                            messageSent = true;
-                                            break;
-                                        }
-                                    }
-
-                                    // If the assignee is not online, sent him message to discord
-                                    if (!messageSent) {
-                                        DiscordManager.getInstance().taskCreated(discordUserID, p.getName(), task);
-                                    }
-                                });
-                    } catch (SQLException | IllegalArgumentException | DataAccessException ex) {
-                        Bukkit.getScheduler().runTask(plugin,
-                                () -> p.sendMessage(ChatColor.RED + ex.getMessage()));
-                        ex.printStackTrace();
+                    // If the assignee is not online, sent him message to discord
+                    if (!messageSent) {
+                        DiscordManager.getInstance().taskCreated(discordUserID, p.getName(), task);
                     }
                 });
+            } catch (SQLException | IllegalArgumentException | DataAccessException ex) {
+                Bukkit.getScheduler().runTask(plugin,
+                        () -> p.sendMessage(ChatColor.RED + ex.getMessage()));
+                ex.printStackTrace();
+            }
+        };
+    }
+
+    /**
+     * Creates job for creation of task in {@link me.colormaestro.taskmanager.enums.TaskStatus#PREPARED} state
+     *
+     * @return Runnable (job) for execution
+     */
+    private Runnable createPreparedTask(
+            Player p,
+            UUID uuid,
+            String title,
+            String description,
+            double x,
+            double y,
+            double z,
+            float yaw,
+            float pitch) {
+        return () -> {
+            int advisorID;
+            try {
+                advisorID = playerDAO.getPlayerID(uuid);
+            } catch (SQLException | DataAccessException ex) {
+                Bukkit.getScheduler().runTask(plugin, () -> p.sendMessage(ChatColor.RED + ex.getMessage()));
+                ex.printStackTrace();
+                return;
+            }
+
+            Task task = new Task(title, description, null, advisorID, x, y, z, yaw, pitch,
+                    TaskStatus.PREPARED, new Date(System.currentTimeMillis()), null);
+            try {
+                taskDAO.createTask(task);
+                Bukkit.getScheduler().runTask(plugin, () -> p.sendMessage(ChatColor.GREEN + "Task prepared."));
+            } catch (SQLException | IllegalArgumentException ex) {
+                Bukkit.getScheduler().runTask(plugin,
+                        () -> p.sendMessage(ChatColor.RED + ex.getMessage()));
+                ex.printStackTrace();
+            }
+        };
     }
 }

@@ -1,15 +1,19 @@
 package me.colormaestro.taskmanager.utils;
 
 import me.colormaestro.taskmanager.enums.TaskStatus;
+import net.md_5.bungee.api.chat.BaseComponent;
+import net.md_5.bungee.api.chat.ComponentBuilder;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.BookMeta;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.SkullMeta;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
@@ -51,6 +55,7 @@ public class ItemStackCreator {
         switch (status) {
             case FINISHED -> material = Material.LIME_CONCRETE;
             case APPROVED -> material = Material.LIGHT_BLUE_CONCRETE;
+            case PREPARED -> material = Material.LIGHT_GRAY_CONCRETE;
         }
         ItemStack is = new ItemStack(material, 1);
         ItemMeta itemMeta = is.getItemMeta();
@@ -92,5 +97,46 @@ public class ItemStackCreator {
         }
 
         return result;
+    }
+
+    /**
+     * Creates ItemStack of Material.WRITABLE_BOOK for creating new task
+     *
+     * @param ign name of member for which to create task, for given name created task will be directly assigned
+     *            to the member (in {@link me.colormaestro.taskmanager.enums.TaskStatus#DOING} state), otherwise null
+     *            value causes that task will be only prepared (in {@link me.colormaestro.taskmanager.enums.TaskStatus#PREPARED} state)
+     * @param description instructions what to do in the task
+     * @return ItemStack for creating the task
+     */
+    public static ItemStack createAssignmentBook(String ign, String description) {
+        ItemStack book = new ItemStack(Material.WRITABLE_BOOK);
+        BookMeta bookMeta = (BookMeta) book.getItemMeta();
+
+        BaseComponent[] page = new ComponentBuilder("Instructions:")
+                .color(net.md_5.bungee.api.ChatColor.BLUE).bold(true)
+                // new line must be in this block, otherwise color continues, seems like a bug in spigot
+                .append("""
+
+                        1) Only the second page of this book serves as task description for player what to do in this task.
+                        """)
+                .color(net.md_5.bungee.api.ChatColor.RESET).bold(false)
+                .append("2) Book title serves as headline for the task - this will be displayed at the hologram.\n")
+                .append("3) Tasks is created immediately after you sign the book.\n")
+                .create();
+
+        BaseComponent[] page2 = new ComponentBuilder(description).create();
+
+        bookMeta.spigot().addPage(page);
+
+        if (ign != null) {
+            bookMeta.setDisplayName(ChatColor.GOLD + "Assignment book for " + ign);
+            bookMeta.setLore(new ArrayList<>(Arrays.asList(Directives.CREATE_TASK, ign)));
+        } else {
+            bookMeta.setDisplayName(ChatColor.GRAY + "Book for creation of prepared task");
+            bookMeta.setLore(new ArrayList<>(List.of(Directives.PREPARE_TASK)));
+        }
+
+        book.setItemMeta(bookMeta);
+        return book;
     }
 }
