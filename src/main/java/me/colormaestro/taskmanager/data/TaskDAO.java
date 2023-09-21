@@ -318,9 +318,10 @@ public class TaskDAO {
     public synchronized List<AdvisedTask> fetchAdvisorActiveTasks(int advisorID) throws SQLException {
         try (Connection connection = DriverManager.getConnection(url);
              PreparedStatement st = connection.prepareStatement(
-                     "SELECT tasks.id AS task_id, title, description, status, players.ign AS ign " +
-                             "FROM PLAYERS JOIN TASKS ON PLAYERS.id = TASKS.advisor_id " +
-                             "WHERE advisor_id = ? AND status != 'APPROVED'")) {
+                     "SELECT tasks.id AS task_id, title, description, status, assignee.ign AS ign " +
+                             "FROM PLAYERS advisor JOIN PLAYERS assignee JOIN TASKS " +
+                             "ON advisor.id = TASKS.advisor_id AND assignee.id = TASKS.assignee_id " +
+                             "WHERE advisor_id = ? AND status != 'APPROVED' AND status != 'PREPARED'")) {
 
             st.setInt(1, advisorID);
             ResultSet rs = st.executeQuery();
