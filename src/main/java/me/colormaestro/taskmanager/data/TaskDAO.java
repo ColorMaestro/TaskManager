@@ -125,6 +125,31 @@ public class TaskDAO {
     }
 
     /**
+     * Marks task as doing. Useful when assigning prepared task.
+     *
+     * @param taskID     id of the task
+     * @param assigneeID id of assignee
+     * @param advisorID  if of advisor
+     * @throws SQLException        if SQL error arise
+     * @throws DataAccessException if player tries to finish task which belongs to someone else
+     */
+    public synchronized void assignTask(int taskID, int assigneeID, int advisorID) throws SQLException, DataAccessException {
+        try (Connection connection = DriverManager.getConnection(url);
+             PreparedStatement st = connection.prepareStatement(
+                     "UPDATE TASKS SET status = 'DOING', assignee_id = ?, advisor_id = ? WHERE id = ? AND " +
+                             "status = 'PREPARED'")) {
+
+            st.setInt(1, assigneeID);
+            st.setInt(2, advisorID);
+            st.setInt(3, taskID);
+            int affected = st.executeUpdate();
+            if (affected == 0) {
+                throw new DataAccessException("No change. Make sure you choose prepared task.");
+            }
+        }
+    }
+
+    /**
      * Sets task state to {@link me.colormaestro.taskmanager.enums.TaskStatus#DOING}, which is the default for new tasks.
      *
      * @param id    ID of the task

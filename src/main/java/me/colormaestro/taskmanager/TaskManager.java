@@ -3,6 +3,7 @@ package me.colormaestro.taskmanager;
 import me.colormaestro.taskmanager.commands.AddMember;
 import me.colormaestro.taskmanager.commands.AddTask;
 import me.colormaestro.taskmanager.commands.ApproveTask;
+import me.colormaestro.taskmanager.commands.AssignTask;
 import me.colormaestro.taskmanager.commands.Dashboard;
 import me.colormaestro.taskmanager.commands.Establish;
 import me.colormaestro.taskmanager.commands.FinishTask;
@@ -68,6 +69,7 @@ public final class TaskManager extends JavaPlugin {
         setCommandExecutor("tasks", new Tasks(this, taskDAO, playerDAO));
         setCommandExecutor("addtask", new AddTask(this, taskDAO));
         setCommandExecutor("preparetask", new PrepareTask());
+        setCommandExecutor("assigntask", new AssignTask(this, taskDAO, playerDAO));
         setCommandExecutor("finishtask", new FinishTask(taskDAO, playerDAO));
         setCommandExecutor("approvetask", new ApproveTask(taskDAO, playerDAO));
         setCommandExecutor("visittask", new VisitTask(taskDAO, playerDAO));

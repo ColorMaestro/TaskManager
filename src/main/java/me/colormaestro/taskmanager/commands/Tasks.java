@@ -42,6 +42,8 @@ public class Tasks implements CommandExecutor {
             {"/taskinfo <id>", "obtains info in book for related task"},
             {"/addtask <IGN>", "creates task assignment book with blank description"},
             {"/addtask <IGN> [id]", "creates task assignment book, description is taken from selected task"},
+            {"/preparetask", "creates task book for creating of prepared task"},
+            {"/assigntask <IGN> <id>", "assigns prepared tasks to member"},
             {"/finishtask <id>", "marks task as finished"},
             {"/approvetask <id> [force]", "approves the finished task"},
             {"/returntask <id> [force]", "returns task back to given (unfinished) state"},
