@@ -36,6 +36,7 @@ public class Tasks implements CommandExecutor {
             {"/dashboard <IGN>", "jumps directly in dashboard to selected member tasks"},
             {"/tasks given", "shows tasks, which you are advising"},
             {"/tasks stats", "shows task statistics"},
+            {"/tasks prepared", "shows task which are prepared for members"},
             {"/tasks [IGN]", "shows your or other member's tasks"},
             {"/visittask <id>", "teleports to the task workplace"},
             {"/taskinfo <id>", "obtains info in book for related task"},
@@ -105,6 +106,24 @@ public class Tasks implements CommandExecutor {
             return true;
         }
 
+        if (sender instanceof Player && args.length == 1 && args[0].equals("prepared")) {
+            Player p = (Player) sender;
+            Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
+                try {
+                    List<Task> preparedTasks = taskDAO.fetchPreparedTasks();
+
+                    Bukkit.getScheduler().runTask(plugin,
+                            () -> sendPreparedTasks(p, preparedTasks));
+                } catch (SQLException ex) {
+                    Bukkit.getScheduler().runTask(plugin,
+                            () -> p.sendMessage(ChatColor.RED + ex.getMessage()));
+                    ex.printStackTrace();
+                }
+
+            });
+            return true;
+        }
+
         if (sender instanceof Player && (args.length == 0 || args.length == 1)) {
             Player p = (Player) sender;
             UUID uuid = p.getUniqueId();
@@ -148,8 +167,10 @@ public class Tasks implements CommandExecutor {
         p.sendMessage(ChatColor.AQUA + "-=-=-=- " + name + "'s tasks -=-=-=-");
         for (Task task : tasks) {
             switch (task.getStatus()) {
-                case DOING -> p.sendMessage(ChatColor.GOLD + "[" + task.getId() + "] " + ChatColor.WHITE + task.getTitle());
-                case FINISHED -> p.sendMessage(ChatColor.GREEN + "[" + task.getId() + "] " + ChatColor.WHITE + task.getTitle());
+                case DOING ->
+                        p.sendMessage(ChatColor.GOLD + "[" + task.getId() + "] " + ChatColor.WHITE + task.getTitle());
+                case FINISHED ->
+                        p.sendMessage(ChatColor.GREEN + "[" + task.getId() + "] " + ChatColor.WHITE + task.getTitle());
             }
         }
     }
@@ -164,9 +185,21 @@ public class Tasks implements CommandExecutor {
             switch (task.status()) {
                 case DOING -> p.sendMessage(ChatColor.GOLD + "[" + task.id() + "] " + ChatColor.WHITE + task.title() +
                         ChatColor.ITALIC + " (" + task.ign() + ")");
-                case FINISHED -> p.sendMessage(ChatColor.GREEN + "[" + task.id() + "] " + ChatColor.WHITE + task.title() +
-                        ChatColor.ITALIC + " (" + task.ign() + ")");
+                case FINISHED ->
+                        p.sendMessage(ChatColor.GREEN + "[" + task.id() + "] " + ChatColor.WHITE + task.title() +
+                                ChatColor.ITALIC + " (" + task.ign() + ")");
             }
+        }
+    }
+
+    private void sendPreparedTasks(Player p, List<Task> tasks) {
+        if (tasks.isEmpty()) {
+            p.sendMessage(ChatColor.GREEN + "No prepared tasks");
+            return;
+        }
+        p.sendMessage(ChatColor.GRAY + "-=-=-=- Prepared tasks -=-=-=-");
+        for (Task task : tasks) {
+            p.sendMessage(ChatColor.GRAY + "[" + task.getId() + "] " + ChatColor.WHITE + task.getTitle());
         }
     }
 

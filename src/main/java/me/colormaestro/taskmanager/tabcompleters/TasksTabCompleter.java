@@ -23,6 +23,7 @@ public class TasksTabCompleter extends MembersTabCompleter {
             names.add("help");
             names.add("given");
             names.add("stats");
+            names.add("prepared");
         } catch (SQLException e) {
             e.printStackTrace();
             names = new ArrayList<>();
