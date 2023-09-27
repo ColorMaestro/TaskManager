@@ -5,6 +5,7 @@ import me.colormaestro.taskmanager.data.DiscordManager;
 import me.colormaestro.taskmanager.data.HologramLayer;
 import me.colormaestro.taskmanager.data.PlayerDAO;
 import me.colormaestro.taskmanager.data.TaskDAO;
+import me.colormaestro.taskmanager.enums.TaskStatus;
 import me.colormaestro.taskmanager.model.Task;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -45,6 +46,12 @@ public class TransferTask implements CommandExecutor {
             try {
                 int id = Integer.parseInt(args[0]);
                 Task task = taskDAO.findTask(id);
+                if (task.getStatus() == TaskStatus.PREPARED) {
+                    Bukkit.getScheduler().runTask(plugin, () -> {
+                        p.sendMessage(ChatColor.RED + "The task is in prepared state thus transfering is not possible");
+                    });
+                    return;
+                }
                 int oldAssigneeID = task.getAssigneeID();
                 int newAssigneeID = playerDAO.getPlayerID(args[1]);
                 taskDAO.updateTaskAssignee(id, newAssigneeID);
@@ -55,42 +62,41 @@ public class TransferTask implements CommandExecutor {
                 long discordOldAssigneeID = playerDAO.getDiscordUserID(oldAssigneeUUID);
                 long discordNewAssigneeID = playerDAO.getDiscordUserID(newAssigneeUUID);
                 String oldAssigneeIGN = playerDAO.getPlayerIGN(oldAssigneeID);
-                Bukkit.getScheduler().runTask(plugin,
-                        () -> {
-                            p.sendMessage(ChatColor.GREEN + "Task transferred.");
-                            if (Bukkit.getPluginManager().isPluginEnabled("DecentHolograms")) {
-                                HologramLayer.getInstance().setTasks(oldAssigneeUUID, activeTasksOldAssignee);
-                                HologramLayer.getInstance().setTasks(newAssigneeUUID, activeTasksNewAssignee);
-                            }
+                Bukkit.getScheduler().runTask(plugin, () -> {
+                    p.sendMessage(ChatColor.GREEN + "Task transferred.");
+                    if (Bukkit.getPluginManager().isPluginEnabled("DecentHolograms")) {
+                        HologramLayer.getInstance().setTasks(oldAssigneeUUID, activeTasksOldAssignee);
+                        HologramLayer.getInstance().setTasks(newAssigneeUUID, activeTasksNewAssignee);
+                    }
 
-                            // Firstly we try to notify the assignees in game
-                            boolean messageSentOldAssignee = false;
-                            boolean messageSentNewAssignee = false;
-                            for (Player target : Bukkit.getOnlinePlayers()) {
-                                if (target.getUniqueId().toString().equals(oldAssigneeUUID)) {
-                                    target.sendMessage(ChatColor.GOLD + p.getName() +
-                                            " has transferred task " + id + " to " + args[1] + ".");
-                                    messageSentOldAssignee = true;
-                                }
+                    // Firstly we try to notify the assignees in game
+                    boolean messageSentOldAssignee = false;
+                    boolean messageSentNewAssignee = false;
+                    for (Player target : Bukkit.getOnlinePlayers()) {
+                        if (target.getUniqueId().toString().equals(oldAssigneeUUID)) {
+                            target.sendMessage(ChatColor.GOLD + p.getName() +
+                                    " has transferred task " + id + " to " + args[1] + ".");
+                            messageSentOldAssignee = true;
+                        }
 
-                                if (target.getUniqueId().toString().equals(newAssigneeUUID)) {
-                                    target.sendMessage(ChatColor.GOLD + p.getName() +
-                                            " has transferred task " + id + " to you.");
-                                    messageSentNewAssignee = true;
-                                }
-                            }
+                        if (target.getUniqueId().toString().equals(newAssigneeUUID)) {
+                            target.sendMessage(ChatColor.GOLD + p.getName() +
+                                    " has transferred task " + id + " to you.");
+                            messageSentNewAssignee = true;
+                        }
+                    }
 
-                            // If the assignees are not online, sent them message to discord
-                            if (!messageSentOldAssignee) {
-                                DiscordManager.getInstance().taskTransferred(discordOldAssigneeID, p.getName(),
-                                        oldAssigneeIGN, args[1], task,true);
-                            }
+                    // If the assignees are not online, sent them message to discord
+                    if (!messageSentOldAssignee) {
+                        DiscordManager.getInstance().taskTransferred(discordOldAssigneeID, p.getName(),
+                                oldAssigneeIGN, args[1], task, true);
+                    }
 
-                            if (!messageSentNewAssignee) {
-                                DiscordManager.getInstance().taskTransferred(discordNewAssigneeID, p.getName(),
-                                        oldAssigneeIGN, args[1], task,false);
-                            }
-                        });
+                    if (!messageSentNewAssignee) {
+                        DiscordManager.getInstance().taskTransferred(discordNewAssigneeID, p.getName(),
+                                oldAssigneeIGN, args[1], task, false);
+                    }
+                });
             } catch (SQLException ex) {
                 Bukkit.getScheduler().runTask(plugin,
                         () -> p.sendMessage(ChatColor.RED + ex.getMessage()));

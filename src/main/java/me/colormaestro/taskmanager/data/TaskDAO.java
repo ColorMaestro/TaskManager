@@ -171,6 +171,9 @@ public class TaskDAO {
                 throw new DataAccessException("No task with such an ID found.");
             }
             TaskStatus status = TaskStatus.valueOf(rs.getString("status"));
+            if (status == TaskStatus.PREPARED) {
+                throw new DataAccessException("The task is in prepared state thus returning is not possible");
+            }
             if (status == TaskStatus.APPROVED && !force) {
                 throw new DataAccessException("The task is approved. If you want to proceed add force " +
                         "as second argument to this command");

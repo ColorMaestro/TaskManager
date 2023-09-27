@@ -43,43 +43,41 @@ public class ReturnTask implements CommandExecutor {
         Player p = (Player) sender;
         String sid = args[0];
         boolean force = args.length == 2 && args[1].equals("force");
-        Bukkit.getScheduler().runTaskAsynchronously(plugin,
-                () -> {
-                    try {
-                        int id = Integer.parseInt(sid);
-                        taskDAO.returnTask(id, force);
-                        Task task = taskDAO.findTask(id);
-                        List<Task> activeTasks = taskDAO.fetchPlayersActiveTasks(task.getAssigneeID());
-                        String assigneeUUID = playerDAO.getPlayerUUID(task.getAssigneeID());
-                        long discordUserID = playerDAO.getDiscordUserID(assigneeUUID);
-                        Bukkit.getScheduler().runTask(plugin,
-                                () -> {
-                                    p.sendMessage(ChatColor.GREEN + "Task returned.");
-                                    if (Bukkit.getPluginManager().isPluginEnabled("DecentHolograms")) {
-                                        HologramLayer.getInstance().setTasks(assigneeUUID, activeTasks);
-                                    }
+        Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
+            try {
+                int id = Integer.parseInt(sid);
+                taskDAO.returnTask(id, force);
+                Task task = taskDAO.findTask(id);
+                List<Task> activeTasks = taskDAO.fetchPlayersActiveTasks(task.getAssigneeID());
+                String assigneeUUID = playerDAO.getPlayerUUID(task.getAssigneeID());
+                long discordUserID = playerDAO.getDiscordUserID(assigneeUUID);
+                Bukkit.getScheduler().runTask(plugin, () -> {
+                    p.sendMessage(ChatColor.GREEN + "Task returned.");
+                    if (Bukkit.getPluginManager().isPluginEnabled("DecentHolograms")) {
+                        HologramLayer.getInstance().setTasks(assigneeUUID, activeTasks);
+                    }
 
-                                    // Firstly we try to notify the assignee in game
-                                    boolean messageSent = false;
-                                    for (Player target : Bukkit.getOnlinePlayers()) {
-                                        if (target.getUniqueId().toString().equals(assigneeUUID)) {
-                                            target.sendMessage(ChatColor.GOLD + p.getName() + " has returned your task.");
-                                            messageSent = true;
-                                            break;
-                                        }
-                                    }
+                    // Firstly we try to notify the assignee in game
+                    boolean messageSent = false;
+                    for (Player target : Bukkit.getOnlinePlayers()) {
+                        if (target.getUniqueId().toString().equals(assigneeUUID)) {
+                            target.sendMessage(ChatColor.GOLD + p.getName() + " has returned your task.");
+                            messageSent = true;
+                            break;
+                        }
+                    }
 
-                                    // If the assignee is not online, sent him message to discord
-                                    if (!messageSent) {
-                                        DiscordManager.getInstance().taskReturned(discordUserID, p.getName(), task);
-                                    }
-                                });
-                    } catch (SQLException | DataAccessException | NumberFormatException ex) {
-                        Bukkit.getScheduler().runTask(plugin,
-                                () -> p.sendMessage(ChatColor.RED + ex.getMessage()));
-                        ex.printStackTrace();
+                    // If the assignee is not online, sent him message to discord
+                    if (!messageSent) {
+                        DiscordManager.getInstance().taskReturned(discordUserID, p.getName(), task);
                     }
                 });
+            } catch (SQLException | DataAccessException | NumberFormatException ex) {
+                Bukkit.getScheduler().runTask(plugin,
+                        () -> p.sendMessage(ChatColor.RED + ex.getMessage()));
+                ex.printStackTrace();
+            }
+        });
         return true;
     }
 }
