@@ -6,6 +6,7 @@ import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.entities.MessageEmbed;
+import net.dv8tion.jda.api.exceptions.ErrorResponseException;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -30,7 +31,7 @@ public class DiscordManager {
         try {
             api = JDABuilder.createDefault(token).addEventListeners(new DiscordMessageListener()).build();
             plugin.getLogger().info("Token provided, bot connection with Discord established");
-        } catch (LoginException e) {
+        } catch (LoginException | ErrorResponseException e) {
             plugin.getLogger().info("Cannot login Discord bot: " + e.getMessage());
         }
         codes = Collections.synchronizedMap(new HashMap<>());
