@@ -5,7 +5,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
 
-public class ParsingUtils {
+class ParsingUtils {
 
     /**
      * Sets integer or null value at given index for prepared statement
