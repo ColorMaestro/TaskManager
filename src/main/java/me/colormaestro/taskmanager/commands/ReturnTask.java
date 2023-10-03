@@ -5,6 +5,7 @@ import me.colormaestro.taskmanager.data.DiscordManager;
 import me.colormaestro.taskmanager.data.HologramLayer;
 import me.colormaestro.taskmanager.data.PlayerDAO;
 import me.colormaestro.taskmanager.data.TaskDAO;
+import me.colormaestro.taskmanager.model.Member;
 import me.colormaestro.taskmanager.model.Task;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -49,18 +50,17 @@ public class ReturnTask implements CommandExecutor {
                 taskDAO.returnTask(id, force);
                 Task task = taskDAO.findTask(id);
                 List<Task> activeTasks = taskDAO.fetchPlayersActiveTasks(task.getAssigneeID());
-                String assigneeUUID = playerDAO.getPlayerUUID(task.getAssigneeID());
-                long discordUserID = playerDAO.getDiscordUserID(assigneeUUID);
+                Member assignee = playerDAO.findMember(task.getAssigneeID());
                 Bukkit.getScheduler().runTask(plugin, () -> {
                     p.sendMessage(ChatColor.GREEN + "Task returned.");
                     if (Bukkit.getPluginManager().isPluginEnabled("DecentHolograms")) {
-                        HologramLayer.getInstance().setTasks(assigneeUUID, activeTasks);
+                        HologramLayer.getInstance().setTasks(assignee.getUuid(), activeTasks);
                     }
 
                     // Firstly we try to notify the assignee in game
                     boolean messageSent = false;
                     for (Player target : Bukkit.getOnlinePlayers()) {
-                        if (target.getUniqueId().toString().equals(assigneeUUID)) {
+                        if (target.getUniqueId().toString().equals(assignee.getUuid())) {
                             target.sendMessage(ChatColor.GOLD + p.getName() + " has returned your task.");
                             messageSent = true;
                             break;
@@ -68,8 +68,8 @@ public class ReturnTask implements CommandExecutor {
                     }
 
                     // If the assignee is not online, sent him message to discord
-                    if (!messageSent) {
-                        DiscordManager.getInstance().taskReturned(discordUserID, p.getName(), task);
+                    if (!messageSent && assignee.getDiscordID() != null) {
+                        DiscordManager.getInstance().taskReturned(assignee.getDiscordID(), p.getName(), task);
                     }
                 });
             } catch (SQLException | DataAccessException | NumberFormatException ex) {

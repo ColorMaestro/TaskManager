@@ -6,6 +6,7 @@ import me.colormaestro.taskmanager.data.HologramLayer;
 import me.colormaestro.taskmanager.data.PlayerDAO;
 import me.colormaestro.taskmanager.data.TaskDAO;
 import me.colormaestro.taskmanager.enums.TaskStatus;
+import me.colormaestro.taskmanager.model.Member;
 import me.colormaestro.taskmanager.model.Task;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -53,33 +54,29 @@ public class TransferTask implements CommandExecutor {
                     return;
                 }
                 int oldAssigneeID = task.getAssigneeID();
-                int newAssigneeID = playerDAO.getPlayerID(args[1]);
-                taskDAO.updateTaskAssignee(id, newAssigneeID);
+                Member oldAssignee = playerDAO.findMember(oldAssigneeID);
+                Member newAssignee = playerDAO.findMember(args[1]);
+                taskDAO.updateTaskAssignee(id, newAssignee.getId());
                 List<Task> activeTasksOldAssignee = taskDAO.fetchPlayersActiveTasks(oldAssigneeID);
-                List<Task> activeTasksNewAssignee = taskDAO.fetchPlayersActiveTasks(newAssigneeID);
-                String oldAssigneeUUID = playerDAO.getPlayerUUID(oldAssigneeID);
-                String newAssigneeUUID = playerDAO.getPlayerUUID(newAssigneeID);
-                long discordOldAssigneeID = playerDAO.getDiscordUserID(oldAssigneeUUID);
-                long discordNewAssigneeID = playerDAO.getDiscordUserID(newAssigneeUUID);
-                String oldAssigneeIGN = playerDAO.getPlayerIGN(oldAssigneeID);
+                List<Task> activeTasksNewAssignee = taskDAO.fetchPlayersActiveTasks(newAssignee.getId());
                 Bukkit.getScheduler().runTask(plugin, () -> {
                     p.sendMessage(ChatColor.GREEN + "Task transferred.");
                     if (Bukkit.getPluginManager().isPluginEnabled("DecentHolograms")) {
-                        HologramLayer.getInstance().setTasks(oldAssigneeUUID, activeTasksOldAssignee);
-                        HologramLayer.getInstance().setTasks(newAssigneeUUID, activeTasksNewAssignee);
+                        HologramLayer.getInstance().setTasks(oldAssignee.getUuid(), activeTasksOldAssignee);
+                        HologramLayer.getInstance().setTasks(newAssignee.getUuid(), activeTasksNewAssignee);
                     }
 
                     // Firstly we try to notify the assignees in game
                     boolean messageSentOldAssignee = false;
                     boolean messageSentNewAssignee = false;
                     for (Player target : Bukkit.getOnlinePlayers()) {
-                        if (target.getUniqueId().toString().equals(oldAssigneeUUID)) {
+                        if (target.getUniqueId().toString().equals(oldAssignee.getUuid())) {
                             target.sendMessage(ChatColor.GOLD + p.getName() +
                                     " has transferred task " + id + " to " + args[1] + ".");
                             messageSentOldAssignee = true;
                         }
 
-                        if (target.getUniqueId().toString().equals(newAssigneeUUID)) {
+                        if (target.getUniqueId().toString().equals(newAssignee.getUuid())) {
                             target.sendMessage(ChatColor.GOLD + p.getName() +
                                     " has transferred task " + id + " to you.");
                             messageSentNewAssignee = true;
@@ -87,14 +84,14 @@ public class TransferTask implements CommandExecutor {
                     }
 
                     // If the assignees are not online, sent them message to discord
-                    if (!messageSentOldAssignee) {
-                        DiscordManager.getInstance().taskTransferred(discordOldAssigneeID, p.getName(),
-                                oldAssigneeIGN, args[1], task, true);
+                    if (!messageSentOldAssignee && oldAssignee.getDiscordID() != null) {
+                        DiscordManager.getInstance().taskTransferred(oldAssignee.getDiscordID(), p.getName(),
+                                oldAssignee.getIgn(), args[1], task, true);
                     }
 
-                    if (!messageSentNewAssignee) {
-                        DiscordManager.getInstance().taskTransferred(discordNewAssigneeID, p.getName(),
-                                oldAssigneeIGN, args[1], task, false);
+                    if (!messageSentNewAssignee && newAssignee.getDiscordID() != null) {
+                        DiscordManager.getInstance().taskTransferred(newAssignee.getDiscordID(), p.getName(),
+                                oldAssignee.getIgn(), args[1], task, false);
                     }
                 });
             } catch (SQLException ex) {

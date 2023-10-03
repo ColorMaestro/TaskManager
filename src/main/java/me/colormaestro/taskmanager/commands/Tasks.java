@@ -4,6 +4,7 @@ import me.colormaestro.taskmanager.data.DataAccessException;
 import me.colormaestro.taskmanager.data.PlayerDAO;
 import me.colormaestro.taskmanager.data.TaskDAO;
 import me.colormaestro.taskmanager.model.AdvisedTask;
+import me.colormaestro.taskmanager.model.Member;
 import me.colormaestro.taskmanager.model.MemberTaskStats;
 import me.colormaestro.taskmanager.model.Task;
 import net.md_5.bungee.api.chat.ComponentBuilder;
@@ -73,8 +74,8 @@ public class Tasks implements CommandExecutor {
             UUID uuid = p.getUniqueId();
             Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
                 try {
-                    int id = playerDAO.getPlayerID(uuid);
-                    List<AdvisedTask> tasks = taskDAO.fetchAdvisorActiveTasks(id);
+                    Member member = playerDAO.findMember(uuid);
+                    List<AdvisedTask> tasks = taskDAO.fetchAdvisorActiveTasks(member.getId());
                     Bukkit.getScheduler().runTask(plugin,
                             () -> sendAdvisorTasks(p, tasks));
                 } catch (SQLException | DataAccessException ex) {
@@ -131,16 +132,15 @@ public class Tasks implements CommandExecutor {
             UUID uuid = p.getUniqueId();
             Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
                 try {
-                    int id;
+                    Member member;
                     if (args.length == 0) {
-                        id = playerDAO.getPlayerID(uuid);
+                        member = playerDAO.findMember(uuid);
                     } else {
-                        id = playerDAO.getPlayerID(args[0]);
+                        member = playerDAO.findMember(args[0]);
                     }
-                    String playerIGN = playerDAO.getPlayerIGN(id);
-                    List<Task> tasks = taskDAO.fetchPlayersActiveTasks(id);
+                    List<Task> tasks = taskDAO.fetchPlayersActiveTasks(member.getId());
                     Bukkit.getScheduler().runTask(plugin,
-                            () -> sendTasks(p, tasks, playerIGN));
+                            () -> sendTasks(p, tasks, member.getIgn()));
                 } catch (SQLException | DataAccessException ex) {
                     Bukkit.getScheduler().runTask(plugin,
                             () -> p.sendMessage(ChatColor.RED + ex.getMessage()));

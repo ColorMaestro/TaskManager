@@ -4,6 +4,7 @@ import me.colormaestro.taskmanager.data.DataAccessException;
 import me.colormaestro.taskmanager.data.HologramLayer;
 import me.colormaestro.taskmanager.data.PlayerDAO;
 import me.colormaestro.taskmanager.data.TaskDAO;
+import me.colormaestro.taskmanager.model.Member;
 import me.colormaestro.taskmanager.model.Task;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -64,10 +65,9 @@ public class PlayerJoinListener implements Listener {
             UUID uuid = event.getPlayer().getUniqueId();
             Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
                 try {
-                    long id = playerDAO.getDiscordUserID(uuid.toString());
-                    // id == 0 means that discord_id is null in database.
+                    Member member = playerDAO.findMember(uuid.toString());
                     Bukkit.getScheduler().runTask(plugin, () -> {
-                        if (id == 0) {
+                        if (member.getDiscordID() == null) {
                             event.getPlayer().sendMessage(ChatColor.BLUE
                                     + "ℹ You don't have linked your discord account yet. If you want to receive");
                             event.getPlayer().sendMessage(ChatColor.BLUE +
@@ -99,8 +99,8 @@ public class PlayerJoinListener implements Listener {
             UUID uuid = event.getPlayer().getUniqueId();
             Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
                 try {
-                    int id = playerDAO.getPlayerID(uuid);
-                    List<Task> finishedTasks = taskDAO.fetchFinishedTasks(id);
+                    Member advisor = playerDAO.findMember(uuid);
+                    List<Task> finishedTasks = taskDAO.fetchFinishedTasks(advisor.getId());
                     Bukkit.getScheduler().runTask(plugin, () -> sendFinishedTasks(event.getPlayer(), finishedTasks));
                 } catch (SQLException ex) {
                     ex.printStackTrace();

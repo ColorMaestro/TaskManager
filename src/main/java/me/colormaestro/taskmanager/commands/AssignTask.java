@@ -7,6 +7,7 @@ import me.colormaestro.taskmanager.data.PlayerDAO;
 import me.colormaestro.taskmanager.data.TaskDAO;
 import me.colormaestro.taskmanager.enums.TaskStatus;
 import me.colormaestro.taskmanager.model.AdvisedTask;
+import me.colormaestro.taskmanager.model.Member;
 import me.colormaestro.taskmanager.model.Task;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -48,10 +49,10 @@ public class AssignTask implements CommandExecutor {
         Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
             String ign = args[0];
             UUID uuid = player.getUniqueId();
-            int assigneeID, advisorID;
+            Member assignee, advisor;
             try {
-                assigneeID = playerDAO.getPlayerID(ign);
-                advisorID = playerDAO.getPlayerID(uuid);
+                assignee = playerDAO.findMember(ign);
+                advisor = playerDAO.findMember(uuid);
             } catch (SQLException ex) {
                 Bukkit.getScheduler().runTask(plugin, () -> player.sendMessage(ChatColor.RED + ex.getMessage()));
                 ex.printStackTrace();
@@ -65,21 +66,19 @@ public class AssignTask implements CommandExecutor {
 
             try {
                 int taskId = Integer.parseInt(args[1]);
-                taskDAO.assignTask(taskId, assigneeID, advisorID);
+                taskDAO.assignTask(taskId, assignee.getId(), advisor.getId());
                 Task task = taskDAO.findTask(taskId);
-                List<Task> activeTasks = taskDAO.fetchPlayersActiveTasks(assigneeID);
-                String assigneeUUID = playerDAO.getPlayerUUID(assigneeID);
-                long discordUserID = playerDAO.getDiscordUserID(assigneeUUID);
+                List<Task> activeTasks = taskDAO.fetchPlayersActiveTasks(assignee.getId());
                 Bukkit.getScheduler().runTask(plugin, () -> {
                     player.sendMessage(ChatColor.GREEN + "Task assigned.");
 
                     // Firstly we try to notify the assignee in game
                     boolean messageSent = false;
                     if (Bukkit.getPluginManager().isPluginEnabled("DecentHolograms")) {
-                        HologramLayer.getInstance().setTasks(assigneeUUID, activeTasks);
+                        HologramLayer.getInstance().setTasks(assignee.getUuid(), activeTasks);
                     }
                     for (Player target : Bukkit.getOnlinePlayers()) {
-                        if (target.getUniqueId().toString().equals(assigneeUUID)) {
+                        if (target.getUniqueId().toString().equals(assignee.getUuid())) {
                             target.sendMessage(ChatColor.GOLD + "You have new task from " + player.getName());
                             target.playSound(target.getLocation(),
                                     "minecraft:record.newtask", 10, 1);
@@ -89,8 +88,8 @@ public class AssignTask implements CommandExecutor {
                     }
 
                     // If the assignee is not online, sent him message to discord
-                    if (!messageSent) {
-                        DiscordManager.getInstance().taskCreated(discordUserID, player.getName(), task);
+                    if (!messageSent && assignee.getDiscordID() != null) {
+                        DiscordManager.getInstance().taskCreated(assignee.getDiscordID(), player.getName(), task);
                     }
                 });
             } catch (SQLException | IllegalArgumentException | DataAccessException ex) {

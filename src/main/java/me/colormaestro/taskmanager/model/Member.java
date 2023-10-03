@@ -4,9 +4,9 @@ public class Member {
     private Integer id;
     private final String uuid;
     private final String ign;
-    private final long discordID;
+    private final Long discordID;
 
-    public Member(String uuid, String ign, long discordID) {
+    public Member(String uuid, String ign, Long discordID) {
         this.uuid = uuid;
         this.ign = ign;
         this.discordID = discordID;
@@ -28,7 +28,7 @@ public class Member {
         return ign;
     }
 
-    public long getDiscordID() {
+    public Long getDiscordID() {
         return discordID;
     }
 }
