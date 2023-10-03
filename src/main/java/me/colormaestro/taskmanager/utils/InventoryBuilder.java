@@ -8,7 +8,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
 public class InventoryBuilder {
-    private Inventory inventory;
+    private final Inventory inventory;
     private static final int INVENTORY_SIZE = 54;
     private static final int SIXTH_ROW_FIRST_POSITION = 45;
     private static final int SIXTH_ROW_LAST_POSITION = 53;
