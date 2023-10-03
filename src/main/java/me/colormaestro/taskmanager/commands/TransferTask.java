@@ -3,7 +3,7 @@ package me.colormaestro.taskmanager.commands;
 import me.colormaestro.taskmanager.data.DataAccessException;
 import me.colormaestro.taskmanager.data.DiscordManager;
 import me.colormaestro.taskmanager.data.HologramLayer;
-import me.colormaestro.taskmanager.data.PlayerDAO;
+import me.colormaestro.taskmanager.data.MemberDAO;
 import me.colormaestro.taskmanager.data.TaskDAO;
 import me.colormaestro.taskmanager.enums.TaskStatus;
 import me.colormaestro.taskmanager.model.Member;
@@ -22,11 +22,11 @@ import java.util.List;
 
 public class TransferTask implements CommandExecutor {
     private final TaskDAO taskDAO;
-    private final PlayerDAO playerDAO;
+    private final MemberDAO memberDAO;
 
-    public TransferTask(TaskDAO taskDAO, PlayerDAO playerDAO) {
+    public TransferTask(TaskDAO taskDAO, MemberDAO memberDAO) {
         this.taskDAO = taskDAO;
-        this.playerDAO = playerDAO;
+        this.memberDAO = memberDAO;
     }
 
     @Override
@@ -54,8 +54,8 @@ public class TransferTask implements CommandExecutor {
                     return;
                 }
                 int oldAssigneeID = task.getAssigneeID();
-                Member oldAssignee = playerDAO.findMember(oldAssigneeID);
-                Member newAssignee = playerDAO.findMember(args[1]);
+                Member oldAssignee = memberDAO.findMember(oldAssigneeID);
+                Member newAssignee = memberDAO.findMember(args[1]);
                 taskDAO.updateTaskAssignee(id, newAssignee.getId());
                 List<Task> activeTasksOldAssignee = taskDAO.fetchPlayersActiveTasks(oldAssigneeID);
                 List<Task> activeTasksNewAssignee = taskDAO.fetchPlayersActiveTasks(newAssignee.getId());

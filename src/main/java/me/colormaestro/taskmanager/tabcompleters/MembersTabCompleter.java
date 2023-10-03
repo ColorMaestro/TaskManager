@@ -1,6 +1,6 @@
 package me.colormaestro.taskmanager.tabcompleters;
 
-import me.colormaestro.taskmanager.data.PlayerDAO;
+import me.colormaestro.taskmanager.data.MemberDAO;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -11,15 +11,15 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public class MembersTabCompleter implements ReloadableTabCompleter {
-    protected final PlayerDAO playerDAO;
+    protected final MemberDAO memberDAO;
     protected List<String> names;
 
     /**
      * Provides names of members as suggested command completion.
-     * @param playerDAO
+     * @param memberDAO
      */
-    public MembersTabCompleter(PlayerDAO playerDAO) {
-        this.playerDAO = playerDAO;
+    public MembersTabCompleter(MemberDAO memberDAO) {
+        this.memberDAO = memberDAO;
         reload();
     }
 
@@ -39,7 +39,7 @@ public class MembersTabCompleter implements ReloadableTabCompleter {
      */
     public void reload() {
         try {
-            names = playerDAO.getAllIGN();
+            names = memberDAO.getMembersNames();
         } catch (SQLException e) {
             e.printStackTrace();
             names = new ArrayList<>();

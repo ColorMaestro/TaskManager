@@ -1,14 +1,14 @@
 package me.colormaestro.taskmanager.tabcompleters;
 
-import me.colormaestro.taskmanager.data.PlayerDAO;
+import me.colormaestro.taskmanager.data.MemberDAO;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
 
 public class TasksTabCompleter extends MembersTabCompleter {
 
-    public TasksTabCompleter(PlayerDAO playerDAO) {
-        super(playerDAO);
+    public TasksTabCompleter(MemberDAO memberDAO) {
+        super(memberDAO);
     }
 
     /**
@@ -18,7 +18,7 @@ public class TasksTabCompleter extends MembersTabCompleter {
     @Override
     public void reload() {
         try {
-            names = playerDAO.getAllIGN();
+            names = memberDAO.getMembersNames();
             // adds 3 special targets (used in /tasks command)
             names.add("help");
             names.add("given");

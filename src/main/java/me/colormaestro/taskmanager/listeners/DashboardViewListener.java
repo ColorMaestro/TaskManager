@@ -1,6 +1,6 @@
 package me.colormaestro.taskmanager.listeners;
 
-import me.colormaestro.taskmanager.data.PlayerDAO;
+import me.colormaestro.taskmanager.data.MemberDAO;
 import me.colormaestro.taskmanager.data.TaskDAO;
 import me.colormaestro.taskmanager.utils.Directives;
 import org.bukkit.Bukkit;
@@ -16,12 +16,12 @@ import org.bukkit.plugin.Plugin;
 public class DashboardViewListener implements Listener {
     private final Plugin plugin;
     private final TaskDAO taskDAO;
-    private final PlayerDAO playerDAO;
+    private final MemberDAO memberDAO;
 
-    public DashboardViewListener(Plugin plugin, TaskDAO taskDAO, PlayerDAO playerDAO) {
+    public DashboardViewListener(Plugin plugin, TaskDAO taskDAO, MemberDAO memberDAO) {
         this.plugin = plugin;
         this.taskDAO = taskDAO;
-        this.playerDAO = playerDAO;
+        this.memberDAO = memberDAO;
     }
 
     @EventHandler
@@ -46,12 +46,12 @@ public class DashboardViewListener implements Listener {
     private void handlePlayerHeadClick(HumanEntity player, ItemStack headStack) {
         String ign = headStack.getItemMeta().getDisplayName().replaceFirst(ChatColor.BLUE + "" + ChatColor.BOLD, "");
         Bukkit.getScheduler().runTaskAsynchronously(plugin,
-                SharedRunnables.showActiveTasksView(plugin, taskDAO, playerDAO, player, ign, 1));
+                SharedRunnables.showActiveTasksView(plugin, taskDAO, memberDAO, player, ign, 1));
     }
 
     private void handleEyeClick(HumanEntity player) {
         Bukkit.getScheduler().runTaskAsynchronously(plugin,
-                SharedRunnables.showSupervisedTasksView(plugin, taskDAO, playerDAO, player, 1));
+                SharedRunnables.showSupervisedTasksView(plugin, taskDAO, memberDAO, player, 1));
     }
 
     private void handleArrowClick(HumanEntity player, InventoryView view, ItemStack arrow) {

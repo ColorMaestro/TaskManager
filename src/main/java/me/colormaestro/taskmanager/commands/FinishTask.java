@@ -3,7 +3,7 @@ package me.colormaestro.taskmanager.commands;
 import me.colormaestro.taskmanager.data.DataAccessException;
 import me.colormaestro.taskmanager.data.DiscordManager;
 import me.colormaestro.taskmanager.data.HologramLayer;
-import me.colormaestro.taskmanager.data.PlayerDAO;
+import me.colormaestro.taskmanager.data.MemberDAO;
 import me.colormaestro.taskmanager.data.TaskDAO;
 import me.colormaestro.taskmanager.model.Member;
 import me.colormaestro.taskmanager.model.Task;
@@ -21,11 +21,11 @@ import java.util.UUID;
 
 public class FinishTask implements CommandExecutor {
     private final TaskDAO taskDAO;
-    private final PlayerDAO playerDAO;
+    private final MemberDAO memberDAO;
 
-    public FinishTask(TaskDAO taskDAO, PlayerDAO playerDAO) {
+    public FinishTask(TaskDAO taskDAO, MemberDAO memberDAO) {
         this.taskDAO = taskDAO;
-        this.playerDAO = playerDAO;
+        this.memberDAO = memberDAO;
     }
 
     @Override
@@ -45,12 +45,12 @@ public class FinishTask implements CommandExecutor {
         UUID uuid = p.getUniqueId();
         Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
             try {
-                Member assignee = playerDAO.findMember(uuid);
+                Member assignee = memberDAO.findMember(uuid);
                 int id = Integer.parseInt(args[0]);
                 taskDAO.finishTask(id, assignee.getId());
                 List<Task> activeTasks = taskDAO.fetchPlayersActiveTasks(assignee.getId());
                 Task task = taskDAO.findTask(id);
-                Member advisor = playerDAO.findMember(task.getAdvisorID());
+                Member advisor = memberDAO.findMember(task.getAdvisorID());
                 Bukkit.getScheduler().runTask(plugin,
                         () -> {
                             p.sendMessage(ChatColor.GREEN + "Task finished.");

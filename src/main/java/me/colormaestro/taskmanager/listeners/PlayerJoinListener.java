@@ -2,7 +2,7 @@ package me.colormaestro.taskmanager.listeners;
 
 import me.colormaestro.taskmanager.data.DataAccessException;
 import me.colormaestro.taskmanager.data.HologramLayer;
-import me.colormaestro.taskmanager.data.PlayerDAO;
+import me.colormaestro.taskmanager.data.MemberDAO;
 import me.colormaestro.taskmanager.data.TaskDAO;
 import me.colormaestro.taskmanager.model.Member;
 import me.colormaestro.taskmanager.model.Task;
@@ -21,12 +21,12 @@ import java.util.UUID;
 public class PlayerJoinListener implements Listener {
     private final Plugin plugin;
     private final TaskDAO taskDAO;
-    private final PlayerDAO playerDAO;
+    private final MemberDAO memberDAO;
 
-    public PlayerJoinListener(Plugin plugin, TaskDAO taskDAO, PlayerDAO playerDAO) {
+    public PlayerJoinListener(Plugin plugin, TaskDAO taskDAO, MemberDAO memberDAO) {
         this.plugin = plugin;
         this.taskDAO = taskDAO;
-        this.playerDAO = playerDAO;
+        this.memberDAO = memberDAO;
     }
 
     @EventHandler
@@ -34,8 +34,8 @@ public class PlayerJoinListener implements Listener {
         if (Bukkit.getPluginManager().isPluginEnabled("DecentHolograms")) {
             Bukkit.getScheduler().runTaskLater(plugin, checkHologram(event), 180);
         }
-        Bukkit.getScheduler().runTaskLater(plugin, checkDiscordID(event, plugin, playerDAO), 190);
-        Bukkit.getScheduler().runTaskLater(plugin, checkFinishedTasks(event, plugin, taskDAO, playerDAO), 200);
+        Bukkit.getScheduler().runTaskLater(plugin, checkDiscordID(event, plugin, memberDAO), 190);
+        Bukkit.getScheduler().runTaskLater(plugin, checkFinishedTasks(event, plugin, taskDAO, memberDAO), 200);
     }
 
     private static Runnable checkHologram(PlayerJoinEvent event) {
@@ -57,15 +57,15 @@ public class PlayerJoinListener implements Listener {
      *
      * @param event     PlayerJoinEvent
      * @param plugin    under which to run the job
-     * @param playerDAO object for communication with database
+     * @param memberDAO object for communication with database
      * @return Runnable (job) for execution
      */
-    private static Runnable checkDiscordID(PlayerJoinEvent event, Plugin plugin, PlayerDAO playerDAO) {
+    private static Runnable checkDiscordID(PlayerJoinEvent event, Plugin plugin, MemberDAO memberDAO) {
         return () -> {
             UUID uuid = event.getPlayer().getUniqueId();
             Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
                 try {
-                    Member member = playerDAO.findMember(uuid.toString());
+                    Member member = memberDAO.findMember(uuid.toString());
                     Bukkit.getScheduler().runTask(plugin, () -> {
                         if (member.getDiscordID() == null) {
                             event.getPlayer().sendMessage(ChatColor.BLUE
@@ -91,15 +91,15 @@ public class PlayerJoinListener implements Listener {
      *
      * @param event     PlayerJoinEvent
      * @param plugin    under which to run the job
-     * @param playerDAO object for communication with database
+     * @param memberDAO object for communication with database
      * @return Runnable (job) for execution
      */
-    private static Runnable checkFinishedTasks(PlayerJoinEvent event, Plugin plugin, TaskDAO taskDAO, PlayerDAO playerDAO) {
+    private static Runnable checkFinishedTasks(PlayerJoinEvent event, Plugin plugin, TaskDAO taskDAO, MemberDAO memberDAO) {
         return () -> {
             UUID uuid = event.getPlayer().getUniqueId();
             Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
                 try {
-                    Member advisor = playerDAO.findMember(uuid);
+                    Member advisor = memberDAO.findMember(uuid);
                     List<Task> finishedTasks = taskDAO.fetchFinishedTasks(advisor.getId());
                     Bukkit.getScheduler().runTask(plugin, () -> sendFinishedTasks(event.getPlayer(), finishedTasks));
                 } catch (SQLException ex) {

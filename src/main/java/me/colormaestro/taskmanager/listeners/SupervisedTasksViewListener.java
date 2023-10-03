@@ -1,6 +1,6 @@
 package me.colormaestro.taskmanager.listeners;
 
-import me.colormaestro.taskmanager.data.PlayerDAO;
+import me.colormaestro.taskmanager.data.MemberDAO;
 import me.colormaestro.taskmanager.data.TaskDAO;
 import me.colormaestro.taskmanager.utils.Directives;
 import org.bukkit.Bukkit;
@@ -15,12 +15,12 @@ import org.bukkit.plugin.Plugin;
 public class SupervisedTasksViewListener implements Listener {
     private final Plugin plugin;
     private final TaskDAO taskDAO;
-    private final PlayerDAO playerDAO;
+    private final MemberDAO memberDAO;
 
-    public SupervisedTasksViewListener(Plugin plugin, TaskDAO taskDAO, PlayerDAO playerDAO) {
+    public SupervisedTasksViewListener(Plugin plugin, TaskDAO taskDAO, MemberDAO memberDAO) {
         this.plugin = plugin;
         this.taskDAO = taskDAO;
-        this.playerDAO = playerDAO;
+        this.memberDAO = memberDAO;
     }
 
     @EventHandler
@@ -70,6 +70,6 @@ public class SupervisedTasksViewListener implements Listener {
         }
 
         Bukkit.getScheduler().runTaskAsynchronously(plugin,
-                SharedRunnables.showSupervisedTasksView(plugin, taskDAO, playerDAO, player, currentPage));
+                SharedRunnables.showSupervisedTasksView(plugin, taskDAO, memberDAO, player, currentPage));
     }
 }

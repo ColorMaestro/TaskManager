@@ -1,6 +1,6 @@
 package me.colormaestro.taskmanager.commands;
 
-import me.colormaestro.taskmanager.data.PlayerDAO;
+import me.colormaestro.taskmanager.data.MemberDAO;
 import me.colormaestro.taskmanager.data.TaskDAO;
 import me.colormaestro.taskmanager.listeners.SharedRunnables;
 import org.bukkit.Bukkit;
@@ -13,11 +13,11 @@ import org.bukkit.plugin.Plugin;
 
 public class VisitTask implements CommandExecutor {
     private final TaskDAO taskDAO;
-    private final PlayerDAO playerDAO;
+    private final MemberDAO memberDAO;
 
-    public VisitTask(TaskDAO taskDAO, PlayerDAO playerDAO) {
+    public VisitTask(TaskDAO taskDAO, MemberDAO memberDAO) {
         this.taskDAO = taskDAO;
-        this.playerDAO = playerDAO;
+        this.memberDAO = memberDAO;
     }
 
     @Override
@@ -37,7 +37,7 @@ public class VisitTask implements CommandExecutor {
         Bukkit.getScheduler().runTaskAsynchronously(plugin,
                 SharedRunnables.teleportPlayerToTask(plugin, taskDAO, player, taskId));
         Bukkit.getScheduler().runTaskAsynchronously(plugin,
-                SharedRunnables.givePlayerAssignmentBook(plugin, taskDAO, playerDAO, player, taskId));
+                SharedRunnables.givePlayerAssignmentBook(plugin, taskDAO, memberDAO, player, taskId));
         return true;
     }
 }

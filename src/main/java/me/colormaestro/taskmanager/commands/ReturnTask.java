@@ -3,7 +3,7 @@ package me.colormaestro.taskmanager.commands;
 import me.colormaestro.taskmanager.data.DataAccessException;
 import me.colormaestro.taskmanager.data.DiscordManager;
 import me.colormaestro.taskmanager.data.HologramLayer;
-import me.colormaestro.taskmanager.data.PlayerDAO;
+import me.colormaestro.taskmanager.data.MemberDAO;
 import me.colormaestro.taskmanager.data.TaskDAO;
 import me.colormaestro.taskmanager.model.Member;
 import me.colormaestro.taskmanager.model.Task;
@@ -21,11 +21,11 @@ import java.util.List;
 
 public class ReturnTask implements CommandExecutor {
     private final TaskDAO taskDAO;
-    private final PlayerDAO playerDAO;
+    private final MemberDAO memberDAO;
 
-    public ReturnTask(TaskDAO taskDAO, PlayerDAO playerDAO) {
+    public ReturnTask(TaskDAO taskDAO, MemberDAO memberDAO) {
         this.taskDAO = taskDAO;
-        this.playerDAO = playerDAO;
+        this.memberDAO = memberDAO;
     }
 
     @Override
@@ -50,7 +50,7 @@ public class ReturnTask implements CommandExecutor {
                 taskDAO.returnTask(id, force);
                 Task task = taskDAO.findTask(id);
                 List<Task> activeTasks = taskDAO.fetchPlayersActiveTasks(task.getAssigneeID());
-                Member assignee = playerDAO.findMember(task.getAssigneeID());
+                Member assignee = memberDAO.findMember(task.getAssigneeID());
                 Bukkit.getScheduler().runTask(plugin, () -> {
                     p.sendMessage(ChatColor.GREEN + "Task returned.");
                     if (Bukkit.getPluginManager().isPluginEnabled("DecentHolograms")) {

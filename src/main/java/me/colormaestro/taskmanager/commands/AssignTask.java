@@ -3,10 +3,8 @@ package me.colormaestro.taskmanager.commands;
 import me.colormaestro.taskmanager.data.DataAccessException;
 import me.colormaestro.taskmanager.data.DiscordManager;
 import me.colormaestro.taskmanager.data.HologramLayer;
-import me.colormaestro.taskmanager.data.PlayerDAO;
+import me.colormaestro.taskmanager.data.MemberDAO;
 import me.colormaestro.taskmanager.data.TaskDAO;
-import me.colormaestro.taskmanager.enums.TaskStatus;
-import me.colormaestro.taskmanager.model.AdvisedTask;
 import me.colormaestro.taskmanager.model.Member;
 import me.colormaestro.taskmanager.model.Task;
 import org.bukkit.Bukkit;
@@ -18,7 +16,6 @@ import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 import org.jetbrains.annotations.NotNull;
 
-import java.sql.Date;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.UUID;
@@ -26,12 +23,12 @@ import java.util.UUID;
 public class AssignTask implements CommandExecutor {
     private final Plugin plugin;
     private final TaskDAO taskDAO;
-    private final PlayerDAO playerDAO;
+    private final MemberDAO memberDAO;
 
-    public AssignTask(Plugin plugin, TaskDAO taskDAO, PlayerDAO playerDAO) {
+    public AssignTask(Plugin plugin, TaskDAO taskDAO, MemberDAO memberDAO) {
         this.plugin = plugin;
         this.taskDAO = taskDAO;
-        this.playerDAO = playerDAO;
+        this.memberDAO = memberDAO;
     }
 
     @Override
@@ -51,8 +48,8 @@ public class AssignTask implements CommandExecutor {
             UUID uuid = player.getUniqueId();
             Member assignee, advisor;
             try {
-                assignee = playerDAO.findMember(ign);
-                advisor = playerDAO.findMember(uuid);
+                assignee = memberDAO.findMember(ign);
+                advisor = memberDAO.findMember(uuid);
             } catch (SQLException ex) {
                 Bukkit.getScheduler().runTask(plugin, () -> player.sendMessage(ChatColor.RED + ex.getMessage()));
                 ex.printStackTrace();

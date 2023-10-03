@@ -20,13 +20,13 @@ import java.util.Random;
 import java.util.UUID;
 
 public class DiscordManager {
-    private final PlayerDAO playerDAO;
+    private final MemberDAO memberDAO;
     private static DiscordManager instance;
     private final JavaPlugin plugin;
     private final Map<String, UUID> codes;
     private JDA api = null;
 
-    private DiscordManager(String token, PlayerDAO playerDAO, JavaPlugin plugin) {
+    private DiscordManager(String token, MemberDAO memberDAO, JavaPlugin plugin) {
         try {
             api = JDABuilder.createDefault(token).addEventListeners(new DiscordMessageListener()).build();
             plugin.getLogger().info("Token provided, bot connection with Discord established");
@@ -34,13 +34,13 @@ public class DiscordManager {
             plugin.getLogger().info("Cannot login Discord bot: " + e.getMessage());
         }
         codes = Collections.synchronizedMap(new HashMap<>());
-        this.playerDAO = playerDAO;
+        this.memberDAO = memberDAO;
         this.plugin = plugin;
     }
 
-    public static void instantiate(String token, PlayerDAO playerDAO, JavaPlugin plugin) {
+    public static void instantiate(String token, MemberDAO memberDAO, JavaPlugin plugin) {
         if (instance == null) {
-            instance = new DiscordManager(token, playerDAO, plugin);
+            instance = new DiscordManager(token, memberDAO, plugin);
         }
     }
 
@@ -140,7 +140,7 @@ public class DiscordManager {
         synchronized (codes) {
             if (codes.containsKey(code)) {
                 try {
-                    playerDAO.setDiscordUserID(codes.get(code), discordID);
+                    memberDAO.setDiscordUserID(codes.get(code), discordID);
                     codes.remove(code);
                     return true;
                 } catch (SQLException | DataAccessException ex) {

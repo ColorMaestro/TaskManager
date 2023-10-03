@@ -1,6 +1,6 @@
 package me.colormaestro.taskmanager.commands;
 
-import me.colormaestro.taskmanager.data.PlayerDAO;
+import me.colormaestro.taskmanager.data.MemberDAO;
 import me.colormaestro.taskmanager.tabcompleters.ReloadableTabCompleter;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -16,13 +16,13 @@ import java.sql.SQLException;
 
 public class AddMember implements CommandExecutor {
     private final Plugin plugin;
-    private final PlayerDAO playerDAO;
+    private final MemberDAO memberDAO;
     private final ReloadableTabCompleter completer;
     private final ReloadableTabCompleter completerA;
 
-    public AddMember(Plugin plugin, PlayerDAO playerDAO, ReloadableTabCompleter completer, ReloadableTabCompleter completerA) {
+    public AddMember(Plugin plugin, MemberDAO memberDAO, ReloadableTabCompleter completer, ReloadableTabCompleter completerA) {
         this.plugin = plugin;
-        this.playerDAO = playerDAO;
+        this.memberDAO = memberDAO;
         this.completer = completer;
         this.completerA = completerA;
     }
@@ -56,8 +56,8 @@ public class AddMember implements CommandExecutor {
         String finalUuid = uuid;
         Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
             try {
-                if (!playerDAO.playerExists(finalUuid)) {
-                    playerDAO.addPlayer(finalUuid, ign);
+                if (!memberDAO.memberExists(finalUuid)) {
+                    memberDAO.addMember(finalUuid, ign);
                     completer.reload();
                     completerA.reload();
                     Bukkit.getScheduler().runTask(plugin, () -> player.sendMessage(

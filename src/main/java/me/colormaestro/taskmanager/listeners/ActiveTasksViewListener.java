@@ -1,6 +1,6 @@
 package me.colormaestro.taskmanager.listeners;
 
-import me.colormaestro.taskmanager.data.PlayerDAO;
+import me.colormaestro.taskmanager.data.MemberDAO;
 import me.colormaestro.taskmanager.data.TaskDAO;
 import me.colormaestro.taskmanager.utils.Directives;
 import org.bukkit.Bukkit;
@@ -16,12 +16,12 @@ import org.bukkit.plugin.Plugin;
 public class ActiveTasksViewListener implements Listener {
     private final Plugin plugin;
     private final TaskDAO taskDAO;
-    private final PlayerDAO playerDAO;
+    private final MemberDAO memberDAO;
 
-    public ActiveTasksViewListener(Plugin plugin, TaskDAO taskDAO, PlayerDAO playerDAO) {
+    public ActiveTasksViewListener(Plugin plugin, TaskDAO taskDAO, MemberDAO memberDAO) {
         this.plugin = plugin;
         this.taskDAO = taskDAO;
-        this.playerDAO = playerDAO;
+        this.memberDAO = memberDAO;
     }
 
     @EventHandler
@@ -53,7 +53,7 @@ public class ActiveTasksViewListener implements Listener {
         String adjective = concreteStack.getItemMeta().getDisplayName().split(" ")[1];
         String ign = adjective.split("'")[0];
         Bukkit.getScheduler().runTaskAsynchronously(plugin,
-                SharedRunnables.showApprovedTasksView(plugin, taskDAO, playerDAO, player, ign, 1));
+                SharedRunnables.showApprovedTasksView(plugin, taskDAO, memberDAO, player, ign, 1));
     }
 
     private void handleSpectralArrowClick(HumanEntity player) {
@@ -80,6 +80,6 @@ public class ActiveTasksViewListener implements Listener {
         }
 
         Bukkit.getScheduler().runTaskAsynchronously(plugin,
-                SharedRunnables.showActiveTasksView(plugin, taskDAO, playerDAO, player, ign, currentPage));
+                SharedRunnables.showActiveTasksView(plugin, taskDAO, memberDAO, player, ign, currentPage));
     }
 }

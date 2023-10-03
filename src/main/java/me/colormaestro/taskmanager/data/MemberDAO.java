@@ -1,8 +1,6 @@
 package me.colormaestro.taskmanager.data;
 
-import me.colormaestro.taskmanager.enums.TaskStatus;
 import me.colormaestro.taskmanager.model.Member;
-import me.colormaestro.taskmanager.model.Task;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -16,10 +14,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-public class PlayerDAO {
+public class MemberDAO {
     private final String url;
 
-    public PlayerDAO(String dataFolderPath) {
+    public MemberDAO(String dataFolderPath) {
         Path path = Paths.get(dataFolderPath, "db.sqlite");
         this.url = "jdbc:sqlite:" + path;
         initTable();
@@ -142,7 +140,7 @@ public class PlayerDAO {
      * @return list of all members' in game names
      * @throws SQLException if SQL error arise
      */
-    public synchronized List<String> getAllIGN() throws SQLException {
+    public synchronized List<String> getMembersNames() throws SQLException {
         try (Connection connection = DriverManager.getConnection(url);
              PreparedStatement st = connection.prepareStatement(
                      "SELECT ign FROM PLAYERS")) {
@@ -157,13 +155,13 @@ public class PlayerDAO {
     }
 
     /**
-     * Checks whether there is record about player in DB.
+     * Checks whether there is record about member in DB.
      *
      * @param uuid according to which to seek
      * @return true if there's matching record, false otherwise
      * @throws SQLException if SQL error arise
      */
-    public synchronized boolean playerExists(String uuid) throws SQLException {
+    public synchronized boolean memberExists(String uuid) throws SQLException {
         try (Connection connection = DriverManager.getConnection(url);
              PreparedStatement st = connection.prepareStatement(
                      "SELECT ign FROM PLAYERS WHERE uuid = ?")) {
@@ -178,13 +176,13 @@ public class PlayerDAO {
     }
 
     /**
-     * Creates record about player.
+     * Creates record about member.
      *
-     * @param uuid player's uuid
-     * @param ign  player's ign
+     * @param uuid member's uuid
+     * @param ign  member's ign
      * @throws SQLException if SQL error arise
      */
-    public synchronized void addPlayer(String uuid, String ign) throws SQLException {
+    public synchronized void addMember(String uuid, String ign) throws SQLException {
         try (Connection connection = DriverManager.getConnection(url);
              PreparedStatement st = connection.prepareStatement(
                      "INSERT INTO PLAYERS (uuid, ign) VALUES (?, ?)")) {
@@ -197,8 +195,8 @@ public class PlayerDAO {
     /**
      * Sets member's discord ID.
      *
-     * @param uuid      player's uuid
-     * @param discordID ID of player's discord account
+     * @param uuid      member's uuid
+     * @param discordID ID of members's discord account
      * @throws SQLException        if SQL error arise
      * @throws DataAccessException if there's no matching record for member
      */
@@ -210,7 +208,7 @@ public class PlayerDAO {
             st.setString(2, uuid.toString());
             int affected = st.executeUpdate();
             if (affected == 0) {
-                throw new DataAccessException("No discord ID change for player with uuid " + uuid + ".");
+                throw new DataAccessException("No discord ID change for member with uuid " + uuid + ".");
             }
         }
     }

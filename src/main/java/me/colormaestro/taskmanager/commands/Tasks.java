@@ -1,7 +1,7 @@
 package me.colormaestro.taskmanager.commands;
 
 import me.colormaestro.taskmanager.data.DataAccessException;
-import me.colormaestro.taskmanager.data.PlayerDAO;
+import me.colormaestro.taskmanager.data.MemberDAO;
 import me.colormaestro.taskmanager.data.TaskDAO;
 import me.colormaestro.taskmanager.model.AdvisedTask;
 import me.colormaestro.taskmanager.model.Member;
@@ -27,7 +27,7 @@ import java.util.UUID;
 public class Tasks implements CommandExecutor {
     private final Plugin plugin;
     private final TaskDAO taskDAO;
-    private final PlayerDAO playerDAO;
+    private final MemberDAO memberDAO;
     private final Random rand;
 
     private final String[][] commandsAndDescriptions = {
@@ -54,10 +54,10 @@ public class Tasks implements CommandExecutor {
             {"/establish", "establishes the Hologram where is summary of member's tasks"}
     };
 
-    public Tasks(Plugin plugin, TaskDAO taskDAO, PlayerDAO playerDAO) {
+    public Tasks(Plugin plugin, TaskDAO taskDAO, MemberDAO memberDAO) {
         this.plugin = plugin;
         this.taskDAO = taskDAO;
-        this.playerDAO = playerDAO;
+        this.memberDAO = memberDAO;
         this.rand = new Random();
     }
 
@@ -74,7 +74,7 @@ public class Tasks implements CommandExecutor {
             UUID uuid = p.getUniqueId();
             Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
                 try {
-                    Member member = playerDAO.findMember(uuid);
+                    Member member = memberDAO.findMember(uuid);
                     List<AdvisedTask> tasks = taskDAO.fetchAdvisorActiveTasks(member.getId());
                     Bukkit.getScheduler().runTask(plugin,
                             () -> sendAdvisorTasks(p, tasks));
@@ -134,9 +134,9 @@ public class Tasks implements CommandExecutor {
                 try {
                     Member member;
                     if (args.length == 0) {
-                        member = playerDAO.findMember(uuid);
+                        member = memberDAO.findMember(uuid);
                     } else {
-                        member = playerDAO.findMember(args[0]);
+                        member = memberDAO.findMember(args[0]);
                     }
                     List<Task> tasks = taskDAO.fetchPlayersActiveTasks(member.getId());
                     Bukkit.getScheduler().runTask(plugin,

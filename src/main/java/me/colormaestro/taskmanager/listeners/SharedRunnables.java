@@ -1,9 +1,8 @@
 package me.colormaestro.taskmanager.listeners;
 
 import me.colormaestro.taskmanager.data.DataAccessException;
-import me.colormaestro.taskmanager.data.PlayerDAO;
+import me.colormaestro.taskmanager.data.MemberDAO;
 import me.colormaestro.taskmanager.data.TaskDAO;
-import me.colormaestro.taskmanager.enums.TaskStatus;
 import me.colormaestro.taskmanager.model.AdvisedTask;
 import me.colormaestro.taskmanager.model.Member;
 import me.colormaestro.taskmanager.model.MemberTaskStats;
@@ -66,10 +65,10 @@ public class SharedRunnables {
         };
     }
 
-    public static Runnable showActiveTasksView(Plugin plugin, TaskDAO taskDAO, PlayerDAO playerDAO, HumanEntity player, String ign, long page) {
+    public static Runnable showActiveTasksView(Plugin plugin, TaskDAO taskDAO, MemberDAO memberDAO, HumanEntity player, String ign, long page) {
         return () -> {
             try {
-                Member member = playerDAO.findMember(ign);
+                Member member = memberDAO.findMember(ign);
                 List<Task> tasks = taskDAO.fetchPlayersActiveTasks(member.getId());
                 int totalPages = tasks.size() / PAGE_SIZE + 1;
                 List<Task> finalTasks = tasks.stream().skip((page - 1) * PAGE_SIZE).limit(PAGE_SIZE).toList();
@@ -106,10 +105,10 @@ public class SharedRunnables {
         };
     }
 
-    public static Runnable showApprovedTasksView(Plugin plugin, TaskDAO taskDAO, PlayerDAO playerDAO, HumanEntity player, String ign, long page) {
+    public static Runnable showApprovedTasksView(Plugin plugin, TaskDAO taskDAO, MemberDAO memberDAO, HumanEntity player, String ign, long page) {
         return () -> {
             try {
-                Member member = playerDAO.findMember(ign);
+                Member member = memberDAO.findMember(ign);
                 List<Task> tasks = taskDAO.fetchPlayersApprovedTasks(member.getId());
                 int totalPages = tasks.size() / PAGE_SIZE + 1;
                 List<Task> finalTasks = tasks.stream().skip((page - 1) * PAGE_SIZE).limit(PAGE_SIZE).toList();
@@ -144,10 +143,10 @@ public class SharedRunnables {
         };
     }
 
-    public static Runnable showSupervisedTasksView(Plugin plugin, TaskDAO taskDAO, PlayerDAO playerDAO, HumanEntity player, long page) {
+    public static Runnable showSupervisedTasksView(Plugin plugin, TaskDAO taskDAO, MemberDAO memberDAO, HumanEntity player, long page) {
         return () -> {
             try {
-                Member member = playerDAO.findMember(player.getName());
+                Member member = memberDAO.findMember(player.getName());
                 List<AdvisedTask> tasks = taskDAO.fetchAdvisorActiveTasks(member.getId());
                 int totalPages = tasks.size() / PAGE_SIZE + 1;
                 List<AdvisedTask> finalTasks = tasks.stream().skip((page - 1) * PAGE_SIZE).limit(PAGE_SIZE).toList();
@@ -244,7 +243,7 @@ public class SharedRunnables {
     public static Runnable givePlayerAssignmentBook(
             Plugin plugin,
             TaskDAO taskDAO,
-            PlayerDAO playerDAO,
+            MemberDAO memberDAO,
             Player player,
             String taskId) {
         return () -> {
@@ -255,8 +254,8 @@ public class SharedRunnables {
                 Integer advisorID = task.getAdvisorID();
                 Integer assigneeID = task.getAssigneeID();
 
-                String advisorName = advisorID != null ? playerDAO.findMember(advisorID).getIgn() : "Unassigned";
-                String assigneeName = assigneeID != null ? playerDAO.findMember(assigneeID).getIgn() : "Unassigned";
+                String advisorName = advisorID != null ? memberDAO.findMember(advisorID).getIgn() : "Unassigned";
+                String assigneeName = assigneeID != null ? memberDAO.findMember(assigneeID).getIgn() : "Unassigned";
                 Bukkit.getScheduler().runTask(plugin, () -> {
                     ItemStack book = createTaskBook(task, advisorName, assigneeName);
                     player.getInventory().addItem(book);

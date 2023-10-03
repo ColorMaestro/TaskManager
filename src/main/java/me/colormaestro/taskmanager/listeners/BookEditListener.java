@@ -3,7 +3,7 @@ package me.colormaestro.taskmanager.listeners;
 import me.colormaestro.taskmanager.data.DataAccessException;
 import me.colormaestro.taskmanager.data.DiscordManager;
 import me.colormaestro.taskmanager.data.HologramLayer;
-import me.colormaestro.taskmanager.data.PlayerDAO;
+import me.colormaestro.taskmanager.data.MemberDAO;
 import me.colormaestro.taskmanager.data.TaskDAO;
 import me.colormaestro.taskmanager.enums.TaskStatus;
 import me.colormaestro.taskmanager.model.Member;
@@ -25,12 +25,12 @@ import java.util.UUID;
 public class BookEditListener implements Listener {
     private final Plugin plugin;
     private final TaskDAO taskDAO;
-    private final PlayerDAO playerDAO;
+    private final MemberDAO memberDAO;
 
-    public BookEditListener(Plugin plugin, TaskDAO taskDAO, PlayerDAO playerDAO) {
+    public BookEditListener(Plugin plugin, TaskDAO taskDAO, MemberDAO memberDAO) {
         this.plugin = plugin;
         this.taskDAO = taskDAO;
-        this.playerDAO = playerDAO;
+        this.memberDAO = memberDAO;
     }
 
     @EventHandler
@@ -88,8 +88,8 @@ public class BookEditListener implements Listener {
         return () -> {
             Member assignee, advisor;
             try {
-                assignee = playerDAO.findMember(ign);
-                advisor = playerDAO.findMember(uuid);
+                assignee = memberDAO.findMember(ign);
+                advisor = memberDAO.findMember(uuid);
             } catch (SQLException ex) {
                 Bukkit.getScheduler().runTask(plugin, () -> p.sendMessage(ChatColor.RED + ex.getMessage()));
                 ex.printStackTrace();
@@ -155,7 +155,7 @@ public class BookEditListener implements Listener {
         return () -> {
             Member advisor;
             try {
-                advisor = playerDAO.findMember(uuid);
+                advisor = memberDAO.findMember(uuid);
             } catch (SQLException | DataAccessException ex) {
                 Bukkit.getScheduler().runTask(plugin, () -> p.sendMessage(ChatColor.RED + ex.getMessage()));
                 ex.printStackTrace();

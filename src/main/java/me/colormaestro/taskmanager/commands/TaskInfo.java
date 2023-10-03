@@ -1,28 +1,23 @@
 package me.colormaestro.taskmanager.commands;
 
-import me.colormaestro.taskmanager.data.DataAccessException;
-import me.colormaestro.taskmanager.data.PlayerDAO;
+import me.colormaestro.taskmanager.data.MemberDAO;
 import me.colormaestro.taskmanager.data.TaskDAO;
 import me.colormaestro.taskmanager.listeners.SharedRunnables;
-import me.colormaestro.taskmanager.model.Task;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
-import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.Plugin;
-
-import java.sql.SQLException;
 
 public class TaskInfo implements CommandExecutor {
     private final TaskDAO taskDAO;
-    private final PlayerDAO playerDAO;
+    private final MemberDAO memberDAO;
 
-    public TaskInfo(TaskDAO taskDAO, PlayerDAO playerDAO) {
+    public TaskInfo(TaskDAO taskDAO, MemberDAO memberDAO) {
         this.taskDAO = taskDAO;
-        this.playerDAO = playerDAO;
+        this.memberDAO = memberDAO;
     }
 
     @Override
@@ -40,7 +35,7 @@ public class TaskInfo implements CommandExecutor {
         Plugin plugin = Bukkit.getPluginManager().getPlugin("TaskManager");
         String taskId = args[0];
         Bukkit.getScheduler().runTaskAsynchronously(plugin,
-                SharedRunnables.givePlayerAssignmentBook(plugin, taskDAO, playerDAO, player, taskId));
+                SharedRunnables.givePlayerAssignmentBook(plugin, taskDAO, memberDAO, player, taskId));
         return true;
     }
 }
