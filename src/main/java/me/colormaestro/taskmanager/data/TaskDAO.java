@@ -16,7 +16,6 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.sql.Types;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -86,8 +85,8 @@ public class TaskDAO {
                              "status, date_given, date_finished) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)")) {
             st.setString(1, task.getTitle());
             st.setString(2, task.getDescription());
-            setIntOrNull(st, 3, task.getAssigneeID());
-            setIntOrNull(st, 4, task.getAdvisorID());
+            ParsingUtils.setIntOrNull(st, 3, task.getAssigneeID());
+            ParsingUtils.setIntOrNull(st, 4, task.getAdvisorID());
             st.setDouble(5, task.getX());
             st.setDouble(6, task.getY());
             st.setDouble(7, task.getZ());
@@ -244,8 +243,8 @@ public class TaskDAO {
             Task task = new Task(
                     rs.getString("title"),
                     rs.getString("description"),
-                    getIntOrNull(rs, "assignee_id"),
-                    getIntOrNull(rs, "advisor_id"),
+                    ParsingUtils.getIntOrNull(rs, "assignee_id"),
+                    ParsingUtils.getIntOrNull(rs, "advisor_id"),
                     rs.getDouble("x"),
                     rs.getDouble("y"),
                     rs.getDouble("z"),
@@ -500,37 +499,5 @@ public class TaskDAO {
         }
         rs.close();
         return tasks;
-    }
-
-    /**
-     * Sets integer or null value at given index for prepared statement
-     *
-     * @param statement in which to set value
-     * @param index numbered from 1
-     * @param value to set
-     */
-    private void setIntOrNull(PreparedStatement statement, int index, Integer value) throws SQLException {
-        if (value != null) {
-            statement.setInt(index, value);
-        } else {
-            statement.setNull(index, Types.INTEGER);
-        }
-    }
-
-    /**
-     * Gets integer value or null for given column
-     *
-     * @param resultSet describing returned records from query
-     * @param columnName column from which to extract value
-     * @return Integer instance
-     * @throws SQLException if SQL error arise
-     */
-    private Integer getIntOrNull(ResultSet resultSet, String columnName) throws SQLException {
-        int value = resultSet.getInt(columnName);
-        if (resultSet.wasNull()) {
-            return null;
-        } else {
-            return value;
-        }
     }
 }
