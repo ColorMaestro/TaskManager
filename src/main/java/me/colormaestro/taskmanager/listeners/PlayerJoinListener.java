@@ -104,7 +104,7 @@ public class PlayerJoinListener implements Listener {
             UUID uuid = event.getPlayer().getUniqueId();
             Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
                 try {
-                    Member member = memberDAO.findMember(uuid.toString());
+                    Member member = memberDAO.findMember(uuid);
                     Bukkit.getScheduler().runTask(plugin, () -> {
                         if (member.getDiscordID() == null) {
                             event.getPlayer().sendMessage(ChatColor.BLUE
