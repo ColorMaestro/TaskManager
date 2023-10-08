@@ -6,6 +6,7 @@ import me.colormaestro.taskmanager.data.MemberDAO;
 import me.colormaestro.taskmanager.data.TaskDAO;
 import me.colormaestro.taskmanager.model.Member;
 import me.colormaestro.taskmanager.model.Task;
+import me.colormaestro.taskmanager.tabcompleters.ReloadableTabCompleter;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
@@ -22,20 +23,58 @@ public class PlayerJoinListener implements Listener {
     private final Plugin plugin;
     private final TaskDAO taskDAO;
     private final MemberDAO memberDAO;
+    private final ReloadableTabCompleter completer;
+    private final ReloadableTabCompleter completerA;
 
-    public PlayerJoinListener(Plugin plugin, TaskDAO taskDAO, MemberDAO memberDAO) {
+    public PlayerJoinListener(Plugin plugin, TaskDAO taskDAO, MemberDAO memberDAO,
+                              ReloadableTabCompleter completer, ReloadableTabCompleter completerA) {
         this.plugin = plugin;
         this.taskDAO = taskDAO;
         this.memberDAO = memberDAO;
+        this.completer = completer;
+        this.completerA = completerA;
     }
 
     @EventHandler
     public void onJoin(PlayerJoinEvent event) {
+        Bukkit.getScheduler().runTaskLater(plugin, checkMemberNameUpdate(event, plugin, memberDAO, completer, completerA), 20);
         if (Bukkit.getPluginManager().isPluginEnabled("DecentHolograms")) {
             Bukkit.getScheduler().runTaskLater(plugin, checkHologram(event), 180);
         }
         Bukkit.getScheduler().runTaskLater(plugin, checkDiscordID(event, plugin, memberDAO), 190);
         Bukkit.getScheduler().runTaskLater(plugin, checkFinishedTasks(event, plugin, taskDAO, memberDAO), 200);
+    }
+
+    /**
+     * @param event      PlayerJoinEvent
+     * @param plugin     under which to run the job
+     * @param memberDAO  object for communication with database
+     * @param completer
+     * @param completerA
+     * @return Runnable (job) for execution
+     */
+    private static Runnable checkMemberNameUpdate(PlayerJoinEvent event, Plugin plugin, MemberDAO memberDAO,
+                                                  ReloadableTabCompleter completer, ReloadableTabCompleter completerA) {
+        return () -> {
+            Player player = event.getPlayer();
+            Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
+                try {
+                    Member member = memberDAO.findMember(player.getUniqueId());
+                    if (!player.getName().equals(member.getIgn())) {
+                        memberDAO.updateMemberName(player.getUniqueId(), player.getName());
+                        completer.reload();
+                        completerA.reload();
+                        Bukkit.getScheduler().runTask(plugin, () -> event.getPlayer().sendMessage(ChatColor.DARK_AQUA +
+                                "It seems that you changed your name, hereby it was updated in database."));
+                    }
+                } catch (SQLException ex) {
+                    player.sendMessage(ChatColor.RED + ex.getMessage());
+                    ex.printStackTrace();
+                } catch (DataAccessException ignored) {
+                    // Ignored if player is not a member
+                }
+            });
+        };
     }
 
     private static Runnable checkHologram(PlayerJoinEvent event) {

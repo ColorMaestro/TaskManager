@@ -196,7 +196,7 @@ public class MemberDAO {
      * Sets member's discord ID.
      *
      * @param uuid      member's uuid
-     * @param discordID ID of members's discord account
+     * @param discordID ID of member's discord account
      * @throws SQLException        if SQL error arise
      * @throws DataAccessException if there's no matching record for member
      */
@@ -209,6 +209,27 @@ public class MemberDAO {
             int affected = st.executeUpdate();
             if (affected == 0) {
                 throw new DataAccessException("No discord ID change for member with uuid " + uuid + ".");
+            }
+        }
+    }
+
+    /**
+     * Updates member's name
+     *
+     * @param uuid member's uuid
+     * @param name to save
+     * @throws SQLException        if SQL error arise
+     * @throws DataAccessException if there's no matching record for member
+     */
+    public synchronized void updateMemberName(UUID uuid, String name) throws SQLException, DataAccessException {
+        try (Connection connection = DriverManager.getConnection(url);
+             PreparedStatement st = connection.prepareStatement(
+                     "UPDATE PLAYERS SET ign = ? WHERE uuid = ?")) {
+            st.setString(1, name);
+            st.setString(2, uuid.toString());
+            int affected = st.executeUpdate();
+            if (affected == 0) {
+                throw new DataAccessException("Failed to update member name with uuid " + uuid + ".");
             }
         }
     }

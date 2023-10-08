@@ -56,7 +56,7 @@ public final class TaskManager extends JavaPlugin {
         Objects.requireNonNull(this.getCommand("addtask")).setTabCompleter(membersTabCompleter);
         Objects.requireNonNull(this.getCommand("dashboard")).setTabCompleter(membersTabCompleter);
 
-        registerEventListener(new PlayerJoinListener(this, taskDAO, memberDAO));
+        registerEventListener(new PlayerJoinListener(this, taskDAO, memberDAO, tasksTabCompleter, membersTabCompleter));
         registerEventListener(new BookEditListener(this, taskDAO, memberDAO));
         registerEventListener(new DashboardViewListener(this, taskDAO, memberDAO));
         registerEventListener(new SupervisedTasksViewListener(this, taskDAO, memberDAO));
