@@ -5,7 +5,7 @@ import me.colormaestro.taskmanager.data.MemberDAO;
 import me.colormaestro.taskmanager.data.TaskDAO;
 import me.colormaestro.taskmanager.model.AdvisedTask;
 import me.colormaestro.taskmanager.model.Member;
-import me.colormaestro.taskmanager.model.MemberTaskStats;
+import me.colormaestro.taskmanager.model.MemberDashboardInfo;
 import me.colormaestro.taskmanager.model.Task;
 import me.colormaestro.taskmanager.utils.Directives;
 import me.colormaestro.taskmanager.utils.InventoryBuilder;
@@ -33,18 +33,24 @@ public class SharedRunnables {
     public static Runnable showDashboardView(Plugin plugin, TaskDAO taskDAO, HumanEntity player, long page) {
         return () -> {
             try {
-                List<MemberTaskStats> stats = taskDAO.fetchTaskStatistics();
+                List<MemberDashboardInfo> stats = taskDAO.fetchMembersDashboardInfo();
                 int totalPages = stats.size() / PAGE_SIZE + 1;
                 // Variable used in lambda should be final or effectively final
-                List<MemberTaskStats> finalStats = stats.stream().skip((page - 1) * PAGE_SIZE).limit(PAGE_SIZE).toList();
+                List<MemberDashboardInfo> finalStats = stats.stream().skip((page - 1) * PAGE_SIZE).limit(PAGE_SIZE).toList();
                 Bukkit.getScheduler().runTask(plugin, () -> {
                     String inventoryTitle = ChatColor.BLUE + "" + ChatColor.BOLD + "Tasks Dashboard" + ChatColor.RESET + " (" + page + "/" + totalPages + ") " + Directives.DASHBOARD;
                     InventoryBuilder builder = new InventoryBuilder(player, inventoryTitle);
 
                     ItemStack stack;
                     int position = 0;
-                    for (MemberTaskStats memberStats : finalStats) {
-                        stack = ItemStackCreator.createMemberStack(memberStats.uuid(), memberStats.ign(), memberStats.doing(), memberStats.finished(), memberStats.approved());
+                    for (MemberDashboardInfo memberInfo : finalStats) {
+                        stack = ItemStackCreator.createMemberStack(
+                                memberInfo.uuid(),
+                                memberInfo.ign(),
+                                memberInfo.doing(),
+                                memberInfo.finished(),
+                                memberInfo.approved(),
+                                memberInfo.lastLogin());
                         builder.addItemStack(position, stack);
                         position++;
                     }

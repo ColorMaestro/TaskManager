@@ -12,6 +12,9 @@ import org.bukkit.inventory.meta.BookMeta;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.SkullMeta;
 
+import java.sql.Date;
+import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -20,7 +23,7 @@ import java.util.UUID;
 public class ItemStackCreator {
     private final static int LORE_WIDTH_LIMIT = 40;
 
-    public static ItemStack createMemberStack(String uuid, String ign, int doing, int finished, int approved) {
+    public static ItemStack createMemberStack(String uuid, String ign, int doing, int finished, int approved, Date lastLogin) {
         ItemStack is = new ItemStack(Material.PLAYER_HEAD, 1);
         SkullMeta skullMeta = (SkullMeta) is.getItemMeta();
         if (skullMeta == null) {
@@ -29,7 +32,17 @@ public class ItemStackCreator {
         OfflinePlayer op = Bukkit.getOfflinePlayer(UUID.fromString(uuid));
         skullMeta.setOwningPlayer(op);
         skullMeta.setDisplayName(ChatColor.BLUE + "" + ChatColor.BOLD + ign);
-        skullMeta.setLore(createHeadStatsLore(doing, finished, approved));
+
+        List<String> lore = createHeadStatsLore(doing, finished, approved);
+
+        LocalDate currentDate = LocalDate.now();
+        LocalDate sqlLocalDate = lastLogin.toLocalDate();
+        long daysDelta = ChronoUnit.DAYS.between(sqlLocalDate, currentDate);
+
+        lore.add("");
+        lore.add(ChatColor.GRAY + "Last online: " + ChatColor.WHITE + daysDelta + " day(s) ago");
+
+        skullMeta.setLore(lore);
         is.setItemMeta(skullMeta);
         return is;
     }

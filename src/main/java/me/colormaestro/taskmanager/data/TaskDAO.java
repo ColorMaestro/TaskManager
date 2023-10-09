@@ -2,7 +2,7 @@ package me.colormaestro.taskmanager.data;
 
 import me.colormaestro.taskmanager.enums.TaskStatus;
 import me.colormaestro.taskmanager.model.AdvisedTask;
-import me.colormaestro.taskmanager.model.MemberTaskStats;
+import me.colormaestro.taskmanager.model.MemberDashboardInfo;
 import me.colormaestro.taskmanager.model.Task;
 import org.bukkit.Location;
 import org.jetbrains.annotations.NotNull;
@@ -419,35 +419,37 @@ public class TaskDAO {
     }
 
     /**
-     * Collects tasks statistics about members e.g. who has how many tasks of each {@link me.colormaestro.taskmanager.enums.TaskStatus}
+     * Collects needed data for dashboard - last login time of member and task statistics
      *
      * @return List of stats for each player
      * @throws SQLException if SQL error arise
      */
-    public synchronized List<MemberTaskStats> fetchTaskStatistics() throws SQLException {
+    public synchronized List<MemberDashboardInfo> fetchMembersDashboardInfo() throws SQLException {
         try (Connection connection = DriverManager.getConnection(url);
              PreparedStatement st = connection.prepareStatement(
                      """
                              select
                                ign,
                                uuid,
+                               last_login,
                                count(tasks.id) filter (where status = 'DOING') as "doing",
                                count(tasks.id) filter (where status = 'FINISHED') as "finished",
                                count(tasks.id) filter (where status = 'APPROVED') as "approved"
                              from players left join tasks on players.id = tasks.assignee_id
-                             group by ign, uuid
+                             group by ign, uuid, last_login
                              order by upper(ign)""")) {
             ResultSet rs = st.executeQuery();
-            List<MemberTaskStats> stats = new ArrayList<>();
+            List<MemberDashboardInfo> stats = new ArrayList<>();
             while (rs.next()) {
-                MemberTaskStats memberTaskStats = new MemberTaskStats(
+                MemberDashboardInfo memberDashboardInfo = new MemberDashboardInfo(
                         rs.getString("ign"),
                         rs.getString("uuid"),
                         rs.getInt("doing"),
                         rs.getInt("finished"),
-                        rs.getInt("approved")
+                        rs.getInt("approved"),
+                        rs.getDate("last_login")
                 );
-                stats.add(memberTaskStats);
+                stats.add(memberDashboardInfo);
             }
             rs.close();
             return stats;
