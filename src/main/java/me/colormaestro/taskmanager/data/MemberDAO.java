@@ -5,6 +5,7 @@ import me.colormaestro.taskmanager.model.Member;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.sql.Connection;
+import java.sql.Date;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -46,6 +47,7 @@ public class MemberDAO {
                     "id INTEGER PRIMARY KEY," +
                     "uuid VARCHAR(36) NOT NULL," +
                     "ign VARCHAR(30) NOT NULL," +
+                    "last_login DATE NOT NULL," +
                     "discord_id INTEGER" +
                     ")");
         } catch (SQLException ex) {
@@ -62,7 +64,7 @@ public class MemberDAO {
     public synchronized Member findMember(int id) throws SQLException, DataAccessException {
         try (Connection connection = DriverManager.getConnection(url);
              PreparedStatement st = connection.prepareStatement(
-                     "SELECT id, uuid, ign, discord_id FROM PLAYERS WHERE id = ?")) {
+                     "SELECT id, uuid, ign, last_login, discord_id FROM PLAYERS WHERE id = ?")) {
 
             st.setInt(1, id);
             ResultSet rs = st.executeQuery();
@@ -72,6 +74,7 @@ public class MemberDAO {
             Member member = new Member(
                     rs.getString("uuid"),
                     rs.getString("ign"),
+                    rs.getDate("last_login"),
                     ParsingUtils.getLongOrNull(rs, "discord_id")
             );
             member.setId(rs.getInt("id"));
@@ -89,7 +92,7 @@ public class MemberDAO {
     public synchronized Member findMember(String ign) throws SQLException, DataAccessException {
         try (Connection connection = DriverManager.getConnection(url);
              PreparedStatement st = connection.prepareStatement(
-                     "SELECT id, uuid, ign, discord_id FROM PLAYERS WHERE ign = ?")) {
+                     "SELECT id, uuid, ign, last_login, discord_id FROM PLAYERS WHERE ign = ?")) {
 
             st.setString(1, ign);
             ResultSet rs = st.executeQuery();
@@ -99,6 +102,7 @@ public class MemberDAO {
             Member member = new Member(
                     rs.getString("uuid"),
                     rs.getString("ign"),
+                    rs.getDate("last_login"),
                     ParsingUtils.getLongOrNull(rs, "discord_id")
             );
             member.setId(rs.getInt("id"));
@@ -116,7 +120,7 @@ public class MemberDAO {
     public synchronized Member findMember(UUID uuid) throws SQLException, DataAccessException {
         try (Connection connection = DriverManager.getConnection(url);
              PreparedStatement st = connection.prepareStatement(
-                     "SELECT id, uuid, ign, discord_id FROM PLAYERS WHERE uuid = ?")) {
+                     "SELECT id, uuid, ign, last_login, discord_id FROM PLAYERS WHERE uuid = ?")) {
 
             st.setString(1, uuid.toString());
             ResultSet rs = st.executeQuery();
@@ -126,6 +130,7 @@ public class MemberDAO {
             Member member = new Member(
                     rs.getString("uuid"),
                     rs.getString("ign"),
+                    rs.getDate("last_login"),
                     ParsingUtils.getLongOrNull(rs, "discord_id")
             );
             member.setId(rs.getInt("id"));
@@ -185,9 +190,10 @@ public class MemberDAO {
     public synchronized void addMember(String uuid, String ign) throws SQLException {
         try (Connection connection = DriverManager.getConnection(url);
              PreparedStatement st = connection.prepareStatement(
-                     "INSERT INTO PLAYERS (uuid, ign) VALUES (?, ?)")) {
+                     "INSERT INTO PLAYERS (uuid, ign, last_login) VALUES (?, ?, ?)")) {
             st.setString(1, uuid);
             st.setString(2, ign);
+            st.setDate(3, new Date(System.currentTimeMillis()));
             st.executeUpdate();
         }
     }
@@ -231,6 +237,21 @@ public class MemberDAO {
             if (affected == 0) {
                 throw new DataAccessException("Failed to update member name with uuid " + uuid + ".");
             }
+        }
+    }
+
+    /**
+     * Updates member's last online time to current time.
+     *
+     * @param uuid member's uuid
+     * @throws SQLException if SQL error arise
+     */
+    public synchronized void updateLastLoginTime(UUID uuid) throws SQLException {
+        try (Connection connection = DriverManager.getConnection(url);
+             PreparedStatement st = connection.prepareStatement(
+                     "UPDATE PLAYERS SET last_login = ? WHERE uuid = ?")) {
+            st.setDate(1, new Date(System.currentTimeMillis()));
+            st.setString(2, uuid.toString());
         }
     }
 }

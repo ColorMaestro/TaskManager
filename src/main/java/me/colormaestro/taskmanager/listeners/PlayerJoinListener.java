@@ -37,12 +37,27 @@ public class PlayerJoinListener implements Listener {
 
     @EventHandler
     public void onJoin(PlayerJoinEvent event) {
+        Bukkit.getScheduler().runTask(plugin, updateMemberLoginTime(event, plugin, memberDAO));
         Bukkit.getScheduler().runTaskLater(plugin, checkMemberNameUpdate(event, plugin, memberDAO, completer, completerA), 20);
         if (Bukkit.getPluginManager().isPluginEnabled("DecentHolograms")) {
             Bukkit.getScheduler().runTaskLater(plugin, checkHologram(event), 180);
         }
         Bukkit.getScheduler().runTaskLater(plugin, checkDiscordID(event, plugin, memberDAO), 190);
         Bukkit.getScheduler().runTaskLater(plugin, checkFinishedTasks(event, plugin, taskDAO, memberDAO), 200);
+    }
+
+    private static Runnable updateMemberLoginTime(PlayerJoinEvent event, Plugin plugin, MemberDAO memberDAO) {
+        return () -> {
+            Player player = event.getPlayer();
+            Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
+                try {
+                    memberDAO.updateLastLoginTime(player.getUniqueId());
+                } catch (SQLException ex) {
+                    player.sendMessage(ChatColor.RED + ex.getMessage());
+                    ex.printStackTrace();
+                }
+            });
+        };
     }
 
     /**
