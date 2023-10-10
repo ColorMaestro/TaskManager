@@ -40,7 +40,7 @@ public class PlayerJoinListener implements Listener {
         Bukkit.getScheduler().runTask(plugin, updateMemberLoginTime(event, plugin, memberDAO));
         Bukkit.getScheduler().runTaskLater(plugin, checkMemberNameUpdate(event, plugin, memberDAO, completer, completerA), 20);
         if (Bukkit.getPluginManager().isPluginEnabled("DecentHolograms")) {
-            Bukkit.getScheduler().runTaskLater(plugin, checkHologram(event), 180);
+            Bukkit.getScheduler().runTaskLater(plugin, checkHologram(event, plugin, memberDAO), 180);
         }
         Bukkit.getScheduler().runTaskLater(plugin, checkDiscordID(event, plugin, memberDAO), 190);
         Bukkit.getScheduler().runTaskLater(plugin, checkFinishedTasks(event, plugin, taskDAO, memberDAO), 200);
@@ -92,16 +92,26 @@ public class PlayerJoinListener implements Listener {
         };
     }
 
-    private static Runnable checkHologram(PlayerJoinEvent event) {
+    private static Runnable checkHologram(PlayerJoinEvent event, Plugin plugin, MemberDAO memberDAO) {
         return () -> {
-            String uuid = event.getPlayer().getUniqueId().toString();
-            if (!HologramLayer.getInstance().hologramExists(uuid)) {
-                event.getPlayer().sendMessage(ChatColor.DARK_AQUA +
-                        "⚠ Your visual task list has not been established yet");
-                event.getPlayer().sendMessage(ChatColor.DARK_AQUA +
-                        "⚠ To do so issue command" + ChatColor.GOLD + "" + ChatColor.BOLD +
-                        " /establish" + ChatColor.DARK_AQUA + " on the place, where you want to have it");
-            }
+            Player player = event.getPlayer();
+            Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
+                try {
+                    if (memberDAO.memberExists(player.getUniqueId().toString())) {
+                        Bukkit.getScheduler().runTask(plugin, () -> {
+                            if (!HologramLayer.getInstance().hologramExists(player.getUniqueId().toString())) {
+                                event.getPlayer().sendMessage(ChatColor.DARK_AQUA +
+                                        "⚠ Your visual task list has not been established yet");
+                                event.getPlayer().sendMessage(ChatColor.DARK_AQUA +
+                                        "⚠ To do so issue command" + ChatColor.GOLD + ChatColor.BOLD +
+                                        " /establish" + ChatColor.DARK_AQUA + " on the place, where you want to have it");
+                            }
+                        });
+                    }
+                } catch (SQLException e) {
+                    player.sendMessage(ChatColor.RED + e.getMessage());
+                }
+            });
         };
     }
 
