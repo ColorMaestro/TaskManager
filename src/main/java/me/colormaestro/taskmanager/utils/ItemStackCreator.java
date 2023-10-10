@@ -140,6 +140,7 @@ public class ItemStackCreator {
         BaseComponent[] page2 = new ComponentBuilder(description).create();
 
         bookMeta.spigot().addPage(page);
+        bookMeta.spigot().addPage(page2);
 
         if (ign != null) {
             bookMeta.setDisplayName(ChatColor.GOLD + "Assignment book for " + ign);
