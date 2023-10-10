@@ -126,21 +126,22 @@ public class PlayerJoinListener implements Listener {
      */
     private static Runnable checkDiscordID(PlayerJoinEvent event, Plugin plugin, MemberDAO memberDAO) {
         return () -> {
-            UUID uuid = event.getPlayer().getUniqueId();
+            Player player = event.getPlayer();
             Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
                 try {
-                    Member member = memberDAO.findMember(uuid);
+                    Member member = memberDAO.findMember(player.getUniqueId());
                     Bukkit.getScheduler().runTask(plugin, () -> {
                         if (member.getDiscordID() == null) {
                             event.getPlayer().sendMessage(ChatColor.BLUE
                                     + "ℹ You don't have linked your discord account yet. If you want to receive");
                             event.getPlayer().sendMessage(ChatColor.BLUE +
                                     "ℹ  notifications about new or approved tasks issue command "
-                                    + ChatColor.GOLD + "" + ChatColor.BOLD + "/linkdiscord");
+                                    + ChatColor.GOLD + ChatColor.BOLD + "/linkdiscord");
 
                         }
                     });
                 } catch (SQLException ex) {
+                    player.sendMessage(ChatColor.RED + ex.getMessage());
                     ex.printStackTrace();
                 } catch (DataAccessException ignored) {
                     // Since this job has purely informative character we can ignore missing record in database.
@@ -160,13 +161,14 @@ public class PlayerJoinListener implements Listener {
      */
     private static Runnable checkFinishedTasks(PlayerJoinEvent event, Plugin plugin, TaskDAO taskDAO, MemberDAO memberDAO) {
         return () -> {
-            UUID uuid = event.getPlayer().getUniqueId();
+            Player player = event.getPlayer();
             Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
                 try {
-                    Member advisor = memberDAO.findMember(uuid);
+                    Member advisor = memberDAO.findMember(player.getUniqueId());
                     List<Task> finishedTasks = taskDAO.fetchFinishedTasks(advisor.getId());
                     Bukkit.getScheduler().runTask(plugin, () -> sendFinishedTasks(event.getPlayer(), finishedTasks));
                 } catch (SQLException ex) {
+                    player.sendMessage(ChatColor.RED + ex.getMessage());
                     ex.printStackTrace();
                 } catch (DataAccessException ignored) {
                     // Since this job has purely informative character we can ignore missing record in database.
