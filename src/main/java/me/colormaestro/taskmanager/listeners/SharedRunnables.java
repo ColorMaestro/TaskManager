@@ -257,13 +257,15 @@ public class SharedRunnables {
                 int id = Integer.parseInt(taskId);
                 Task task = taskDAO.findTask(id);
 
+                int creatorID = task.getCreatorID();
                 Integer advisorID = task.getAdvisorID();
                 Integer assigneeID = task.getAssigneeID();
 
+                String creatorName = memberDAO.findMember(creatorID).getIgn();
                 String advisorName = advisorID != null ? memberDAO.findMember(advisorID).getIgn() : "Unassigned";
                 String assigneeName = assigneeID != null ? memberDAO.findMember(assigneeID).getIgn() : "Unassigned";
                 Bukkit.getScheduler().runTask(plugin, () -> {
-                    ItemStack book = createTaskBook(task, advisorName, assigneeName);
+                    ItemStack book = createTaskBook(task, creatorName, advisorName, assigneeName);
                     player.getInventory().addItem(book);
                 });
             } catch (SQLException | DataAccessException | NumberFormatException ex) {
@@ -274,7 +276,7 @@ public class SharedRunnables {
         };
     }
 
-    private static ItemStack createTaskBook(Task task, String advisorName, String assigneeName) {
+    private static ItemStack createTaskBook(Task task, String creatorName, String advisorName, String assigneeName) {
         ItemStack book = new ItemStack(Material.WRITTEN_BOOK);
         BookMeta bookMeta = (BookMeta) book.getItemMeta();
 
@@ -286,16 +288,24 @@ public class SharedRunnables {
 
         ComponentBuilder builder = new ComponentBuilder("   " + task.getTitle() + "\n")
                 .color(net.md_5.bungee.api.ChatColor.BLUE).bold(true)
-                .append("From: ")
+                .append("Creator: ")
+                .color(net.md_5.bungee.api.ChatColor.RESET).bold(false)
+                .append(creatorName + "\n")
+                .color(net.md_5.bungee.api.ChatColor.GOLD)
+                .append("Advisor: ")
                 .color(net.md_5.bungee.api.ChatColor.RESET).bold(false)
                 .append(advisorName + "\n")
                 .color(advisorNameColor)
-                .append("For: ")
+                .append("Assignee: ")
                 .color(net.md_5.bungee.api.ChatColor.RESET).bold(false)
                 .append(assigneeName + "\n")
                 .color(assigneeNameColor)
                 .append("Created: " + task.getDateCreation() + "\n")
                 .color(net.md_5.bungee.api.ChatColor.RESET);
+
+        if (task.getDateAssigned() != null) {
+            builder = builder.append("Assigned: " + task.getDateAssigned() + "\n");
+        }
 
         if (task.getDateCompleted() != null) {
             builder = builder.append("Finished: " + task.getDateCompleted() + "\n");
