@@ -84,20 +84,23 @@ public class TaskDAO {
         }
         try (Connection connection = DriverManager.getConnection(url);
              PreparedStatement st = connection.prepareStatement(
-                     "INSERT INTO TASKS (title, description, assignee_id, advisor_id, x, y, z, yaw, pitch, " +
-                             "status, date_given, date_finished) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)")) {
+                     "INSERT INTO TASKS (title, description, creator_id, assignee_id, advisor_id, x, y, z, yaw, " +
+                             "pitch, status, date_created, date_given, date_finished) " +
+                             "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)")) {
             st.setString(1, task.getTitle());
             st.setString(2, task.getDescription());
-            ParsingUtils.setIntOrNull(st, 3, task.getAssigneeID());
-            ParsingUtils.setIntOrNull(st, 4, task.getAdvisorID());
-            st.setDouble(5, task.getX());
-            st.setDouble(6, task.getY());
-            st.setDouble(7, task.getZ());
-            st.setFloat(8, task.getYaw());
-            st.setFloat(9, task.getPitch());
-            st.setString(10, task.getStatus().name());
-            st.setDate(11, new Date(System.currentTimeMillis()));
-            st.setDate(12, null);
+            st.setInt(3, task.getCreatorID());
+            ParsingUtils.setIntOrNull(st, 4, task.getAssigneeID());
+            ParsingUtils.setIntOrNull(st, 5, task.getAdvisorID());
+            st.setDouble(6, task.getX());
+            st.setDouble(7, task.getY());
+            st.setDouble(8, task.getZ());
+            st.setFloat(9, task.getYaw());
+            st.setFloat(10, task.getPitch());
+            st.setString(11, task.getStatus().name());
+            st.setDate(12, task.getDateCreation());
+            st.setDate(13, task.getDateAssigned());
+            st.setDate(14, task.getDateCompleted());
             st.executeUpdate();
         }
     }
@@ -235,8 +238,8 @@ public class TaskDAO {
     public synchronized Task findTask(int id) throws SQLException, DataAccessException {
         try (Connection connection = DriverManager.getConnection(url);
              PreparedStatement st = connection.prepareStatement(
-                     "SELECT title, description, assignee_id, advisor_id, x, y, z, yaw, pitch, " +
-                             "status, date_given, date_finished FROM TASKS WHERE id = ?")) {
+                     "SELECT title, description, creator_id, assignee_id, advisor_id, x, y, z, yaw, pitch, " +
+                             "status, date_created, date_given, date_finished FROM TASKS WHERE id = ?")) {
 
             st.setInt(1, id);
             ResultSet rs = st.executeQuery();
@@ -277,9 +280,9 @@ public class TaskDAO {
     public synchronized List<Task> fetchPlayersActiveTasks(int assigneeID) throws SQLException {
         try (Connection connection = DriverManager.getConnection(url);
              PreparedStatement st = connection.prepareStatement(
-                     "SELECT id, title, description, assignee_id, advisor_id, x, y, z, yaw, pitch, status, " +
-                             "date_given, date_finished FROM TASKS WHERE assignee_id = ? AND status != 'APPROVED' " +
-                             "order by id desc")) {
+                     "SELECT id, title, description, creator_id, assignee_id, advisor_id, x, y, z, yaw, pitch, " +
+                             "status, date_created, date_given, date_finished FROM TASKS WHERE assignee_id = ? " +
+                             "AND status != 'APPROVED' order by id desc")) {
 
             return executeStatementWithMemberId(st, assigneeID);
         }
@@ -296,9 +299,9 @@ public class TaskDAO {
     public synchronized List<Task> fetchPlayersApprovedTasks(int assigneeID) throws SQLException {
         try (Connection connection = DriverManager.getConnection(url);
              PreparedStatement st = connection.prepareStatement(
-                     "SELECT id, title, description, assignee_id, advisor_id, x, y, z, yaw, pitch, status, " +
-                             "date_given, date_finished FROM TASKS WHERE assignee_id = ? AND status == 'APPROVED' " +
-                             "order by id desc")) {
+                     "SELECT id, title, description, creator_id, assignee_id, advisor_id, x, y, z, yaw, pitch, " +
+                             "status, date_created, date_given, date_finished FROM TASKS WHERE assignee_id = ? " +
+                             "AND status == 'APPROVED' order by id desc")) {
 
             return executeStatementWithMemberId(st, assigneeID);
         }
@@ -315,8 +318,9 @@ public class TaskDAO {
     public synchronized List<Task> fetchFinishedTasks(int advisorID) throws SQLException {
         try (Connection connection = DriverManager.getConnection(url);
              PreparedStatement st = connection.prepareStatement(
-                     "SELECT id, title, description, assignee_id, advisor_id, x, y, z, yaw, pitch, status, " +
-                             "date_given, date_finished FROM TASKS WHERE advisor_id = ? AND status = 'FINISHED'")) {
+                     "SELECT id, title, description, creator_id, assignee_id, advisor_id, x, y, z, yaw, pitch, " +
+                             "status, date_created, date_given, date_finished FROM TASKS WHERE advisor_id = ? " +
+                             "AND status = 'FINISHED'")) {
 
             return executeStatementWithMemberId(st, advisorID);
         }
@@ -331,8 +335,8 @@ public class TaskDAO {
     public synchronized List<Task> fetchPreparedTasks() throws SQLException {
         try (Connection connection = DriverManager.getConnection(url);
              PreparedStatement st = connection.prepareStatement(
-                     "SELECT id, title, description, assignee_id, advisor_id, x, y, z, yaw, pitch, status, " +
-                             "date_given, date_finished FROM TASKS WHERE status = 'PREPARED'")) {
+                     "SELECT id, title, description, creator_id, assignee_id, advisor_id, x, y, z, yaw, pitch, " +
+                             "status, date_created, date_given, date_finished FROM TASKS WHERE status = 'PREPARED'")) {
 
             return executeStatement(st);
         }
