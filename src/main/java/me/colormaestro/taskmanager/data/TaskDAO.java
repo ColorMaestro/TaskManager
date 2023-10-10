@@ -51,6 +51,7 @@ public class TaskDAO {
                     "id INTEGER PRIMARY KEY," +
                     "title VARCHAR(40) NOT NULL," +
                     "description VARCHAR(200) NOT NULL," +
+                    "creator_id INT NOT NULL," +
                     "assignee_id INT," +
                     "advisor_id INT," +
                     "x DOUBLE NOT NULL," +
@@ -59,8 +60,10 @@ public class TaskDAO {
                     "yaw DOUBLE NOT NULL," +
                     "pitch DOUBLE NOT NULL," +
                     "status VARCHAR(10) NOT NULL," +
+                    "date_created DATE NOT NULL ," +
                     "date_given DATE," +
                     "date_finished DATE," +
+                    "FOREIGN KEY (creator_id) REFERENCES PLAYERS (id)," +
                     "FOREIGN KEY (assignee_id) REFERENCES PLAYERS (id)," +
                     "FOREIGN KEY (advisor_id) REFERENCES PLAYERS (id)" +
                     ")");
@@ -243,6 +246,7 @@ public class TaskDAO {
             Task task = new Task(
                     rs.getString("title"),
                     rs.getString("description"),
+                    rs.getInt("creator_id"),
                     ParsingUtils.getIntOrNull(rs, "assignee_id"),
                     ParsingUtils.getIntOrNull(rs, "advisor_id"),
                     rs.getDouble("x"),
@@ -251,6 +255,7 @@ public class TaskDAO {
                     rs.getFloat("yaw"),
                     rs.getFloat("pitch"),
                     TaskStatus.valueOf(rs.getString("status")),
+                    rs.getDate("date_created"),
                     rs.getDate("date_given"),
                     rs.getDate("date_finished")
             );
@@ -485,6 +490,7 @@ public class TaskDAO {
             Task task = new Task(
                     rs.getString("title"),
                     rs.getString("description"),
+                    rs.getInt("creator_id"),
                     rs.getInt("assignee_id"),
                     rs.getInt("advisor_id"),
                     rs.getDouble("x"),
@@ -493,6 +499,7 @@ public class TaskDAO {
                     rs.getFloat("yaw"),
                     rs.getFloat("pitch"),
                     TaskStatus.valueOf(rs.getString("status")),
+                    rs.getDate("date_created"),
                     rs.getDate("date_given"),
                     rs.getDate("date_finished")
             );

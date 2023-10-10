@@ -101,8 +101,9 @@ public class BookEditListener implements Listener {
                 return;
             }
 
-            Task task = new Task(title, description, assignee.getId(), advisor.getId(), x, y, z, yaw, pitch,
-                    TaskStatus.DOING, new Date(System.currentTimeMillis()), null);
+            Date currentDate = new Date(System.currentTimeMillis());
+            Task task = new Task(title, description, advisor.getId(), assignee.getId(), advisor.getId(), x, y, z, yaw,
+                    pitch, TaskStatus.DOING, currentDate, currentDate, null);
             try {
                 taskDAO.createTask(task);
                 List<Task> activeTasks = taskDAO.fetchPlayersActiveTasks(assignee.getId());
@@ -153,17 +154,17 @@ public class BookEditListener implements Listener {
             float yaw,
             float pitch) {
         return () -> {
-            Member advisor;
+            Member creator;
             try {
-                advisor = memberDAO.findMember(uuid);
+                creator = memberDAO.findMember(uuid);
             } catch (SQLException | DataAccessException ex) {
                 Bukkit.getScheduler().runTask(plugin, () -> p.sendMessage(ChatColor.RED + ex.getMessage()));
                 ex.printStackTrace();
                 return;
             }
 
-            Task task = new Task(title, description, null, advisor.getId(), x, y, z, yaw, pitch,
-                    TaskStatus.PREPARED, new Date(System.currentTimeMillis()), null);
+            Task task = new Task(title, description, creator.getId(), null, null, x, y, z, yaw, pitch,
+                    TaskStatus.PREPARED, new Date(System.currentTimeMillis()), null, null);
             try {
                 taskDAO.createTask(task);
                 Bukkit.getScheduler().runTask(plugin, () -> p.sendMessage(ChatColor.GREEN + "Task prepared."));
