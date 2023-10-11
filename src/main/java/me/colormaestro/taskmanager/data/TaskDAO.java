@@ -141,12 +141,13 @@ public class TaskDAO {
     public synchronized void assignTask(int taskID, int assigneeID, int advisorID) throws SQLException, DataAccessException {
         try (Connection connection = DriverManager.getConnection(url);
              PreparedStatement st = connection.prepareStatement(
-                     "UPDATE TASKS SET status = 'DOING', assignee_id = ?, advisor_id = ? WHERE id = ? AND " +
-                             "status = 'PREPARED'")) {
+                     "UPDATE TASKS SET status = 'DOING', assignee_id = ?, advisor_id = ?, date_given = ? " +
+                             "WHERE id = ? AND status = 'PREPARED'")) {
 
             st.setInt(1, assigneeID);
             st.setInt(2, advisorID);
-            st.setInt(3, taskID);
+            st.setDate(3, new Date(System.currentTimeMillis()));
+            st.setInt(4, taskID);
             int affected = st.executeUpdate();
             if (affected == 0) {
                 throw new DataAccessException("No change. Make sure you choose prepared task.");
