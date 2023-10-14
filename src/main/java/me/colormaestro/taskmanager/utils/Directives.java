@@ -8,4 +8,5 @@ public class Directives {
     public static final String ACTIVE_TASKS = "┬──┬◡ﾉ(° ‿°ﾉ)";
     public static final String APPROVED_TASKS = "✓";
     public static final String PREPARED_TASKS = "⊞";
+    public static final String IDLE_TASKS = "⦼";
 }

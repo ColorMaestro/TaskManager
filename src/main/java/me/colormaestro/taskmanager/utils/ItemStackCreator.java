@@ -87,6 +87,35 @@ public class ItemStackCreator {
         return is;
     }
 
+    public static ItemStack createIdleTaskStack(
+            Integer taskId,
+            String title,
+            String description,
+            Date dateAssigned,
+            String assigneeName,
+            String advisorName
+    ) {
+        ItemStack is = new ItemStack(Material.ORANGE_CONCRETE, 1);
+        ItemMeta itemMeta = is.getItemMeta();
+        if (itemMeta == null) {
+            return null;
+        }
+        itemMeta.setDisplayName(ChatColor.BLUE + "" + ChatColor.BOLD + title + " " + ChatColor.DARK_GRAY + "#" + taskId);
+
+        LocalDate currentDate = LocalDate.now();
+        LocalDate sqlLocalDate = dateAssigned.toLocalDate();
+        long daysDelta = ChronoUnit.DAYS.between(sqlLocalDate, currentDate);
+
+        List<String> taskDescriptionLore = createTaskDescriptionLore(description);
+        taskDescriptionLore.add(0, ChatColor.GRAY + "Duration: " + ChatColor.GOLD + daysDelta + " days");
+        taskDescriptionLore.add(0, ChatColor.GRAY + "Advisor: " + ChatColor.GOLD + advisorName);
+        taskDescriptionLore.add(0, ChatColor.GRAY + "Assignee: " + ChatColor.GOLD + assigneeName);
+
+        itemMeta.setLore(taskDescriptionLore);
+        is.setItemMeta(itemMeta);
+        return is;
+    }
+
     private static List<String> createTaskDescriptionLore(String input) {
         List<String> result = new ArrayList<>();
 
@@ -115,9 +144,9 @@ public class ItemStackCreator {
     /**
      * Creates ItemStack of Material.WRITABLE_BOOK for creating new task
      *
-     * @param ign name of member for which to create task, for given name created task will be directly assigned
-     *            to the member (in {@link me.colormaestro.taskmanager.enums.TaskStatus#DOING} state), otherwise null
-     *            value causes that task will be only prepared (in {@link me.colormaestro.taskmanager.enums.TaskStatus#PREPARED} state)
+     * @param ign         name of member for which to create task, for given name created task will be directly assigned
+     *                    to the member (in {@link me.colormaestro.taskmanager.enums.TaskStatus#DOING} state), otherwise null
+     *                    value causes that task will be only prepared (in {@link me.colormaestro.taskmanager.enums.TaskStatus#PREPARED} state)
      * @param description instructions what to do in the task
      * @return ItemStack for creating the task
      */

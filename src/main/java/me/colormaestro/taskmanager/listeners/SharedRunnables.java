@@ -4,6 +4,7 @@ import me.colormaestro.taskmanager.data.DataAccessException;
 import me.colormaestro.taskmanager.data.MemberDAO;
 import me.colormaestro.taskmanager.data.TaskDAO;
 import me.colormaestro.taskmanager.model.AdvisedTask;
+import me.colormaestro.taskmanager.model.IdleTask;
 import me.colormaestro.taskmanager.model.Member;
 import me.colormaestro.taskmanager.model.MemberDashboardInfo;
 import me.colormaestro.taskmanager.model.Task;
@@ -29,6 +30,7 @@ public class SharedRunnables {
     private static final int PAGE_SIZE = 45;
     private static final int LAST_ROW_MIDDLE = 49;
     private static final int LAST_ROW_LEFT_FROM_MIDDLE = 48;
+    private static final int LAST_ROW_RIGHT_FROM_MIDDLE = 50;
 
     public static Runnable showDashboardView(Plugin plugin, TaskDAO taskDAO, HumanEntity player, long page) {
         return () -> {
@@ -59,7 +61,9 @@ public class SharedRunnables {
                             .addItemStack(LAST_ROW_MIDDLE, Material.ENDER_EYE,
                                     ChatColor.DARK_PURPLE + "Show supervised tasks")
                             .addItemStack(LAST_ROW_LEFT_FROM_MIDDLE, Material.LIGHT_GRAY_CONCRETE,
-                                    ChatColor.GRAY + "Show prepared tasks");
+                                    ChatColor.GRAY + "Show prepared tasks")
+                            .addItemStack(LAST_ROW_RIGHT_FROM_MIDDLE, Material.CLOCK,
+                                    ChatColor.GOLD + "Show idle tasks");
 
                     player.openInventory(builder.build());
                 });
@@ -206,6 +210,44 @@ public class SharedRunnables {
                                 task.getDescription(),
                                 task.getStatus(),
                                 null);
+                        builder.addItemStack(position, stack);
+                        position++;
+                    }
+
+                    builder.addPaginationArrows()
+                            .addItemStack(LAST_ROW_MIDDLE, Material.SPECTRAL_ARROW,
+                                    ChatColor.AQUA + "Back to dashboard");
+
+                    player.openInventory(builder.build());
+                });
+            } catch (SQLException ex) {
+                Bukkit.getScheduler().runTask(plugin,
+                        () -> player.sendMessage(ChatColor.RED + ex.getMessage()));
+                ex.printStackTrace();
+            }
+        };
+    }
+
+    public static Runnable showIdleTasksView(Plugin plugin, TaskDAO taskDAO, HumanEntity player, long page) {
+        return () -> {
+            try {
+                List<IdleTask> tasks = taskDAO.fetchIdleTasks();
+                int totalPages = tasks.size() / PAGE_SIZE + 1;
+                List<IdleTask> finalTasks = tasks.stream().skip((page - 1) * PAGE_SIZE).limit(PAGE_SIZE).toList();
+                Bukkit.getScheduler().runTask(plugin, () -> {
+                    String title = ChatColor.DARK_AQUA + "" + ChatColor.BOLD + "Idle tasks" + ChatColor.RESET + " (" + page + "/" + totalPages + ") " + Directives.IDLE_TASKS;
+                    InventoryBuilder builder = new InventoryBuilder(player, title);
+
+                    ItemStack stack;
+                    int position = 0;
+                    for (IdleTask task : finalTasks) {
+                        stack = ItemStackCreator.createIdleTaskStack(
+                                task.id(),
+                                task.title(),
+                                task.description(),
+                                task.dateAssigned(),
+                                task.assigneeName(),
+                                task.advisorName());
                         builder.addItemStack(position, stack);
                         position++;
                     }
