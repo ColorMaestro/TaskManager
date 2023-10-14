@@ -178,7 +178,8 @@ public class Tasks implements CommandExecutor {
     }
 
     private void sendHelp(CommandSender sender) {
-        sender.sendMessage(ChatColor.AQUA + "-=-=-=-=-=- TaskManager help -=-=-=-=-=-");
+        sender.sendMessage(ChatColor.AQUA + "-=-=-=-=-=- TaskManager " +
+                plugin.getDescription().getVersion() + " help -=-=-=-=-=-");
         for (var item : commandsAndDescriptions) {
             sender.sendMessage(ChatColor.GOLD + item[0] + ChatColor.WHITE + " - " + item[1]);
         }
