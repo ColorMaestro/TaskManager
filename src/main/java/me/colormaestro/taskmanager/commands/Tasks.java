@@ -42,6 +42,7 @@ public class Tasks implements CommandExecutor {
             {"/tasks given", "shows tasks, which you are advising"},
             {"/tasks stats", "shows task statistics"},
             {"/tasks prepared", "shows task which are prepared for members"},
+            {"/tasks idle", "shows task on which members work too long"},
             {"/tasks [IGN]", "shows your or other member's tasks"},
             {"/visittask <id>", "teleports to the task workplace"},
             {"/taskinfo <id>", "obtains info in book for related task"},
