@@ -33,10 +33,6 @@ public class MembersTabCompleter implements ReloadableTabCompleter {
         return null;
     }
 
-    /**
-     * (Re)loads all player names from database. Useful when new member comes to the server, so completer can be invoked
-     * to update list of names.
-     */
     public void reload() {
         try {
             names = memberDAO.getMembersNames();

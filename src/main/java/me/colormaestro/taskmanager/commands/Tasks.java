@@ -4,6 +4,7 @@ import me.colormaestro.taskmanager.data.DataAccessException;
 import me.colormaestro.taskmanager.data.MemberDAO;
 import me.colormaestro.taskmanager.data.TaskDAO;
 import me.colormaestro.taskmanager.model.AdvisedTask;
+import me.colormaestro.taskmanager.model.IdleTask;
 import me.colormaestro.taskmanager.model.Member;
 import me.colormaestro.taskmanager.model.MemberDashboardInfo;
 import me.colormaestro.taskmanager.model.Task;
@@ -18,8 +19,11 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.BookMeta;
 import org.bukkit.plugin.Plugin;
+import org.jetbrains.annotations.NotNull;
 
 import java.sql.SQLException;
+import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Random;
 import java.util.UUID;
@@ -62,7 +66,7 @@ public class Tasks implements CommandExecutor {
     }
 
     @Override
-    public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
+    public boolean onCommand(@NotNull CommandSender sender, @NotNull Command cmd, @NotNull String label, String[] args) {
 
         if (args.length == 1 && args[0].equals("help")) {
             sendHelp(sender);
@@ -117,6 +121,24 @@ public class Tasks implements CommandExecutor {
 
                     Bukkit.getScheduler().runTask(plugin,
                             () -> sendPreparedTasks(p, preparedTasks));
+                } catch (SQLException ex) {
+                    Bukkit.getScheduler().runTask(plugin,
+                            () -> p.sendMessage(ChatColor.RED + ex.getMessage()));
+                    ex.printStackTrace();
+                }
+
+            });
+            return true;
+        }
+
+        if (sender instanceof Player && args.length == 1 && args[0].equals("idle")) {
+            Player p = (Player) sender;
+            Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
+                try {
+                    List<IdleTask> preparedTasks = taskDAO.fetchIdleTasks();
+
+                    Bukkit.getScheduler().runTask(plugin,
+                            () -> sendIdleTasks(p, preparedTasks));
                 } catch (SQLException ex) {
                     Bukkit.getScheduler().runTask(plugin,
                             () -> p.sendMessage(ChatColor.RED + ex.getMessage()));
@@ -202,6 +224,22 @@ public class Tasks implements CommandExecutor {
         p.sendMessage(ChatColor.GRAY + "-=-=-=- Prepared tasks -=-=-=-");
         for (Task task : tasks) {
             p.sendMessage(ChatColor.GRAY + "[" + task.getId() + "] " + ChatColor.WHITE + task.getTitle());
+        }
+    }
+
+    private void sendIdleTasks(Player p, List<IdleTask> tasks) {
+        if (tasks.isEmpty()) {
+            p.sendMessage(ChatColor.GREEN + "No idle tasks");
+            return;
+        }
+        LocalDate currentDate = LocalDate.now();
+        LocalDate sqlLocalDate;
+        p.sendMessage(ChatColor.DARK_AQUA + "-=-=-=- Idle tasks -=-=-=-");
+        for (IdleTask task : tasks) {
+            sqlLocalDate = task.dateAssigned().toLocalDate();
+            long daysDelta = ChronoUnit.DAYS.between(sqlLocalDate, currentDate);
+            p.sendMessage(ChatColor.GOLD + "[" + task.id() + "] " + ChatColor.WHITE + task.title() +
+                    ChatColor.ITALIC + " (" + daysDelta + " days)");
         }
     }
 

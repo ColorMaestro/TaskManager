@@ -2,6 +2,7 @@ package me.colormaestro.taskmanager.data;
 
 import me.colormaestro.taskmanager.enums.TaskStatus;
 import me.colormaestro.taskmanager.model.AdvisedTask;
+import me.colormaestro.taskmanager.model.IdleTask;
 import me.colormaestro.taskmanager.model.MemberDashboardInfo;
 import me.colormaestro.taskmanager.model.Task;
 import org.bukkit.Location;
@@ -375,6 +376,40 @@ public class TaskDAO {
             }
             rs.close();
             return stats;
+        }
+    }
+
+    /**
+     * Returns list of tasks on which are members working too long
+     * (status {@link me.colormaestro.taskmanager.enums.TaskStatus#DOING}) - in this case more than 30 days.
+     *
+     * @return list of tasks which are in progress for longer than 30 days.
+     * @throws SQLException if SQL error arise
+     */
+    public synchronized List<IdleTask> fetchIdleTasks() throws SQLException {
+        try (Connection connection = DriverManager.getConnection(url);
+             PreparedStatement st = connection.prepareStatement(
+                     "SELECT tasks.id AS task_id, title, description, date_given, assignee.ign AS assignee_ign, " +
+                             "advisor.ign AS advisor_ign FROM PLAYERS advisor JOIN PLAYERS assignee JOIN TASKS " +
+                             "ON advisor.id = TASKS.advisor_id AND assignee.id = TASKS.assignee_id " +
+                             "WHERE (julianday('now') - julianday(date_given / 1000, 'unixepoch')) > 30 " +
+                             "AND status == 'DOING'")) {
+
+            ResultSet rs = st.executeQuery();
+            List<IdleTask> idleTasks = new ArrayList<>();
+            while (rs.next()) {
+                IdleTask idleTask = new IdleTask(
+                        rs.getInt("task_id"),
+                        rs.getString("title"),
+                        rs.getString("description"),
+                        rs.getDate("date_given"),
+                        rs.getString("assignee_ign"),
+                        rs.getString("advisor_ign")
+                );
+                idleTasks.add(idleTask);
+            }
+            rs.close();
+            return idleTasks;
         }
     }
 
