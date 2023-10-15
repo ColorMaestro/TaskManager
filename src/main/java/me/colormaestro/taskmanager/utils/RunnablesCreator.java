@@ -96,12 +96,11 @@ public class RunnablesCreator {
                     ItemStack stack;
                     int position = 0;
                     for (Task task : finalTasks) {
-                        stack = ItemStackCreator.createTaskStack(
+                        stack = ItemStackCreator.createBasicTaskStack(
                                 task.getId(),
                                 task.getTitle(),
                                 task.getDescription(),
-                                task.getStatus(),
-                                null);
+                                task.getStatus());
                         builder.addItemStack(position, stack);
                         position++;
                     }
@@ -136,12 +135,11 @@ public class RunnablesCreator {
                     ItemStack stack;
                     int position = 0;
                     for (Task task : finalTasks) {
-                        stack = ItemStackCreator.createTaskStack(
+                        stack = ItemStackCreator.createBasicTaskStack(
                                 task.getId(),
                                 task.getTitle(),
                                 task.getDescription(),
-                                task.getStatus(),
-                                null);
+                                task.getStatus());
                         builder.addItemStack(position, stack);
                         position++;
                     }
@@ -174,7 +172,7 @@ public class RunnablesCreator {
                     ItemStack stack;
                     int position = 0;
                     for (AdvisedTask task : finalTasks) {
-                        stack = ItemStackCreator.createTaskStack(
+                        stack = ItemStackCreator.createSupervisedTaskStack(
                                 task.id(),
                                 task.title(),
                                 task.description(),
@@ -211,12 +209,11 @@ public class RunnablesCreator {
                     ItemStack stack;
                     int position = 0;
                     for (Task task : finalTasks) {
-                        stack = ItemStackCreator.createTaskStack(
+                        stack = ItemStackCreator.createBasicTaskStack(
                                 task.getId(),
                                 task.getTitle(),
                                 task.getDescription(),
-                                task.getStatus(),
-                                null);
+                                task.getStatus());
                         builder.addItemStack(position, stack);
                         position++;
                     }

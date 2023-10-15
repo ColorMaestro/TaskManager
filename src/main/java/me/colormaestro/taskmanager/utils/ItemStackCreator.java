@@ -57,34 +57,18 @@ public class ItemStackCreator {
         return result;
     }
 
-    public static ItemStack createTaskStack(
+    public static ItemStack createBasicTaskStack(Integer taskId, String title, String description, TaskStatus status) {
+        return createSupervisedTaskStack(taskId, title, description, status, null);
+    }
+
+    public static ItemStack createSupervisedTaskStack(
             Integer taskId,
             String title,
             String description,
             TaskStatus status,
             String assigneeIgn
     ) {
-        Material material = Material.ORANGE_CONCRETE;
-        switch (status) {
-            case FINISHED -> material = Material.LIME_CONCRETE;
-            case APPROVED -> material = Material.LIGHT_BLUE_CONCRETE;
-            case PREPARED -> material = Material.LIGHT_GRAY_CONCRETE;
-        }
-        ItemStack is = new ItemStack(material, 1);
-        ItemMeta itemMeta = is.getItemMeta();
-        if (itemMeta == null) {
-            return null;
-        }
-        itemMeta.setDisplayName(ChatColor.BLUE + "" + ChatColor.BOLD + title + " " + ChatColor.DARK_GRAY + "#" + taskId);
-
-        List<String> taskDescriptionLore = createTaskDescriptionLore(description);
-        if (assigneeIgn != null) {
-            taskDescriptionLore.add(0, ChatColor.GRAY + "Assignee: " + ChatColor.GOLD + assigneeIgn);
-        }
-
-        itemMeta.setLore(taskDescriptionLore);
-        is.setItemMeta(itemMeta);
-        return is;
+        return createTaskStack(taskId, title, description, status, null, assigneeIgn, null);
     }
 
     public static ItemStack createIdleTaskStack(
@@ -95,21 +79,44 @@ public class ItemStackCreator {
             String assigneeName,
             String advisorName
     ) {
-        ItemStack is = new ItemStack(Material.ORANGE_CONCRETE, 1);
-        ItemMeta itemMeta = is.getItemMeta();
-        if (itemMeta == null) {
-            return null;
+        return createTaskStack(taskId, title, description, TaskStatus.DOING, dateAssigned, assigneeName, advisorName);
+    }
+
+    private static ItemStack createTaskStack(
+            Integer taskId,
+            String title,
+            String description,
+            TaskStatus status,
+            Date dateAssigned,
+            String assigneeName,
+            String advisorName
+    ) {
+        Material material = Material.ORANGE_CONCRETE;
+        switch (status) {
+            case FINISHED -> material = Material.LIME_CONCRETE;
+            case APPROVED -> material = Material.LIGHT_BLUE_CONCRETE;
+            case PREPARED -> material = Material.LIGHT_GRAY_CONCRETE;
         }
+        ItemStack is = new ItemStack(material, 1);
+        ItemMeta itemMeta = is.getItemMeta();
+        assert itemMeta != null;
+
         itemMeta.setDisplayName(ChatColor.BLUE + "" + ChatColor.BOLD + title + " " + ChatColor.DARK_GRAY + "#" + taskId);
 
-        LocalDate currentDate = LocalDate.now();
-        LocalDate sqlLocalDate = dateAssigned.toLocalDate();
-        long daysDelta = ChronoUnit.DAYS.between(sqlLocalDate, currentDate);
-
         List<String> taskDescriptionLore = createTaskDescriptionLore(description);
-        taskDescriptionLore.add(0, ChatColor.GRAY + "Duration: " + ChatColor.GOLD + daysDelta + " days");
-        taskDescriptionLore.add(0, ChatColor.GRAY + "Advisor: " + ChatColor.GOLD + advisorName);
-        taskDescriptionLore.add(0, ChatColor.GRAY + "Assignee: " + ChatColor.GOLD + assigneeName);
+
+        if (dateAssigned != null) {
+            LocalDate currentDate = LocalDate.now();
+            LocalDate sqlLocalDate = dateAssigned.toLocalDate();
+            long daysDelta = ChronoUnit.DAYS.between(sqlLocalDate, currentDate);
+            taskDescriptionLore.add(0, ChatColor.GRAY + "Duration: " + ChatColor.GOLD + daysDelta + " days");
+        }
+        if (advisorName != null) {
+            taskDescriptionLore.add(0, ChatColor.GRAY + "Advisor: " + ChatColor.GOLD + advisorName);
+        }
+        if (assigneeName != null) {
+            taskDescriptionLore.add(0, ChatColor.GRAY + "Assignee: " + ChatColor.GOLD + assigneeName);
+        }
 
         itemMeta.setLore(taskDescriptionLore);
         is.setItemMeta(itemMeta);
