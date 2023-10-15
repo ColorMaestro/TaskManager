@@ -30,6 +30,7 @@ import me.colormaestro.taskmanager.listeners.SupervisedTasksViewListener;
 import me.colormaestro.taskmanager.tabcompleters.MembersTabCompleter;
 import me.colormaestro.taskmanager.tabcompleters.ReloadableTabCompleter;
 import me.colormaestro.taskmanager.tabcompleters.TasksTabCompleter;
+import me.colormaestro.taskmanager.utils.RunnablesCreator;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.configuration.InvalidConfigurationException;
@@ -51,6 +52,8 @@ public final class TaskManager extends JavaPlugin {
     public void onEnable() {
         loadConfig();
         createDAOs();
+        RunnablesCreator creator = new RunnablesCreator(this, taskDAO, memberDAO);
+
         ReloadableTabCompleter tasksTabCompleter = new TasksTabCompleter(memberDAO);
         ReloadableTabCompleter membersTabCompleter = new MembersTabCompleter(memberDAO);
         Objects.requireNonNull(this.getCommand("tasks")).setTabCompleter(tasksTabCompleter);
@@ -59,27 +62,27 @@ public final class TaskManager extends JavaPlugin {
 
         registerEventListener(new PlayerJoinListener(this, taskDAO, memberDAO, tasksTabCompleter, membersTabCompleter));
         registerEventListener(new BookEditListener(this, taskDAO, memberDAO));
-        registerEventListener(new DashboardViewListener(this, taskDAO, memberDAO));
-        registerEventListener(new SupervisedTasksViewListener(this, taskDAO, memberDAO));
-        registerEventListener(new ActiveTasksViewListener(this, taskDAO, memberDAO));
-        registerEventListener(new ApprovedTasksViewListener(this, taskDAO, memberDAO));
-        registerEventListener(new PreparedTasksViewListener(this, taskDAO, memberDAO));
-        registerEventListener(new IdleTaskViewListener(this, taskDAO));
+        registerEventListener(new DashboardViewListener(creator));
+        registerEventListener(new SupervisedTasksViewListener(creator));
+        registerEventListener(new ActiveTasksViewListener(creator));
+        registerEventListener(new ApprovedTasksViewListener(creator));
+        registerEventListener(new PreparedTasksViewListener(creator));
+        registerEventListener(new IdleTaskViewListener(creator));
 
         setCommandExecutor("addmember", new AddMember(this, memberDAO, tasksTabCompleter, membersTabCompleter));
-        setCommandExecutor("dashboard", new Dashboard(this, taskDAO, memberDAO));
+        setCommandExecutor("dashboard", new Dashboard(creator));
         setCommandExecutor("tasks", new Tasks(this, taskDAO, memberDAO));
         setCommandExecutor("addtask", new AddTask(this, taskDAO));
         setCommandExecutor("preparetask", new PrepareTask());
         setCommandExecutor("assigntask", new AssignTask(this, taskDAO, memberDAO));
         setCommandExecutor("finishtask", new FinishTask(taskDAO, memberDAO));
         setCommandExecutor("approvetask", new ApproveTask(taskDAO, memberDAO));
-        setCommandExecutor("visittask", new VisitTask(taskDAO, memberDAO));
+        setCommandExecutor("visittask", new VisitTask(creator));
         setCommandExecutor("returntask", new ReturnTask(taskDAO, memberDAO));
         setCommandExecutor("settaskplace", new SetTaskPlace(taskDAO, memberDAO));
         setCommandExecutor("linkdiscord", new LinkDiscord());
         setCommandExecutor("establish", new Establish(taskDAO, memberDAO));
-        setCommandExecutor("taskinfo", new TaskInfo(taskDAO, memberDAO));
+        setCommandExecutor("taskinfo", new TaskInfo(creator));
         setCommandExecutor("transfertask", new TransferTask(taskDAO, memberDAO));
 
         if (Bukkit.getPluginManager().isPluginEnabled("DecentHolograms")) {

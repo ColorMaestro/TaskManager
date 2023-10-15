@@ -1,4 +1,4 @@
-package me.colormaestro.taskmanager.listeners;
+package me.colormaestro.taskmanager.utils;
 
 import me.colormaestro.taskmanager.data.DataAccessException;
 import me.colormaestro.taskmanager.data.MemberDAO;
@@ -8,9 +8,6 @@ import me.colormaestro.taskmanager.model.IdleTask;
 import me.colormaestro.taskmanager.model.Member;
 import me.colormaestro.taskmanager.model.MemberDashboardInfo;
 import me.colormaestro.taskmanager.model.Task;
-import me.colormaestro.taskmanager.utils.Directives;
-import me.colormaestro.taskmanager.utils.InventoryBuilder;
-import me.colormaestro.taskmanager.utils.ItemStackCreator;
 import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.ComponentBuilder;
 import org.bukkit.Bukkit;
@@ -26,13 +23,23 @@ import org.bukkit.plugin.Plugin;
 import java.sql.SQLException;
 import java.util.List;
 
-public class SharedRunnables {
+public class RunnablesCreator {
     private static final int PAGE_SIZE = 45;
     private static final int LAST_ROW_MIDDLE = 49;
     private static final int LAST_ROW_LEFT_FROM_MIDDLE = 48;
     private static final int LAST_ROW_RIGHT_FROM_MIDDLE = 50;
 
-    public static Runnable showDashboardView(Plugin plugin, TaskDAO taskDAO, HumanEntity player, long page) {
+    private final TaskDAO taskDAO;
+    private final MemberDAO memberDAO;
+    private final Plugin plugin;
+
+    public RunnablesCreator(Plugin plugin, TaskDAO taskDAO, MemberDAO memberDAO) {
+        this.plugin = plugin;
+        this.taskDAO = taskDAO;
+        this.memberDAO = memberDAO;
+    }
+
+    public Runnable showDashboardView(HumanEntity player, long page) {
         return () -> {
             try {
                 List<MemberDashboardInfo> stats = taskDAO.fetchMembersDashboardInfo();
@@ -75,7 +82,7 @@ public class SharedRunnables {
         };
     }
 
-    public static Runnable showActiveTasksView(Plugin plugin, TaskDAO taskDAO, MemberDAO memberDAO, HumanEntity player, String ign, long page) {
+    public Runnable showActiveTasksView(HumanEntity player, String ign, long page) {
         return () -> {
             try {
                 Member member = memberDAO.findMember(ign);
@@ -115,7 +122,7 @@ public class SharedRunnables {
         };
     }
 
-    public static Runnable showApprovedTasksView(Plugin plugin, TaskDAO taskDAO, MemberDAO memberDAO, HumanEntity player, String ign, long page) {
+    public Runnable showApprovedTasksView(HumanEntity player, String ign, long page) {
         return () -> {
             try {
                 Member member = memberDAO.findMember(ign);
@@ -153,7 +160,7 @@ public class SharedRunnables {
         };
     }
 
-    public static Runnable showSupervisedTasksView(Plugin plugin, TaskDAO taskDAO, MemberDAO memberDAO, HumanEntity player, long page) {
+    public Runnable showSupervisedTasksView(HumanEntity player, long page) {
         return () -> {
             try {
                 Member member = memberDAO.findMember(player.getName());
@@ -191,7 +198,7 @@ public class SharedRunnables {
         };
     }
 
-    public static Runnable showPreparedTasksView(Plugin plugin, TaskDAO taskDAO, HumanEntity player, long page) {
+    public Runnable showPreparedTasksView(HumanEntity player, long page) {
         return () -> {
             try {
                 List<Task> tasks = taskDAO.fetchPreparedTasks();
@@ -228,7 +235,7 @@ public class SharedRunnables {
         };
     }
 
-    public static Runnable showIdleTasksView(Plugin plugin, TaskDAO taskDAO, HumanEntity player, long page) {
+    public Runnable showIdleTasksView(HumanEntity player, long page) {
         return () -> {
             try {
                 List<IdleTask> tasks = taskDAO.fetchIdleTasks();
@@ -266,7 +273,7 @@ public class SharedRunnables {
         };
     }
 
-    public static Runnable teleportPlayerToTask(Plugin plugin, TaskDAO taskDAO, HumanEntity player, String taskId) {
+    public Runnable teleportPlayerToTask(HumanEntity player, String taskId) {
         return () -> {
             try {
                 Task task = taskDAO.findTask(Integer.parseInt(taskId));
@@ -288,12 +295,7 @@ public class SharedRunnables {
         };
     }
 
-    public static Runnable givePlayerAssignmentBook(
-            Plugin plugin,
-            TaskDAO taskDAO,
-            MemberDAO memberDAO,
-            Player player,
-            String taskId) {
+    public Runnable givePlayerAssignmentBook(Player player, String taskId) {
         return () -> {
             try {
                 int id = Integer.parseInt(taskId);
@@ -318,7 +320,11 @@ public class SharedRunnables {
         };
     }
 
-    private static ItemStack createTaskBook(Task task, String creatorName, String advisorName, String assigneeName) {
+    public Plugin getPlugin() {
+        return plugin;
+    }
+
+    private ItemStack createTaskBook(Task task, String creatorName, String advisorName, String assigneeName) {
         ItemStack book = new ItemStack(Material.WRITTEN_BOOK);
         BookMeta bookMeta = (BookMeta) book.getItemMeta();
 

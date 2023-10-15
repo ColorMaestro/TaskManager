@@ -1,23 +1,18 @@
 package me.colormaestro.taskmanager.commands;
 
-import me.colormaestro.taskmanager.data.MemberDAO;
-import me.colormaestro.taskmanager.data.TaskDAO;
-import me.colormaestro.taskmanager.listeners.SharedRunnables;
+import me.colormaestro.taskmanager.utils.RunnablesCreator;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
-import org.bukkit.plugin.Plugin;
 
 public class TaskInfo implements CommandExecutor {
-    private final TaskDAO taskDAO;
-    private final MemberDAO memberDAO;
+    private final RunnablesCreator creator;
 
-    public TaskInfo(TaskDAO taskDAO, MemberDAO memberDAO) {
-        this.taskDAO = taskDAO;
-        this.memberDAO = memberDAO;
+    public TaskInfo(RunnablesCreator creator) {
+        this.creator = creator;
     }
 
     @Override
@@ -32,10 +27,8 @@ public class TaskInfo implements CommandExecutor {
             return true;
         }
 
-        Plugin plugin = Bukkit.getPluginManager().getPlugin("TaskManager");
         String taskId = args[0];
-        Bukkit.getScheduler().runTaskAsynchronously(plugin,
-                SharedRunnables.givePlayerAssignmentBook(plugin, taskDAO, memberDAO, player, taskId));
+        Bukkit.getScheduler().runTaskAsynchronously(creator.getPlugin(), creator.givePlayerAssignmentBook(player, taskId));
         return true;
     }
 }
