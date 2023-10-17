@@ -39,7 +39,7 @@ public class RunnablesCreator {
         this.plugin = plugin;
         this.taskDAO = taskDAO;
         this.memberDAO = memberDAO;
-        this.stackCreator = new ItemStackCreator();
+        this.stackCreator = new ItemStackCreator(plugin);
     }
 
     public Runnable showDashboardView(HumanEntity player, long page) {

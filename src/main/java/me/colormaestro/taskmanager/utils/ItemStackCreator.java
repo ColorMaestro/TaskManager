@@ -6,11 +6,14 @@ import net.md_5.bungee.api.chat.ComponentBuilder;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
+import org.bukkit.NamespacedKey;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.BookMeta;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.SkullMeta;
+import org.bukkit.persistence.PersistentDataType;
+import org.bukkit.plugin.Plugin;
 
 import java.sql.Date;
 import java.time.LocalDate;
@@ -22,6 +25,12 @@ import java.util.UUID;
 
 public class ItemStackCreator {
     private final static int LORE_WIDTH_LIMIT = 40;
+
+    private final Plugin plugin;
+
+    public ItemStackCreator(Plugin plugin) {
+        this.plugin = plugin;
+    }
 
     public ItemStack createMemberStack(String uuid, String ign, int doing, int finished, int approved, Date lastLogin) {
         ItemStack is = new ItemStack(Material.PLAYER_HEAD, 1);
@@ -180,10 +189,15 @@ public class ItemStackCreator {
 
         if (ign != null) {
             bookMeta.setDisplayName(ChatColor.GOLD + "Assignment book for " + ign);
-            bookMeta.setLore(new ArrayList<>(Arrays.asList(Directives.CREATE_TASK, ign)));
+            bookMeta.getPersistentDataContainer()
+                    .set(new NamespacedKey(plugin, DataContainerKeys.BOOK_ACTION), PersistentDataType.STRING, Directives.CREATE_TASK);
+            bookMeta.getPersistentDataContainer()
+                    .set(new NamespacedKey(plugin, DataContainerKeys.MEMBER_NAME), PersistentDataType.STRING, ign);
         } else {
             bookMeta.setDisplayName(ChatColor.GRAY + "Book for creation of prepared task");
-            bookMeta.setLore(new ArrayList<>(List.of(Directives.PREPARE_TASK)));
+            bookMeta.getPersistentDataContainer()
+                    .set(new NamespacedKey(plugin, DataContainerKeys.BOOK_ACTION), PersistentDataType.STRING, Directives.PREPARE_TASK);
+
         }
 
         book.setItemMeta(bookMeta);

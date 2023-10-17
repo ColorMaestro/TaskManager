@@ -24,7 +24,7 @@ public class AddTask implements CommandExecutor {
     public AddTask(Plugin plugin, TaskDAO taskDAO) {
         this.plugin = plugin;
         this.taskDAO = taskDAO;
-        this.stackCreator = new ItemStackCreator();
+        this.stackCreator = new ItemStackCreator(plugin);
     }
 
     @Override

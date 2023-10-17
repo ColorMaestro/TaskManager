@@ -73,7 +73,7 @@ public final class TaskManager extends JavaPlugin {
         setCommandExecutor("dashboard", new Dashboard(creator));
         setCommandExecutor("tasks", new Tasks(this, taskDAO, memberDAO));
         setCommandExecutor("addtask", new AddTask(this, taskDAO));
-        setCommandExecutor("preparetask", new PrepareTask());
+        setCommandExecutor("preparetask", new PrepareTask(this));
         setCommandExecutor("assigntask", new AssignTask(this, taskDAO, memberDAO));
         setCommandExecutor("finishtask", new FinishTask(taskDAO, memberDAO));
         setCommandExecutor("approvetask", new ApproveTask(taskDAO, memberDAO));

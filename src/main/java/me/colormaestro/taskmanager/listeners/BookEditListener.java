@@ -8,13 +8,16 @@ import me.colormaestro.taskmanager.data.TaskDAO;
 import me.colormaestro.taskmanager.enums.TaskStatus;
 import me.colormaestro.taskmanager.model.Member;
 import me.colormaestro.taskmanager.model.Task;
+import me.colormaestro.taskmanager.utils.DataContainerKeys;
 import me.colormaestro.taskmanager.utils.Directives;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.NamespacedKey;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerEditBookEvent;
+import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.plugin.Plugin;
 
 import java.sql.Date;
@@ -35,8 +38,9 @@ public class BookEditListener implements Listener {
 
     @EventHandler
     public void onBookEdit(PlayerEditBookEvent event) {
-        List<String> lore = event.getPreviousBookMeta().getLore();
-        if (!event.getNewBookMeta().hasAuthor() || lore == null) {
+        var dataContainer = event.getPreviousBookMeta().getPersistentDataContainer();
+        String directive = dataContainer.get(new NamespacedKey(plugin, DataContainerKeys.BOOK_ACTION), PersistentDataType.STRING);
+        if (!event.getNewBookMeta().hasAuthor() || directive == null) {
             return;
         }
 
@@ -56,11 +60,11 @@ public class BookEditListener implements Listener {
         float yaw = p.getLocation().getYaw();
         float pitch = p.getLocation().getPitch();
 
-        String directive = lore.get(0);
-
         if (directive.equals(Directives.CREATE_TASK)) {
+            String memberName = dataContainer.get(
+                    new NamespacedKey(plugin, DataContainerKeys.MEMBER_NAME), PersistentDataType.STRING);
             Bukkit.getScheduler().runTaskAsynchronously(plugin,
-                    createDoingTask(p, lore.get(1), p.getUniqueId(), title, description, x, y, z, yaw, pitch));
+                    createDoingTask(p, memberName, p.getUniqueId(), title, description, x, y, z, yaw, pitch));
         }
 
         if (directive.equals(Directives.PREPARE_TASK)) {
