@@ -23,7 +23,7 @@ import java.util.UUID;
 public class ItemStackCreator {
     private final static int LORE_WIDTH_LIMIT = 40;
 
-    public static ItemStack createMemberStack(String uuid, String ign, int doing, int finished, int approved, Date lastLogin) {
+    public ItemStack createMemberStack(String uuid, String ign, int doing, int finished, int approved, Date lastLogin) {
         ItemStack is = new ItemStack(Material.PLAYER_HEAD, 1);
         SkullMeta skullMeta = (SkullMeta) is.getItemMeta();
         if (skullMeta == null) {
@@ -47,7 +47,7 @@ public class ItemStackCreator {
         return is;
     }
 
-    private static List<String> createHeadStatsLore(int doing, int finished, int approved) {
+    private List<String> createHeadStatsLore(int doing, int finished, int approved) {
         List<String> result = new ArrayList<>();
 
         result.add(ChatColor.GRAY + "Opened: " + ChatColor.GOLD + doing);
@@ -57,11 +57,11 @@ public class ItemStackCreator {
         return result;
     }
 
-    public static ItemStack createBasicTaskStack(Integer taskId, String title, String description, TaskStatus status) {
+    public ItemStack createBasicTaskStack(Integer taskId, String title, String description, TaskStatus status) {
         return createSupervisedTaskStack(taskId, title, description, status, null);
     }
 
-    public static ItemStack createSupervisedTaskStack(
+    public ItemStack createSupervisedTaskStack(
             Integer taskId,
             String title,
             String description,
@@ -71,7 +71,7 @@ public class ItemStackCreator {
         return createTaskStack(taskId, title, description, status, null, assigneeIgn, null);
     }
 
-    public static ItemStack createIdleTaskStack(
+    public ItemStack createIdleTaskStack(
             Integer taskId,
             String title,
             String description,
@@ -82,7 +82,7 @@ public class ItemStackCreator {
         return createTaskStack(taskId, title, description, TaskStatus.DOING, dateAssigned, assigneeName, advisorName);
     }
 
-    private static ItemStack createTaskStack(
+    private ItemStack createTaskStack(
             Integer taskId,
             String title,
             String description,
@@ -123,7 +123,7 @@ public class ItemStackCreator {
         return is;
     }
 
-    private static List<String> createTaskDescriptionLore(String input) {
+    private List<String> createTaskDescriptionLore(String input) {
         List<String> result = new ArrayList<>();
 
         String[] words = input.split("\\s+");
@@ -157,7 +157,7 @@ public class ItemStackCreator {
      * @param description instructions what to do in the task
      * @return ItemStack for creating the task
      */
-    public static ItemStack createAssignmentBook(String ign, String description) {
+    public ItemStack createAssignmentBook(String ign, String description) {
         ItemStack book = new ItemStack(Material.WRITABLE_BOOK);
         BookMeta bookMeta = (BookMeta) book.getItemMeta();
 

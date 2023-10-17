@@ -33,10 +33,13 @@ public class RunnablesCreator {
     private final MemberDAO memberDAO;
     private final Plugin plugin;
 
+    private final ItemStackCreator stackCreator;
+
     public RunnablesCreator(Plugin plugin, TaskDAO taskDAO, MemberDAO memberDAO) {
         this.plugin = plugin;
         this.taskDAO = taskDAO;
         this.memberDAO = memberDAO;
+        this.stackCreator = new ItemStackCreator();
     }
 
     public Runnable showDashboardView(HumanEntity player, long page) {
@@ -53,7 +56,7 @@ public class RunnablesCreator {
                     ItemStack stack;
                     int position = 0;
                     for (MemberDashboardInfo memberInfo : finalStats) {
-                        stack = ItemStackCreator.createMemberStack(
+                        stack = stackCreator.createMemberStack(
                                 memberInfo.uuid(),
                                 memberInfo.ign(),
                                 memberInfo.doing(),
@@ -96,7 +99,7 @@ public class RunnablesCreator {
                     ItemStack stack;
                     int position = 0;
                     for (Task task : finalTasks) {
-                        stack = ItemStackCreator.createBasicTaskStack(
+                        stack = stackCreator.createBasicTaskStack(
                                 task.getId(),
                                 task.getTitle(),
                                 task.getDescription(),
@@ -135,7 +138,7 @@ public class RunnablesCreator {
                     ItemStack stack;
                     int position = 0;
                     for (Task task : finalTasks) {
-                        stack = ItemStackCreator.createBasicTaskStack(
+                        stack = stackCreator.createBasicTaskStack(
                                 task.getId(),
                                 task.getTitle(),
                                 task.getDescription(),
@@ -172,7 +175,7 @@ public class RunnablesCreator {
                     ItemStack stack;
                     int position = 0;
                     for (AdvisedTask task : finalTasks) {
-                        stack = ItemStackCreator.createSupervisedTaskStack(
+                        stack = stackCreator.createSupervisedTaskStack(
                                 task.id(),
                                 task.title(),
                                 task.description(),
@@ -209,7 +212,7 @@ public class RunnablesCreator {
                     ItemStack stack;
                     int position = 0;
                     for (Task task : finalTasks) {
-                        stack = ItemStackCreator.createBasicTaskStack(
+                        stack = stackCreator.createBasicTaskStack(
                                 task.getId(),
                                 task.getTitle(),
                                 task.getDescription(),
@@ -245,7 +248,7 @@ public class RunnablesCreator {
                     ItemStack stack;
                     int position = 0;
                     for (IdleTask task : finalTasks) {
-                        stack = ItemStackCreator.createIdleTaskStack(
+                        stack = stackCreator.createIdleTaskStack(
                                 task.id(),
                                 task.title(),
                                 task.description(),

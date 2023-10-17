@@ -19,10 +19,12 @@ import java.sql.SQLException;
 public class AddTask implements CommandExecutor {
     private final Plugin plugin;
     private final TaskDAO taskDAO;
+    private final ItemStackCreator stackCreator;
 
     public AddTask(Plugin plugin, TaskDAO taskDAO) {
         this.plugin = plugin;
         this.taskDAO = taskDAO;
+        this.stackCreator = new ItemStackCreator();
     }
 
     @Override
@@ -41,7 +43,7 @@ public class AddTask implements CommandExecutor {
         Player p = (Player) sender;
         String ign = args[0];
         if (args.length == 1) {  // Empty description
-            ItemStack book = ItemStackCreator.createAssignmentBook(ign, "");
+            ItemStack book = stackCreator.createAssignmentBook(ign, "");
             p.getInventory().addItem(book);
         } else {  // Description taken from selected task
             String sid = args[1];
@@ -51,7 +53,7 @@ public class AddTask implements CommandExecutor {
                     Task task = taskDAO.findTask(id);
                     Bukkit.getScheduler().runTask(plugin,
                             () -> {
-                                ItemStack book = ItemStackCreator.createAssignmentBook(ign, task.getDescription());
+                                ItemStack book = stackCreator.createAssignmentBook(ign, task.getDescription());
                                 p.getInventory().addItem(book);
                             });
                 } catch (SQLException | DataAccessException | NumberFormatException ex) {

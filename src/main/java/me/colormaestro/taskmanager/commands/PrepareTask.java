@@ -7,9 +7,16 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.plugin.Plugin;
 import org.jetbrains.annotations.NotNull;
 
 public class PrepareTask implements CommandExecutor {
+
+    private final ItemStackCreator stackCreator;
+
+    public PrepareTask() {
+        this.stackCreator = new ItemStackCreator();
+    }
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
         if (!(sender instanceof Player p)) {
@@ -17,7 +24,7 @@ public class PrepareTask implements CommandExecutor {
             return true;
         }
 
-        ItemStack book = ItemStackCreator.createAssignmentBook(null, "");
+        ItemStack book = stackCreator.createAssignmentBook(null, "");
         p.getInventory().addItem(book);
 
         return true;
