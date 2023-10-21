@@ -252,6 +252,7 @@ public class MemberDAO {
                      "UPDATE PLAYERS SET last_login = ? WHERE uuid = ?")) {
             st.setDate(1, new Date(System.currentTimeMillis()));
             st.setString(2, uuid.toString());
+            st.executeUpdate();
         }
     }
 }
