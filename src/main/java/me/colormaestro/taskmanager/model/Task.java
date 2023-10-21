@@ -8,8 +8,9 @@ public class Task {
     private Integer id;
     private final String title;
     private final String description;
-    private final int assigneeID;
-    private final int advisorID;
+    private final int creatorID;
+    private final Integer assigneeID;
+    private final Integer advisorID;
     private final double x;
     private final double y;
     private final double z;
@@ -17,13 +18,15 @@ public class Task {
     private final float pitch;
     private final TaskStatus status;
     private final Date dateCreation;
+    private final Date dateAssigned;
     private final Date dateCompleted;
 
-    public Task(String title, String description, int assigneeID, int advisorID,
+    public Task(String title, String description, int creatorID, Integer assigneeID, Integer advisorID,
                 double x, double y, double z, float yaw, float pitch,
-                TaskStatus status, Date dateCreation, Date dateCompleted) {
+                TaskStatus status, Date dateCreation, Date dateAssigned, Date dateCompleted) {
         this.title = title;
         this.description = description;
+        this.creatorID = creatorID;
         this.assigneeID = assigneeID;
         this.advisorID = advisorID;
         this.x = x;
@@ -33,6 +36,7 @@ public class Task {
         this.pitch = pitch;
         this.status = status;
         this.dateCreation = dateCreation;
+        this.dateAssigned = dateAssigned;
         this.dateCompleted = dateCompleted;
     }
 
@@ -52,11 +56,15 @@ public class Task {
         return description;
     }
 
-    public int getAssigneeID() {
+    public int getCreatorID() {
+        return creatorID;
+    }
+
+    public Integer getAssigneeID() {
         return assigneeID;
     }
 
-    public int getAdvisorID() {
+    public Integer getAdvisorID() {
         return advisorID;
     }
 
@@ -66,6 +74,10 @@ public class Task {
 
     public Date getDateCreation() {
         return dateCreation;
+    }
+
+    public Date getDateAssigned() {
+        return dateAssigned;
     }
 
     public Date getDateCompleted() {

@@ -1,7 +1,9 @@
 package me.colormaestro.taskmanager.data;
 
 import me.colormaestro.taskmanager.enums.TaskStatus;
-import me.colormaestro.taskmanager.model.MemberTaskStats;
+import me.colormaestro.taskmanager.model.AdvisedTask;
+import me.colormaestro.taskmanager.model.IdleTask;
+import me.colormaestro.taskmanager.model.MemberDashboardInfo;
 import me.colormaestro.taskmanager.model.Task;
 import org.bukkit.Location;
 import org.jetbrains.annotations.NotNull;
@@ -50,16 +52,19 @@ public class TaskDAO {
                     "id INTEGER PRIMARY KEY," +
                     "title VARCHAR(40) NOT NULL," +
                     "description VARCHAR(200) NOT NULL," +
-                    "assignee_id INT NOT NULL," +
-                    "advisor_id INT NOT NULL," +
-                    "x DOUBLE," +
-                    "y DOUBLE," +
-                    "z DOUBLE," +
-                    "yaw DOUBLE," +
-                    "pitch DOUBLE," +
-                    "status VARCHAR(10)," +
+                    "creator_id INT NOT NULL," +
+                    "assignee_id INT," +
+                    "advisor_id INT," +
+                    "x DOUBLE NOT NULL," +
+                    "y DOUBLE NOT NULL," +
+                    "z DOUBLE NOT NULL," +
+                    "yaw DOUBLE NOT NULL," +
+                    "pitch DOUBLE NOT NULL," +
+                    "status VARCHAR(10) NOT NULL," +
+                    "date_created DATE NOT NULL ," +
                     "date_given DATE," +
                     "date_finished DATE," +
+                    "FOREIGN KEY (creator_id) REFERENCES PLAYERS (id)," +
                     "FOREIGN KEY (assignee_id) REFERENCES PLAYERS (id)," +
                     "FOREIGN KEY (advisor_id) REFERENCES PLAYERS (id)" +
                     ")");
@@ -80,20 +85,23 @@ public class TaskDAO {
         }
         try (Connection connection = DriverManager.getConnection(url);
              PreparedStatement st = connection.prepareStatement(
-                     "INSERT INTO TASKS (title, description, assignee_id, advisor_id, x, y, z, yaw, pitch, " +
-                             "status, date_given, date_finished) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)")) {
+                     "INSERT INTO TASKS (title, description, creator_id, assignee_id, advisor_id, x, y, z, yaw, " +
+                             "pitch, status, date_created, date_given, date_finished) " +
+                             "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)")) {
             st.setString(1, task.getTitle());
             st.setString(2, task.getDescription());
-            st.setInt(3, task.getAssigneeID());
-            st.setInt(4, task.getAdvisorID());
-            st.setDouble(5, task.getX());
-            st.setDouble(6, task.getY());
-            st.setDouble(7, task.getZ());
-            st.setFloat(8, task.getYaw());
-            st.setFloat(9, task.getPitch());
-            st.setString(10, task.getStatus().name());
-            st.setDate(11, new Date(System.currentTimeMillis()));
-            st.setDate(12, null);
+            st.setInt(3, task.getCreatorID());
+            ParsingUtils.setIntOrNull(st, 4, task.getAssigneeID());
+            ParsingUtils.setIntOrNull(st, 5, task.getAdvisorID());
+            st.setDouble(6, task.getX());
+            st.setDouble(7, task.getY());
+            st.setDouble(8, task.getZ());
+            st.setFloat(9, task.getYaw());
+            st.setFloat(10, task.getPitch());
+            st.setString(11, task.getStatus().name());
+            st.setDate(12, task.getDateCreation());
+            st.setDate(13, task.getDateAssigned());
+            st.setDate(14, task.getDateCompleted());
             st.executeUpdate();
         }
     }
@@ -123,6 +131,32 @@ public class TaskDAO {
     }
 
     /**
+     * Marks task as doing. Useful when assigning prepared task.
+     *
+     * @param taskID     id of the task
+     * @param assigneeID id of assignee
+     * @param advisorID  if of advisor
+     * @throws SQLException        if SQL error arise
+     * @throws DataAccessException if player tries to finish task which belongs to someone else
+     */
+    public synchronized void assignTask(int taskID, int assigneeID, int advisorID) throws SQLException, DataAccessException {
+        try (Connection connection = DriverManager.getConnection(url);
+             PreparedStatement st = connection.prepareStatement(
+                     "UPDATE TASKS SET status = 'DOING', assignee_id = ?, advisor_id = ?, date_given = ? " +
+                             "WHERE id = ? AND status = 'PREPARED'")) {
+
+            st.setInt(1, assigneeID);
+            st.setInt(2, advisorID);
+            st.setDate(3, new Date(System.currentTimeMillis()));
+            st.setInt(4, taskID);
+            int affected = st.executeUpdate();
+            if (affected == 0) {
+                throw new DataAccessException("No change. Make sure you choose prepared task.");
+            }
+        }
+    }
+
+    /**
      * Sets task state to {@link me.colormaestro.taskmanager.enums.TaskStatus#DOING}, which is the default for new tasks.
      *
      * @param id    ID of the task
@@ -144,6 +178,9 @@ public class TaskDAO {
                 throw new DataAccessException("No task with such an ID found.");
             }
             TaskStatus status = TaskStatus.valueOf(rs.getString("status"));
+            if (status == TaskStatus.PREPARED) {
+                throw new DataAccessException("The task is in prepared state thus returning is not possible");
+            }
             if (status == TaskStatus.APPROVED && !force) {
                 throw new DataAccessException("The task is approved. If you want to proceed add force " +
                         "as second argument to this command");
@@ -203,8 +240,8 @@ public class TaskDAO {
     public synchronized Task findTask(int id) throws SQLException, DataAccessException {
         try (Connection connection = DriverManager.getConnection(url);
              PreparedStatement st = connection.prepareStatement(
-                     "SELECT title, description, assignee_id, advisor_id, x, y, z, yaw, pitch, " +
-                             "status, date_given, date_finished FROM TASKS WHERE id = ?")) {
+                     "SELECT title, description, creator_id, assignee_id, advisor_id, x, y, z, yaw, pitch, " +
+                             "status, date_created, date_given, date_finished FROM TASKS WHERE id = ?")) {
 
             st.setInt(1, id);
             ResultSet rs = st.executeQuery();
@@ -214,14 +251,16 @@ public class TaskDAO {
             Task task = new Task(
                     rs.getString("title"),
                     rs.getString("description"),
-                    rs.getInt("assignee_id"),
-                    rs.getInt("advisor_id"),
+                    rs.getInt("creator_id"),
+                    ParsingUtils.getIntOrNull(rs, "assignee_id"),
+                    ParsingUtils.getIntOrNull(rs, "advisor_id"),
                     rs.getDouble("x"),
                     rs.getDouble("y"),
                     rs.getDouble("z"),
                     rs.getFloat("yaw"),
                     rs.getFloat("pitch"),
                     TaskStatus.valueOf(rs.getString("status")),
+                    rs.getDate("date_created"),
                     rs.getDate("date_given"),
                     rs.getDate("date_finished")
             );
@@ -243,10 +282,11 @@ public class TaskDAO {
     public synchronized List<Task> fetchPlayersActiveTasks(int assigneeID) throws SQLException {
         try (Connection connection = DriverManager.getConnection(url);
              PreparedStatement st = connection.prepareStatement(
-                     "SELECT id, title, description, assignee_id, advisor_id, x, y, z, yaw, pitch, status, " +
-                             "date_given, date_finished FROM TASKS WHERE assignee_id = ? AND status != 'APPROVED'")) {
+                     "SELECT id, title, description, creator_id, assignee_id, advisor_id, x, y, z, yaw, pitch, " +
+                             "status, date_created, date_given, date_finished FROM TASKS WHERE assignee_id = ? " +
+                             "AND status != 'APPROVED' order by id desc")) {
 
-            return executeStatement(assigneeID, st);
+            return executeStatementWithMemberId(st, assigneeID);
         }
     }
 
@@ -261,10 +301,11 @@ public class TaskDAO {
     public synchronized List<Task> fetchPlayersApprovedTasks(int assigneeID) throws SQLException {
         try (Connection connection = DriverManager.getConnection(url);
              PreparedStatement st = connection.prepareStatement(
-                     "SELECT id, title, description, assignee_id, advisor_id, x, y, z, yaw, pitch, status, " +
-                             "date_given, date_finished FROM TASKS WHERE assignee_id = ? AND status == 'APPROVED'")) {
+                     "SELECT id, title, description, creator_id, assignee_id, advisor_id, x, y, z, yaw, pitch, " +
+                             "status, date_created, date_given, date_finished FROM TASKS WHERE assignee_id = ? " +
+                             "AND status == 'APPROVED' order by id desc")) {
 
-            return executeStatement(assigneeID, st);
+            return executeStatementWithMemberId(st, assigneeID);
         }
     }
 
@@ -279,29 +320,96 @@ public class TaskDAO {
     public synchronized List<Task> fetchFinishedTasks(int advisorID) throws SQLException {
         try (Connection connection = DriverManager.getConnection(url);
              PreparedStatement st = connection.prepareStatement(
-                     "SELECT id, title, description, assignee_id, advisor_id, x, y, z, yaw, pitch, status, " +
-                             "date_given, date_finished FROM TASKS WHERE advisor_id = ? AND status = 'FINISHED'")) {
+                     "SELECT id, title, description, creator_id, assignee_id, advisor_id, x, y, z, yaw, pitch, " +
+                             "status, date_created, date_given, date_finished FROM TASKS WHERE advisor_id = ? " +
+                             "AND status = 'FINISHED'")) {
 
-            return executeStatement(advisorID, st);
+            return executeStatementWithMemberId(st, advisorID);
+        }
+    }
+
+    /**
+     * Retrieves all prepared tasks.
+     *
+     * @return prepared tasks
+     * @throws SQLException if SQL error arise
+     */
+    public synchronized List<Task> fetchPreparedTasks() throws SQLException {
+        try (Connection connection = DriverManager.getConnection(url);
+             PreparedStatement st = connection.prepareStatement(
+                     "SELECT id, title, description, creator_id, assignee_id, advisor_id, x, y, z, yaw, pitch, " +
+                             "status, date_created, date_given, date_finished FROM TASKS WHERE status = 'PREPARED'")) {
+
+            return executeStatement(st);
         }
     }
 
     /**
      * Retrieves all active tasks (status {@link me.colormaestro.taskmanager.enums.TaskStatus#DOING} or
      * {@link me.colormaestro.taskmanager.enums.TaskStatus#FINISHED}) whose advisor is selected person.
-     * This help advisors to check which tasks are still active.
-     * param advisor id of advisor
+     * Also adds assignee's name to the task. This help advisors to check which tasks are still active.
      *
+     * @param advisorID id of advisor
      * @return Tasks which were given by this advisor and are not approved yet.
      * @throws SQLException if SQL error arise
      */
-    public synchronized List<Task> fetchAdvisorActiveTasks(int advisorID) throws SQLException {
+    public synchronized List<AdvisedTask> fetchAdvisorActiveTasks(int advisorID) throws SQLException {
         try (Connection connection = DriverManager.getConnection(url);
              PreparedStatement st = connection.prepareStatement(
-                     "SELECT id, title, description, assignee_id, advisor_id, x, y, z, yaw, pitch, status, " +
-                             "date_given, date_finished FROM TASKS WHERE advisor_id = ? AND status != 'APPROVED'")) {
+                     "SELECT tasks.id AS task_id, title, description, status, assignee.ign AS ign " +
+                             "FROM PLAYERS advisor JOIN PLAYERS assignee JOIN TASKS " +
+                             "ON advisor.id = TASKS.advisor_id AND assignee.id = TASKS.assignee_id " +
+                             "WHERE advisor_id = ? AND status != 'APPROVED' AND status != 'PREPARED'")) {
 
-            return executeStatement(advisorID, st);
+            st.setInt(1, advisorID);
+            ResultSet rs = st.executeQuery();
+            List<AdvisedTask> stats = new ArrayList<>();
+            while (rs.next()) {
+                AdvisedTask advisedTask = new AdvisedTask(
+                        rs.getInt("task_id"),
+                        rs.getString("title"),
+                        rs.getString("description"),
+                        TaskStatus.valueOf(rs.getString("status")),
+                        rs.getString("ign")
+                );
+                stats.add(advisedTask);
+            }
+            rs.close();
+            return stats;
+        }
+    }
+
+    /**
+     * Returns list of tasks on which are members working too long
+     * (status {@link me.colormaestro.taskmanager.enums.TaskStatus#DOING}) - in this case more than 30 days.
+     *
+     * @return list of tasks which are in progress for longer than 30 days.
+     * @throws SQLException if SQL error arise
+     */
+    public synchronized List<IdleTask> fetchIdleTasks() throws SQLException {
+        try (Connection connection = DriverManager.getConnection(url);
+             PreparedStatement st = connection.prepareStatement(
+                     "SELECT tasks.id AS task_id, title, description, date_given, assignee.ign AS assignee_ign, " +
+                             "advisor.ign AS advisor_ign FROM PLAYERS advisor JOIN PLAYERS assignee JOIN TASKS " +
+                             "ON advisor.id = TASKS.advisor_id AND assignee.id = TASKS.assignee_id " +
+                             "WHERE (julianday('now') - julianday(date_given / 1000, 'unixepoch')) > 30 " +
+                             "AND status == 'DOING'")) {
+
+            ResultSet rs = st.executeQuery();
+            List<IdleTask> idleTasks = new ArrayList<>();
+            while (rs.next()) {
+                IdleTask idleTask = new IdleTask(
+                        rs.getInt("task_id"),
+                        rs.getString("title"),
+                        rs.getString("description"),
+                        rs.getDate("date_given"),
+                        rs.getString("assignee_ign"),
+                        rs.getString("advisor_ign")
+                );
+                idleTasks.add(idleTask);
+            }
+            rs.close();
+            return idleTasks;
         }
     }
 
@@ -356,35 +464,37 @@ public class TaskDAO {
     }
 
     /**
-     * Collects tasks statistics about members e.g. who has how many tasks of each {@link me.colormaestro.taskmanager.enums.TaskStatus}
+     * Collects needed data for dashboard - last login time of member and task statistics
      *
      * @return List of stats for each player
      * @throws SQLException if SQL error arise
      */
-    public synchronized List<MemberTaskStats> fetchTaskStatistics() throws SQLException {
+    public synchronized List<MemberDashboardInfo> fetchMembersDashboardInfo() throws SQLException {
         try (Connection connection = DriverManager.getConnection(url);
              PreparedStatement st = connection.prepareStatement(
                      """
                              select
                                ign,
                                uuid,
+                               last_login,
                                count(tasks.id) filter (where status = 'DOING') as "doing",
                                count(tasks.id) filter (where status = 'FINISHED') as "finished",
                                count(tasks.id) filter (where status = 'APPROVED') as "approved"
                              from players left join tasks on players.id = tasks.assignee_id
-                             group by ign, uuid
-                             order by ign""")) {
+                             group by ign, uuid, last_login
+                             order by upper(ign)""")) {
             ResultSet rs = st.executeQuery();
-            List<MemberTaskStats> stats = new ArrayList<>();
+            List<MemberDashboardInfo> stats = new ArrayList<>();
             while (rs.next()) {
-                MemberTaskStats memberTaskStats = new MemberTaskStats(
+                MemberDashboardInfo memberDashboardInfo = new MemberDashboardInfo(
                         rs.getString("ign"),
                         rs.getString("uuid"),
                         rs.getInt("doing"),
                         rs.getInt("finished"),
-                        rs.getInt("approved")
+                        rs.getInt("approved"),
+                        rs.getDate("last_login")
                 );
-                stats.add(memberTaskStats);
+                stats.add(memberDashboardInfo);
             }
             rs.close();
             return stats;
@@ -392,7 +502,7 @@ public class TaskDAO {
     }
 
     /**
-     * Executes given statement with memberID parameter
+     * Executes given statement with one binding of member ID
      *
      * @param memberID ID of member which to set in the statement
      * @param statement SQL statement to execute
@@ -400,22 +510,36 @@ public class TaskDAO {
      * @throws SQLException if SQL error arise
      */
     @NotNull
-    private List<Task> executeStatement(int memberID, PreparedStatement statement) throws SQLException {
+    private List<Task> executeStatementWithMemberId(PreparedStatement statement, int memberID) throws SQLException {
         statement.setInt(1, memberID);
+        return executeStatement(statement);
+    }
+
+    /**
+     * Executes given statement, all bindings must be priorly resolved!
+     *
+     * @param statement SQL statement to execute
+     * @return List of tasks collected by statement
+     * @throws SQLException if SQL error arise
+     */
+    @NotNull
+    private List<Task> executeStatement(PreparedStatement statement) throws SQLException {
         ResultSet rs = statement.executeQuery();
         List<Task> tasks = new ArrayList<>();
         while (rs.next()) {
             Task task = new Task(
                     rs.getString("title"),
                     rs.getString("description"),
-                    rs.getInt("assignee_id"),
-                    rs.getInt("advisor_id"),
+                    rs.getInt("creator_id"),
+                    ParsingUtils.getIntOrNull(rs, "assignee_id"),
+                    ParsingUtils.getIntOrNull(rs, "advisor_id"),
                     rs.getDouble("x"),
                     rs.getDouble("y"),
                     rs.getDouble("z"),
                     rs.getFloat("yaw"),
                     rs.getFloat("pitch"),
                     TaskStatus.valueOf(rs.getString("status")),
+                    rs.getDate("date_created"),
                     rs.getDate("date_given"),
                     rs.getDate("date_finished")
             );

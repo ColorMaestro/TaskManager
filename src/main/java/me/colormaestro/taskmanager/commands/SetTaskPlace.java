@@ -1,8 +1,9 @@
 package me.colormaestro.taskmanager.commands;
 
 import me.colormaestro.taskmanager.data.DataAccessException;
-import me.colormaestro.taskmanager.data.PlayerDAO;
+import me.colormaestro.taskmanager.data.MemberDAO;
 import me.colormaestro.taskmanager.data.TaskDAO;
+import me.colormaestro.taskmanager.model.Member;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
@@ -17,11 +18,11 @@ import java.util.UUID;
 
 public class SetTaskPlace implements CommandExecutor {
     private final TaskDAO taskDAO;
-    private final PlayerDAO playerDAO;
+    private final MemberDAO memberDAO;
 
-    public SetTaskPlace(TaskDAO taskDAO, PlayerDAO playerDAO) {
+    public SetTaskPlace(TaskDAO taskDAO, MemberDAO memberDAO) {
         this.taskDAO = taskDAO;
-        this.playerDAO = playerDAO;
+        this.memberDAO = memberDAO;
     }
 
     @Override
@@ -43,9 +44,9 @@ public class SetTaskPlace implements CommandExecutor {
         Location location = p.getLocation();
         Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
             try {
-                int assignee = playerDAO.getPlayerID(uuid);
+                Member assignee = memberDAO.findMember(uuid);
                 int id = Integer.parseInt(sid);
-                taskDAO.updateTaskCords(id, assignee, location);
+                taskDAO.updateTaskCords(id, assignee.getId(), location);
                 Bukkit.getScheduler().runTask(plugin,
                         () -> p.sendMessage(ChatColor.GREEN + "Cords updated."));
             } catch (SQLException | DataAccessException | NumberFormatException ex) {

@@ -1,27 +1,26 @@
 package me.colormaestro.taskmanager.listeners;
 
-import me.colormaestro.taskmanager.data.PlayerDAO;
-import me.colormaestro.taskmanager.data.TaskDAO;
+import me.colormaestro.taskmanager.utils.DataContainerKeys;
 import me.colormaestro.taskmanager.utils.Directives;
+import me.colormaestro.taskmanager.utils.RunnablesCreator;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.NamespacedKey;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.InventoryView;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.plugin.Plugin;
+import org.bukkit.persistence.PersistentDataType;
+
+import java.util.Objects;
 
 public class DashboardViewListener implements Listener {
-    private final Plugin plugin;
-    private final TaskDAO taskDAO;
-    private final PlayerDAO playerDAO;
+    private final RunnablesCreator creator;
 
-    public DashboardViewListener(Plugin plugin, TaskDAO taskDAO, PlayerDAO playerDAO) {
-        this.plugin = plugin;
-        this.taskDAO = taskDAO;
-        this.playerDAO = playerDAO;
+    public DashboardViewListener(RunnablesCreator creator) {
+        this.creator = creator;
     }
 
     @EventHandler
@@ -38,19 +37,20 @@ public class DashboardViewListener implements Listener {
                 case PLAYER_HEAD -> handlePlayerHeadClick(player, event.getCurrentItem());
                 case ENDER_EYE -> handleEyeClick(player);
                 case ARROW -> handleArrowClick(player, event.getView(), event.getCurrentItem());
+                case LIGHT_GRAY_CONCRETE -> handleConcreteClick(player);
+                case CLOCK -> handleClockClick(player);
             }
         }
     }
 
     private void handlePlayerHeadClick(HumanEntity player, ItemStack headStack) {
-        String ign = headStack.getItemMeta().getDisplayName().replaceFirst(ChatColor.BLUE + "" + ChatColor.BOLD, "");
-        Bukkit.getScheduler().runTaskAsynchronously(plugin,
-                SharedRunnables.showActiveTasksView(plugin, taskDAO, playerDAO, player, ign, 1));
+        String ign = Objects.requireNonNull(headStack.getItemMeta()).getPersistentDataContainer()
+                .get(new NamespacedKey(creator.getPlugin(), DataContainerKeys.MEMBER_NAME), PersistentDataType.STRING);
+        Bukkit.getScheduler().runTaskAsynchronously(creator.getPlugin(), creator.showActiveTasksView(player, ign, 1));
     }
 
     private void handleEyeClick(HumanEntity player) {
-        Bukkit.getScheduler().runTaskAsynchronously(plugin,
-                SharedRunnables.showSupervisedTasksView(plugin, taskDAO, playerDAO, player, 1));
+        Bukkit.getScheduler().runTaskAsynchronously(creator.getPlugin(), creator.showSupervisedTasksView(player, 1));
     }
 
     private void handleArrowClick(HumanEntity player, InventoryView view, ItemStack arrow) {
@@ -70,7 +70,14 @@ public class DashboardViewListener implements Listener {
             currentPage = totalPages;
         }
 
-        Bukkit.getScheduler().runTaskAsynchronously(plugin,
-                SharedRunnables.showDashboardView(plugin, taskDAO, player, currentPage));
+        Bukkit.getScheduler().runTaskAsynchronously(creator.getPlugin(), creator.showDashboardView(player, currentPage));
+    }
+
+    private void handleConcreteClick(HumanEntity player) {
+        Bukkit.getScheduler().runTaskAsynchronously(creator.getPlugin(), creator.showPreparedTasksView(player, 1));
+    }
+
+    private void handleClockClick(HumanEntity player) {
+        Bukkit.getScheduler().runTaskAsynchronously(creator.getPlugin(), creator.showIdleTasksView(player, 1));
     }
 }

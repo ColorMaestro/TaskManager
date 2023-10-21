@@ -2,8 +2,9 @@ package me.colormaestro.taskmanager.commands;
 
 import me.colormaestro.taskmanager.data.DataAccessException;
 import me.colormaestro.taskmanager.data.HologramLayer;
-import me.colormaestro.taskmanager.data.PlayerDAO;
+import me.colormaestro.taskmanager.data.MemberDAO;
 import me.colormaestro.taskmanager.data.TaskDAO;
+import me.colormaestro.taskmanager.model.Member;
 import me.colormaestro.taskmanager.model.Task;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -18,11 +19,11 @@ import java.util.List;
 
 public class Establish implements CommandExecutor {
     private final TaskDAO taskDAO;
-    private final PlayerDAO playerDAO;
+    private final MemberDAO memberDAO;
 
-    public Establish(TaskDAO taskDAO, PlayerDAO playerDAO) {
+    public Establish(TaskDAO taskDAO, MemberDAO memberDAO) {
         this.taskDAO = taskDAO;
-        this.playerDAO = playerDAO;
+        this.memberDAO = memberDAO;
     }
 
     @Override
@@ -45,8 +46,8 @@ public class Establish implements CommandExecutor {
             Plugin plugin = Bukkit.getPluginManager().getPlugin("TaskManager");
             Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
                 try {
-                    int id = playerDAO.getPlayerID(player.getUniqueId());
-                    List<Task> membersTasks = taskDAO.fetchPlayersActiveTasks(id);
+                    Member member = memberDAO.findMember(player.getUniqueId());
+                    List<Task> membersTasks = taskDAO.fetchPlayersActiveTasks(member.getId());
                     Bukkit.getScheduler().runTask(plugin, () -> {
                         HologramLayer.getInstance().establishTasksHologram(player);
                         HologramLayer.getInstance().setTasks(player.getUniqueId().toString(), membersTasks);

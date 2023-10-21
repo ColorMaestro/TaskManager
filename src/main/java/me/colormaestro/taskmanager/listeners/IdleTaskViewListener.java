@@ -3,7 +3,6 @@ package me.colormaestro.taskmanager.listeners;
 import me.colormaestro.taskmanager.utils.Directives;
 import me.colormaestro.taskmanager.utils.RunnablesCreator;
 import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -11,16 +10,17 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.InventoryView;
 import org.bukkit.inventory.ItemStack;
 
-public class ApprovedTasksViewListener implements Listener {
+public class IdleTaskViewListener implements Listener {
+
     private final RunnablesCreator creator;
 
-    public ApprovedTasksViewListener(RunnablesCreator creator) {
+    public IdleTaskViewListener(RunnablesCreator creator) {
         this.creator = creator;
     }
 
     @EventHandler
     public void onMenuClick(InventoryClickEvent event) {
-        if (event.getView().getTitle().contains(Directives.APPROVED_TASKS)) {
+        if (event.getView().getTitle().contains(Directives.IDLE_TASKS)) {
             event.setCancelled(true);
 
             if (event.getCurrentItem() == null) {
@@ -29,28 +29,26 @@ public class ApprovedTasksViewListener implements Listener {
 
             HumanEntity player = event.getView().getPlayer();
             switch (event.getCurrentItem().getType()) {
-                case LIGHT_BLUE_CONCRETE -> handleConcreteClick(player, event.getCurrentItem());
-                case SPECTRAL_ARROW -> handleSpectralArrowClick(player, event.getView());
+                case ORANGE_CONCRETE -> handleConcreteClick(player, event.getCurrentItem());
+                case SPECTRAL_ARROW -> handleSpectralArrowClick(player);
                 case ARROW -> handleArrowClick(player, event.getView(), event.getCurrentItem());
             }
         }
     }
 
-    private void handleConcreteClick(HumanEntity player, ItemStack headStack) {
-        String taskId = headStack.getItemMeta().getDisplayName().split("#")[1];
+    private void handleConcreteClick(HumanEntity player, ItemStack taskStack) {
+        String taskId = taskStack.getItemMeta().getDisplayName().split("#")[1];
         Bukkit.getScheduler().runTaskAsynchronously(creator.getPlugin(), creator.teleportPlayerToTask(player, taskId));
     }
 
-    private void handleSpectralArrowClick(HumanEntity player, InventoryView view) {
-        String ign = view.getTitle().replaceFirst(ChatColor.DARK_AQUA + "" + ChatColor.BOLD, "").split("'")[0];
-        Bukkit.getScheduler().runTaskAsynchronously(creator.getPlugin(), creator.showActiveTasksView(player, ign, 1));
+    private void handleSpectralArrowClick(HumanEntity player) {
+        Bukkit.getScheduler().runTaskAsynchronously(creator.getPlugin(), creator.showDashboardView(player, 1));
     }
 
     private void handleArrowClick(HumanEntity player, InventoryView view, ItemStack arrow) {
-        var parts = view.getTitle().replaceFirst(ChatColor.DARK_AQUA + "" + ChatColor.BOLD, "").split("['()/]");
-        String ign = parts[0];
-        long currentPage = Long.parseLong(parts[2]);
-        long totalPages = Long.parseLong(parts[3]);
+        var parts = view.getTitle().split("[()/]");
+        long currentPage = Long.parseLong(parts[1]);
+        long totalPages = Long.parseLong(parts[2]);
 
         if (arrow.getItemMeta().getDisplayName().contains("Next")) {
             currentPage++;
@@ -64,7 +62,6 @@ public class ApprovedTasksViewListener implements Listener {
             currentPage = totalPages;
         }
 
-        Bukkit.getScheduler().runTaskAsynchronously(creator.getPlugin(),
-                creator.showApprovedTasksView(player, ign, currentPage));
+        Bukkit.getScheduler().runTaskAsynchronously(creator.getPlugin(), creator.showIdleTasksView(player, currentPage));
     }
 }
