@@ -1,15 +1,20 @@
 package me.colormaestro.taskmanager.listeners;
 
+import me.colormaestro.taskmanager.utils.DataContainerKeys;
 import me.colormaestro.taskmanager.utils.Directives;
 import me.colormaestro.taskmanager.utils.RunnablesCreator;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.NamespacedKey;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.InventoryView;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.persistence.PersistentDataType;
+
+import java.util.Objects;
 
 public class DashboardViewListener implements Listener {
     private final RunnablesCreator creator;
@@ -39,7 +44,8 @@ public class DashboardViewListener implements Listener {
     }
 
     private void handlePlayerHeadClick(HumanEntity player, ItemStack headStack) {
-        String ign = headStack.getItemMeta().getDisplayName().replaceFirst(ChatColor.BLUE + "" + ChatColor.BOLD, "");
+        String ign = Objects.requireNonNull(headStack.getItemMeta()).getPersistentDataContainer()
+                .get(new NamespacedKey(creator.getPlugin(), DataContainerKeys.MEMBER_NAME), PersistentDataType.STRING);
         Bukkit.getScheduler().runTaskAsynchronously(creator.getPlugin(), creator.showActiveTasksView(player, ign, 1));
     }
 

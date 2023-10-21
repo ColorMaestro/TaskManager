@@ -51,6 +51,9 @@ public class ItemStackCreator {
         lore.add("");
         lore.add(ChatColor.GRAY + "Last online: " + ChatColor.WHITE + daysDelta + " day(s) ago");
 
+        var container = skullMeta.getPersistentDataContainer();
+        container.set(new NamespacedKey(plugin, DataContainerKeys.MEMBER_NAME), PersistentDataType.STRING, ign);
+
         skullMeta.setLore(lore);
         is.setItemMeta(skullMeta);
         return is;
