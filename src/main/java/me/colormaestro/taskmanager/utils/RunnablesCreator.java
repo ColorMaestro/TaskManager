@@ -48,7 +48,7 @@ public class RunnablesCreator {
                 List<MemberDashboardInfo> stats = taskDAO.fetchMembersDashboardInfo();
                 int totalPages = stats.size() / PAGE_SIZE + 1;
                 // Variable used in lambda should be final or effectively final
-                List<MemberDashboardInfo> finalStats = stats.stream().skip((page - 1) * PAGE_SIZE).limit(PAGE_SIZE).toList();
+                List<MemberDashboardInfo> finalStats = getPageFromList(stats, page);
                 Bukkit.getScheduler().runTask(plugin, () -> {
                     String inventoryTitle = ChatColor.BLUE + "" + ChatColor.BOLD + "Tasks Dashboard" + ChatColor.RESET + " (" + page + "/" + totalPages + ") " + Directives.DASHBOARD;
                     InventoryBuilder builder = new InventoryBuilder(player, inventoryTitle);
@@ -91,7 +91,7 @@ public class RunnablesCreator {
                 Member member = memberDAO.findMember(ign);
                 List<Task> tasks = taskDAO.fetchPlayersActiveTasks(member.getId());
                 int totalPages = tasks.size() / PAGE_SIZE + 1;
-                List<Task> finalTasks = tasks.stream().skip((page - 1) * PAGE_SIZE).limit(PAGE_SIZE).toList();
+                List<Task> finalTasks = getPageFromList(tasks, page);
                 Bukkit.getScheduler().runTask(plugin, () -> {
                     String title = ChatColor.BLUE + "" + ChatColor.BOLD + ign + "'s tasks" + ChatColor.RESET + " (" + page + "/" + totalPages + ") " + Directives.ACTIVE_TASKS;
                     InventoryBuilder builder = new InventoryBuilder(player, title);
@@ -130,7 +130,7 @@ public class RunnablesCreator {
                 Member member = memberDAO.findMember(ign);
                 List<Task> tasks = taskDAO.fetchPlayersApprovedTasks(member.getId());
                 int totalPages = tasks.size() / PAGE_SIZE + 1;
-                List<Task> finalTasks = tasks.stream().skip((page - 1) * PAGE_SIZE).limit(PAGE_SIZE).toList();
+                List<Task> finalTasks = getPageFromList(tasks, page);
                 Bukkit.getScheduler().runTask(plugin, () -> {
                     String title = ChatColor.DARK_AQUA + "" + ChatColor.BOLD + ign + "'s approved tasks" + ChatColor.RESET + " (" + page + "/" + totalPages + ") " + Directives.APPROVED_TASKS;
                     InventoryBuilder builder = new InventoryBuilder(player, title);
@@ -167,7 +167,7 @@ public class RunnablesCreator {
                 Member member = memberDAO.findMember(player.getName());
                 List<AdvisedTask> tasks = taskDAO.fetchAdvisorActiveTasks(member.getId());
                 int totalPages = tasks.size() / PAGE_SIZE + 1;
-                List<AdvisedTask> finalTasks = tasks.stream().skip((page - 1) * PAGE_SIZE).limit(PAGE_SIZE).toList();
+                List<AdvisedTask> finalTasks = getPageFromList(tasks, page);
                 Bukkit.getScheduler().runTask(plugin, () -> {
                     String title = ChatColor.DARK_PURPLE + "" + ChatColor.BOLD + "Your supervised tasks" + ChatColor.RESET + " (" + page + "/" + totalPages + ") " + Directives.SUPERVISED_TASKS;
                     InventoryBuilder builder = new InventoryBuilder(player, title);
@@ -204,7 +204,7 @@ public class RunnablesCreator {
             try {
                 List<Task> tasks = taskDAO.fetchPreparedTasks();
                 int totalPages = tasks.size() / PAGE_SIZE + 1;
-                List<Task> finalTasks = tasks.stream().skip((page - 1) * PAGE_SIZE).limit(PAGE_SIZE).toList();
+                List<Task> finalTasks = getPageFromList(tasks, page);
                 Bukkit.getScheduler().runTask(plugin, () -> {
                     String title = ChatColor.DARK_GRAY + "" + ChatColor.BOLD + "Prepared tasks" + ChatColor.RESET + " (" + page + "/" + totalPages + ") " + Directives.PREPARED_TASKS;
                     InventoryBuilder builder = new InventoryBuilder(player, title);
@@ -240,7 +240,7 @@ public class RunnablesCreator {
             try {
                 List<IdleTask> tasks = taskDAO.fetchIdleTasks();
                 int totalPages = tasks.size() / PAGE_SIZE + 1;
-                List<IdleTask> finalTasks = tasks.stream().skip((page - 1) * PAGE_SIZE).limit(PAGE_SIZE).toList();
+                List<IdleTask> finalTasks = getPageFromList(tasks, page);
                 Bukkit.getScheduler().runTask(plugin, () -> {
                     String title = ChatColor.DARK_AQUA + "" + ChatColor.BOLD + "Idle tasks" + ChatColor.RESET + " (" + page + "/" + totalPages + ") " + Directives.IDLE_TASKS;
                     InventoryBuilder builder = new InventoryBuilder(player, title);
@@ -377,5 +377,9 @@ public class RunnablesCreator {
         bookMeta.setAuthor(advisorName);
         book.setItemMeta(bookMeta);
         return book;
+    }
+
+    private <T> List<T> getPageFromList(List<T> list, long page) {
+        return list.stream().skip((page - 1) * PAGE_SIZE).limit(PAGE_SIZE).toList();
     }
 }
