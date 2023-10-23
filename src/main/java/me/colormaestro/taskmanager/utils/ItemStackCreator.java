@@ -33,16 +33,31 @@ public class ItemStackCreator {
     }
 
     public ItemStack createMemberStack(String uuid, String ign, int doing, int finished, int approved, Date lastLogin) {
-        ItemStack is = new ItemStack(Material.PLAYER_HEAD, 1);
-        SkullMeta skullMeta = (SkullMeta) is.getItemMeta();
+        ItemStack stack = new ItemStack(Material.PLAYER_HEAD, 1);
+        SkullMeta skullMeta = (SkullMeta) stack.getItemMeta();
         if (skullMeta == null) {
             return null;
         }
-        OfflinePlayer op = Bukkit.getOfflinePlayer(UUID.fromString(uuid));
-        skullMeta.setOwningPlayer(op);
+        OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(UUID.fromString(uuid));
+        skullMeta.setOwningPlayer(offlinePlayer);
         skullMeta.setDisplayName(ChatColor.BLUE + "" + ChatColor.BOLD + ign);
 
-        List<String> lore = createHeadStatsLore(doing, finished, approved);
+        List<String> lore = createHeadStatsLore(doing, finished, approved, lastLogin);
+
+        var container = skullMeta.getPersistentDataContainer();
+        container.set(new NamespacedKey(plugin, DataContainerKeys.MEMBER_NAME), PersistentDataType.STRING, ign);
+
+        skullMeta.setLore(lore);
+        stack.setItemMeta(skullMeta);
+        return stack;
+    }
+
+    private List<String> createHeadStatsLore(int doing, int finished, int approved, Date lastLogin) {
+        List<String> lore = new ArrayList<>();
+
+        lore.add(ChatColor.GRAY + "Opened: " + ChatColor.GOLD + doing);
+        lore.add(ChatColor.GRAY + "Finished: " + ChatColor.GREEN + finished);
+        lore.add(ChatColor.GRAY + "Approved: " + ChatColor.AQUA + approved);
 
         LocalDate currentDate = LocalDate.now();
         LocalDate sqlLocalDate = lastLogin.toLocalDate();
@@ -51,22 +66,7 @@ public class ItemStackCreator {
         lore.add("");
         lore.add(ChatColor.GRAY + "Last online: " + ChatColor.WHITE + daysDelta + " day(s) ago");
 
-        var container = skullMeta.getPersistentDataContainer();
-        container.set(new NamespacedKey(plugin, DataContainerKeys.MEMBER_NAME), PersistentDataType.STRING, ign);
-
-        skullMeta.setLore(lore);
-        is.setItemMeta(skullMeta);
-        return is;
-    }
-
-    private List<String> createHeadStatsLore(int doing, int finished, int approved) {
-        List<String> result = new ArrayList<>();
-
-        result.add(ChatColor.GRAY + "Opened: " + ChatColor.GOLD + doing);
-        result.add(ChatColor.GRAY + "Finished: " + ChatColor.GREEN + finished);
-        result.add(ChatColor.GRAY + "Approved: " + ChatColor.AQUA + approved);
-
-        return result;
+        return lore;
     }
 
     public ItemStack createBasicTaskStack(Integer taskId, String title, String description, TaskStatus status) {
