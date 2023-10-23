@@ -27,7 +27,7 @@ public class TaskInfo implements CommandExecutor {
             return true;
         }
 
-        String taskId = args[0];
+        int taskId = Integer.parseInt(args[0]);
         Bukkit.getScheduler().runTaskAsynchronously(creator.getPlugin(), creator.givePlayerAssignmentBook(player, taskId));
         return true;
     }

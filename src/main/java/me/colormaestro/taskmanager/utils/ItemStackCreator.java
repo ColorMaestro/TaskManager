@@ -116,6 +116,9 @@ public class ItemStackCreator {
 
         List<String> lore = createTaskStackLore(assigneeName, advisorName, dateAssigned, description);
 
+        var container = itemMeta.getPersistentDataContainer();
+        container.set(new NamespacedKey(plugin, DataContainerKeys.TASK_ID), PersistentDataType.INTEGER, taskId);
+
         itemMeta.setLore(lore);
         stack.setItemMeta(itemMeta);
         return stack;

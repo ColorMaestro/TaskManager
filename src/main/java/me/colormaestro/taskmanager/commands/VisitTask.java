@@ -29,7 +29,7 @@ public class VisitTask implements CommandExecutor {
         }
 
         Plugin plugin = creator.getPlugin();
-        String taskId = args[0];
+        int taskId = Integer.parseInt(args[0]);
         Bukkit.getScheduler().runTaskAsynchronously(plugin, creator.teleportPlayerToTask(player, taskId));
         Bukkit.getScheduler().runTaskAsynchronously(plugin, creator.givePlayerAssignmentBook(player, taskId));
         return true;

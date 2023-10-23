@@ -1,14 +1,19 @@
 package me.colormaestro.taskmanager.listeners;
 
+import me.colormaestro.taskmanager.utils.DataContainerKeys;
 import me.colormaestro.taskmanager.utils.Directives;
 import me.colormaestro.taskmanager.utils.RunnablesCreator;
 import org.bukkit.Bukkit;
+import org.bukkit.NamespacedKey;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.InventoryView;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.persistence.PersistentDataType;
+
+import java.util.Objects;
 
 public class PreparedTasksViewListener implements Listener {
     private final RunnablesCreator creator;
@@ -36,7 +41,8 @@ public class PreparedTasksViewListener implements Listener {
     }
 
     private void handleConcreteClick(HumanEntity player, ItemStack headStack) {
-        String taskId = headStack.getItemMeta().getDisplayName().split("#")[1];
+        int taskId = Objects.requireNonNull(headStack.getItemMeta()).getPersistentDataContainer()
+                .get(new NamespacedKey(creator.getPlugin(), DataContainerKeys.TASK_ID), PersistentDataType.INTEGER);
         Bukkit.getScheduler().runTaskAsynchronously(creator.getPlugin(), creator.teleportPlayerToTask(player, taskId));
     }
 

@@ -273,10 +273,10 @@ public class RunnablesCreator {
         };
     }
 
-    public Runnable teleportPlayerToTask(HumanEntity player, String taskId) {
+    public Runnable teleportPlayerToTask(HumanEntity player, int taskId) {
         return () -> {
             try {
-                Task task = taskDAO.findTask(Integer.parseInt(taskId));
+                Task task = taskDAO.findTask(taskId);
                 Bukkit.getScheduler().runTask(plugin, () -> {
                     double x = task.getX();
                     double y = task.getY();
@@ -295,11 +295,10 @@ public class RunnablesCreator {
         };
     }
 
-    public Runnable givePlayerAssignmentBook(Player player, String taskId) {
+    public Runnable givePlayerAssignmentBook(Player player, int taskId) {
         return () -> {
             try {
-                int id = Integer.parseInt(taskId);
-                Task task = taskDAO.findTask(id);
+                Task task = taskDAO.findTask(taskId);
 
                 int creatorID = task.getCreatorID();
                 Integer advisorID = task.getAdvisorID();
@@ -312,7 +311,7 @@ public class RunnablesCreator {
                     ItemStack book = createTaskBook(task, creatorName, advisorName, assigneeName);
                     player.getInventory().addItem(book);
                 });
-            } catch (SQLException | DataAccessException | NumberFormatException ex) {
+            } catch (SQLException | DataAccessException ex) {
                 Bukkit.getScheduler().runTask(plugin,
                         () -> player.sendMessage(ChatColor.RED + ex.getMessage()));
                 ex.printStackTrace();
