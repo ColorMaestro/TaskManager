@@ -23,7 +23,7 @@ public class InventoryBuilder {
     }
 
     public InventoryBuilder addItemStack(int position, Material material, String displayName) {
-        ItemStack stack = new ItemStack(material, 1);
+        ItemStack stack = new ItemStack(material);
         ItemMeta meta = stack.getItemMeta();
         assert meta != null;
         meta.setDisplayName(displayName);

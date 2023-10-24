@@ -32,7 +32,7 @@ public class ItemStackCreator {
     }
 
     public ItemStack createMemberStack(String uuid, String ign, int doing, int finished, int approved, Date lastLogin) {
-        ItemStack stack = new ItemStack(Material.PLAYER_HEAD, 1);
+        ItemStack stack = new ItemStack(Material.PLAYER_HEAD);
         SkullMeta skullMeta = (SkullMeta) stack.getItemMeta();
         if (skullMeta == null) {
             return null;
@@ -108,7 +108,7 @@ public class ItemStackCreator {
             case APPROVED -> material = Material.LIGHT_BLUE_CONCRETE;
             case PREPARED -> material = Material.LIGHT_GRAY_CONCRETE;
         }
-        ItemStack stack = new ItemStack(material, 1);
+        ItemStack stack = new ItemStack(material);
         ItemMeta itemMeta = stack.getItemMeta();
         assert itemMeta != null;
 
