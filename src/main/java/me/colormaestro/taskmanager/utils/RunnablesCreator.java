@@ -14,10 +14,13 @@ import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.NamespacedKey;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.BookMeta;
+import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.plugin.Plugin;
 
 import java.sql.SQLException;
@@ -108,9 +111,16 @@ public class RunnablesCreator {
                         position++;
                     }
 
+                    var approvedTasksLink = new ItemStack(Material.LIGHT_BLUE_CONCRETE);
+                    ItemMeta meta = approvedTasksLink.getItemMeta();
+                    assert meta != null;
+                    meta.setDisplayName(ChatColor.AQUA + "Show " + ign + "'s approved tasks");
+                    meta.getPersistentDataContainer().set(
+                            new NamespacedKey(plugin, DataContainerKeys.MEMBER_NAME), PersistentDataType.STRING, ign);
+                    approvedTasksLink.setItemMeta(meta);
+
                     builder.addPaginationArrows()
-                            .addItemStack(LAST_ROW_MIDDLE, Material.LIGHT_BLUE_CONCRETE,
-                                    ChatColor.AQUA + "Show " + ign + "'s approved tasks")
+                            .addItemStack(LAST_ROW_MIDDLE, approvedTasksLink)
                             .addItemStack(LAST_ROW_LEFT_FROM_MIDDLE, Material.SPECTRAL_ARROW,
                                     ChatColor.AQUA + "Back to dashboard");
 
@@ -147,9 +157,15 @@ public class RunnablesCreator {
                         position++;
                     }
 
-                    builder.addPaginationArrows()
-                            .addItemStack(LAST_ROW_MIDDLE, Material.SPECTRAL_ARROW,
-                                    ChatColor.AQUA + "Back to active tasks");
+                    var activeTasksLink = new ItemStack(Material.SPECTRAL_ARROW);
+                    ItemMeta meta = activeTasksLink.getItemMeta();
+                    assert meta != null;
+                    meta.setDisplayName(ChatColor.AQUA + "Back to active tasks");
+                    meta.getPersistentDataContainer().set(
+                            new NamespacedKey(plugin, DataContainerKeys.MEMBER_NAME), PersistentDataType.STRING, ign);
+                    activeTasksLink.setItemMeta(meta);
+
+                    builder.addPaginationArrows().addItemStack(LAST_ROW_MIDDLE, activeTasksLink);
 
                     player.openInventory(builder.build());
                 });

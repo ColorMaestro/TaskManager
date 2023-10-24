@@ -35,7 +35,7 @@ public class ApprovedTasksViewListener implements Listener {
             HumanEntity player = event.getView().getPlayer();
             switch (event.getCurrentItem().getType()) {
                 case LIGHT_BLUE_CONCRETE -> handleConcreteClick(player, event.getCurrentItem());
-                case SPECTRAL_ARROW -> handleSpectralArrowClick(player, event.getView());
+                case SPECTRAL_ARROW -> handleSpectralArrowClick(player, event.getCurrentItem());
                 case ARROW -> handleArrowClick(player, event.getView(), event.getCurrentItem());
             }
         }
@@ -47,8 +47,9 @@ public class ApprovedTasksViewListener implements Listener {
         Bukkit.getScheduler().runTaskAsynchronously(creator.getPlugin(), creator.teleportPlayerToTask(player, taskId));
     }
 
-    private void handleSpectralArrowClick(HumanEntity player, InventoryView view) {
-        String ign = view.getTitle().replaceFirst(ChatColor.DARK_AQUA + "" + ChatColor.BOLD, "").split("'")[0];
+    private void handleSpectralArrowClick(HumanEntity player, ItemStack arrow) {
+        String ign = Objects.requireNonNull(arrow.getItemMeta()).getPersistentDataContainer()
+                .get(new NamespacedKey(creator.getPlugin(), DataContainerKeys.MEMBER_NAME), PersistentDataType.STRING);
         Bukkit.getScheduler().runTaskAsynchronously(creator.getPlugin(), creator.showActiveTasksView(player, ign, 1));
     }
 

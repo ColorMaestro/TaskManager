@@ -49,8 +49,8 @@ public class ActiveTasksViewListener implements Listener {
     }
 
     private void handleShowApprovedTasksClick(HumanEntity player, ItemStack concreteStack) {
-        String adjective = concreteStack.getItemMeta().getDisplayName().split(" ")[1];
-        String ign = adjective.split("'")[0];
+        String ign = Objects.requireNonNull(concreteStack.getItemMeta()).getPersistentDataContainer()
+                .get(new NamespacedKey(creator.getPlugin(), DataContainerKeys.MEMBER_NAME), PersistentDataType.STRING);
         Bukkit.getScheduler().runTaskAsynchronously(creator.getPlugin(), creator.showApprovedTasksView(player, ign, 1));
     }
 
