@@ -33,21 +33,15 @@ public class ItemStackCreator {
 
     public ItemStack createMemberStack(String uuid, String ign, int doing, int finished, int approved, Date lastLogin) {
         ItemStack stack = new ItemStack(Material.PLAYER_HEAD);
-        SkullMeta skullMeta = (SkullMeta) stack.getItemMeta();
-        if (skullMeta == null) {
-            return null;
-        }
-        OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(UUID.fromString(uuid));
-        skullMeta.setOwningPlayer(offlinePlayer);
-        skullMeta.setDisplayName(ChatColor.BLUE + "" + ChatColor.BOLD + ign);
 
-        List<String> lore = createMemberStackLore(doing, finished, approved, lastLogin);
+        ItemMeta meta = new SkullMetaBuilder()
+                .setOwningPlayer(Bukkit.getOfflinePlayer(UUID.fromString(uuid)))
+                .setDisplayName(ChatColor.BLUE + "" + ChatColor.BOLD + ign)
+                .setLore(createMemberStackLore(doing, finished, approved, lastLogin))
+                .setPersistentData(new NamespacedKey(plugin, DataContainerKeys.MEMBER_NAME), PersistentDataType.STRING, ign)
+                .build();
 
-        var container = skullMeta.getPersistentDataContainer();
-        container.set(new NamespacedKey(plugin, DataContainerKeys.MEMBER_NAME), PersistentDataType.STRING, ign);
-
-        skullMeta.setLore(lore);
-        stack.setItemMeta(skullMeta);
+        stack.setItemMeta(meta);
         return stack;
     }
 
@@ -109,18 +103,14 @@ public class ItemStackCreator {
             case PREPARED -> material = Material.LIGHT_GRAY_CONCRETE;
         }
         ItemStack stack = new ItemStack(material);
-        ItemMeta itemMeta = stack.getItemMeta();
-        assert itemMeta != null;
 
-        itemMeta.setDisplayName(ChatColor.BLUE + "" + ChatColor.BOLD + title + " " + ChatColor.DARK_GRAY + "#" + taskId);
+        ItemMeta meta = new ItemMetaBuilder()
+                .setDisplayName(ChatColor.BLUE + "" + ChatColor.BOLD + title + " " + ChatColor.DARK_GRAY + "#" + taskId)
+                .setPersistentData(new NamespacedKey(plugin, DataContainerKeys.TASK_ID), PersistentDataType.INTEGER, taskId)
+                .setLore(createTaskStackLore(assigneeName, advisorName, dateAssigned, description))
+                .build();
 
-        List<String> lore = createTaskStackLore(assigneeName, advisorName, dateAssigned, description);
-
-        var container = itemMeta.getPersistentDataContainer();
-        container.set(new NamespacedKey(plugin, DataContainerKeys.TASK_ID), PersistentDataType.INTEGER, taskId);
-
-        itemMeta.setLore(lore);
-        stack.setItemMeta(itemMeta);
+        stack.setItemMeta(meta);
         return stack;
     }
 
