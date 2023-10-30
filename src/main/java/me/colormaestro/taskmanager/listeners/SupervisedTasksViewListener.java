@@ -7,7 +7,6 @@ import org.bukkit.Bukkit;
 import org.bukkit.NamespacedKey;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.event.EventHandler;
-import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.InventoryView;
 import org.bukkit.inventory.ItemStack;
@@ -15,28 +14,25 @@ import org.bukkit.persistence.PersistentDataType;
 
 import java.util.Objects;
 
-public class SupervisedTasksViewListener implements Listener {
-    private final RunnablesCreator creator;
+public class SupervisedTasksViewListener extends InventoryListener {
 
     public SupervisedTasksViewListener(RunnablesCreator creator) {
-        this.creator = creator;
+        super(creator, Directives.SUPERVISED_TASKS);
     }
 
+    @Override
     @EventHandler
-    public void onMenuClick(InventoryClickEvent event) {
-        if (event.getView().getTitle().contains(Directives.SUPERVISED_TASKS)) {
-            event.setCancelled(true);
+    void onInventoryClick(InventoryClickEvent event) {
+        super.onInventoryClick(event);
+    }
 
-            if (event.getCurrentItem() == null) {
-                return;
-            }
-
-            HumanEntity player = event.getView().getPlayer();
-            switch (event.getCurrentItem().getType()) {
-                case ORANGE_CONCRETE, LIME_CONCRETE -> handleConcreteClick(player, event.getCurrentItem());
-                case SPECTRAL_ARROW -> handleSpectralArrowClick(player);
-                case ARROW -> handleArrowClick(player, event.getView(), event.getCurrentItem());
-            }
+    @Override
+    void handleEvent(InventoryClickEvent event) {
+        HumanEntity player = event.getView().getPlayer();
+        switch (event.getCurrentItem().getType()) {
+            case ORANGE_CONCRETE, LIME_CONCRETE -> handleConcreteClick(player, event.getCurrentItem());
+            case SPECTRAL_ARROW -> handleSpectralArrowClick(player);
+            case ARROW -> handleArrowClick(player, event.getView(), event.getCurrentItem());
         }
     }
 
