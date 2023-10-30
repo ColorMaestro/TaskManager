@@ -5,15 +5,12 @@ import me.colormaestro.taskmanager.utils.Directives;
 import me.colormaestro.taskmanager.utils.RunnablesCreator;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
-import org.bukkit.NamespacedKey;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.InventoryView;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.persistence.PersistentDataType;
-
-import java.util.Objects;
 
 public class ApprovedTasksViewListener extends InventoryListener {
 
@@ -38,14 +35,14 @@ public class ApprovedTasksViewListener extends InventoryListener {
     }
 
     private void handleConcreteClick(HumanEntity player, ItemStack headStack) {
-        int taskId = Objects.requireNonNull(headStack.getItemMeta()).getPersistentDataContainer()
-                .get(new NamespacedKey(creator.getPlugin(), DataContainerKeys.TASK_ID), PersistentDataType.INTEGER);
+        int taskId = extractPersistentValue(headStack.getItemMeta(),
+                DataContainerKeys.TASK_ID, PersistentDataType.INTEGER);
         Bukkit.getScheduler().runTaskAsynchronously(creator.getPlugin(), creator.teleportPlayerToTask(player, taskId));
     }
 
     private void handleSpectralArrowClick(HumanEntity player, ItemStack arrow) {
-        String ign = Objects.requireNonNull(arrow.getItemMeta()).getPersistentDataContainer()
-                .get(new NamespacedKey(creator.getPlugin(), DataContainerKeys.MEMBER_NAME), PersistentDataType.STRING);
+        String ign = extractPersistentValue(arrow.getItemMeta(),
+                DataContainerKeys.MEMBER_NAME, PersistentDataType.STRING);
         Bukkit.getScheduler().runTaskAsynchronously(creator.getPlugin(), creator.showActiveTasksView(player, ign, 1));
     }
 

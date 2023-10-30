@@ -1,11 +1,12 @@
 package me.colormaestro.taskmanager.listeners;
 
 import me.colormaestro.taskmanager.utils.RunnablesCreator;
+import org.bukkit.NamespacedKey;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
-
-import java.lang.annotation.Inherited;
+import org.bukkit.persistence.PersistentDataHolder;
+import org.bukkit.persistence.PersistentDataType;
 
 public abstract class InventoryListener implements Listener {
     protected final RunnablesCreator creator;
@@ -30,4 +31,16 @@ public abstract class InventoryListener implements Listener {
      * @param event captured by handler method
      */
     abstract void handleEvent(InventoryClickEvent event);
+
+    /**
+     * Extracts value from persistent data container of holder.
+     *
+     * @param holder from which to extract value
+     * @param key under which is the value stored
+     * @param type of value
+     * @return value or null if nothing is stored under the key
+     */
+    <T, Z> Z extractPersistentValue(PersistentDataHolder holder, String key, PersistentDataType<T, Z> type) {
+        return holder.getPersistentDataContainer().get(new NamespacedKey(creator.getPlugin(), key), type);
+    }
 }
