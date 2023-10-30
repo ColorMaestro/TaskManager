@@ -112,11 +112,13 @@ public class RunnablesCreator {
                     }
 
                     var approvedTasksLink = new ItemStack(Material.LIGHT_BLUE_CONCRETE);
-                    ItemMeta meta = approvedTasksLink.getItemMeta();
-                    assert meta != null;
-                    meta.setDisplayName(ChatColor.AQUA + "Show " + ign + "'s approved tasks");
-                    meta.getPersistentDataContainer().set(
-                            new NamespacedKey(plugin, DataContainerKeys.MEMBER_NAME), PersistentDataType.STRING, ign);
+                    ItemMeta meta = new ItemMetaBuilder()
+                            .setDisplayName(ChatColor.AQUA + "Show " + ign + "'s approved tasks")
+                            .setPersistentData(
+                                    new NamespacedKey(plugin, DataContainerKeys.MEMBER_NAME),
+                                    PersistentDataType.STRING,
+                                    ign)
+                            .build();
                     approvedTasksLink.setItemMeta(meta);
 
                     builder.addPaginationArrows()
@@ -158,11 +160,13 @@ public class RunnablesCreator {
                     }
 
                     var activeTasksLink = new ItemStack(Material.SPECTRAL_ARROW);
-                    ItemMeta meta = activeTasksLink.getItemMeta();
-                    assert meta != null;
-                    meta.setDisplayName(ChatColor.AQUA + "Back to active tasks");
-                    meta.getPersistentDataContainer().set(
-                            new NamespacedKey(plugin, DataContainerKeys.MEMBER_NAME), PersistentDataType.STRING, ign);
+                    ItemMeta meta = new ItemMetaBuilder()
+                            .setDisplayName(ChatColor.AQUA + "Back to active tasks")
+                            .setPersistentData(
+                                    new NamespacedKey(plugin, DataContainerKeys.MEMBER_NAME),
+                                    PersistentDataType.STRING,
+                                    ign)
+                            .build();
                     activeTasksLink.setItemMeta(meta);
 
                     builder.addPaginationArrows().addItemStack(LAST_ROW_MIDDLE, activeTasksLink);
