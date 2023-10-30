@@ -9,6 +9,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.InventoryView;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.persistence.PersistentDataHolder;
 import org.bukkit.persistence.PersistentDataType;
 
 public class PreparedTasksViewListener extends InventoryListener {
@@ -27,15 +28,14 @@ public class PreparedTasksViewListener extends InventoryListener {
     void handleEvent(InventoryClickEvent event) {
         HumanEntity player = event.getView().getPlayer();
         switch (event.getCurrentItem().getType()) {
-            case LIGHT_GRAY_CONCRETE -> handleConcreteClick(player, event.getCurrentItem());
+            case LIGHT_GRAY_CONCRETE -> handleConcreteClick(player, event.getCurrentItem().getItemMeta());
             case SPECTRAL_ARROW -> handleSpectralArrowClick(player);
             case ARROW -> handleArrowClick(player, event.getView(), event.getCurrentItem());
         }
     }
 
-    private void handleConcreteClick(HumanEntity player, ItemStack headStack) {
-        int taskId = extractPersistentValue(headStack.getItemMeta(),
-                DataContainerKeys.TASK_ID, PersistentDataType.INTEGER);
+    private void handleConcreteClick(HumanEntity player, PersistentDataHolder holder) {
+        int taskId = extractPersistentValue(holder, DataContainerKeys.TASK_ID, PersistentDataType.INTEGER);
         Bukkit.getScheduler().runTaskAsynchronously(creator.getPlugin(), creator.teleportPlayerToTask(player, taskId));
     }
 

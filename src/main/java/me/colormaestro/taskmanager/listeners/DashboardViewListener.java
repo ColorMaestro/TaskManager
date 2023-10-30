@@ -10,6 +10,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.InventoryView;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.persistence.PersistentDataHolder;
 import org.bukkit.persistence.PersistentDataType;
 
 public class DashboardViewListener extends InventoryListener implements Listener {
@@ -28,7 +29,7 @@ public class DashboardViewListener extends InventoryListener implements Listener
     void handleEvent(InventoryClickEvent event) {
         HumanEntity player = event.getView().getPlayer();
         switch (event.getCurrentItem().getType()) {
-            case PLAYER_HEAD -> handlePlayerHeadClick(player, event.getCurrentItem());
+            case PLAYER_HEAD -> handlePlayerHeadClick(player, event.getCurrentItem().getItemMeta());
             case ENDER_EYE -> handleEyeClick(player);
             case ARROW -> handleArrowClick(player, event.getView(), event.getCurrentItem());
             case LIGHT_GRAY_CONCRETE -> handleConcreteClick(player);
@@ -36,9 +37,8 @@ public class DashboardViewListener extends InventoryListener implements Listener
         }
     }
 
-    private void handlePlayerHeadClick(HumanEntity player, ItemStack headStack) {
-        String ign = extractPersistentValue(headStack.getItemMeta(),
-                DataContainerKeys.MEMBER_NAME, PersistentDataType.STRING);
+    private void handlePlayerHeadClick(HumanEntity player, PersistentDataHolder holder) {
+        String ign = extractPersistentValue(holder, DataContainerKeys.MEMBER_NAME, PersistentDataType.STRING);
         Bukkit.getScheduler().runTaskAsynchronously(creator.getPlugin(), creator.showActiveTasksView(player, ign, 1));
     }
 
