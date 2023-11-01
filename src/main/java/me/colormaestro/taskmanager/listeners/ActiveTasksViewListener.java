@@ -27,7 +27,8 @@ public class ActiveTasksViewListener extends InventoryListener {
         switch (itemStack.getType()) {
             case ORANGE_CONCRETE, LIME_CONCRETE -> handleConcreteClick(player, itemStack.getItemMeta());
             case LIGHT_BLUE_CONCRETE -> handleShowApprovedTasksClick(player, itemStack.getItemMeta());
-            case SPECTRAL_ARROW -> handleSpectralArrowClick(player);
+            case SPECTRAL_ARROW -> Bukkit.getScheduler()
+                    .runTaskAsynchronously(creator.getPlugin(), creator.showDashboardView(player, 1));
             case ARROW -> handleArrowClick(player, itemStack.getItemMeta());
         }
     }
@@ -40,10 +41,6 @@ public class ActiveTasksViewListener extends InventoryListener {
     private void handleShowApprovedTasksClick(HumanEntity player, PersistentDataHolder holder) {
         String ign = extractPersistentValue(holder, DataContainerKeys.MEMBER_NAME, PersistentDataType.STRING);
         Bukkit.getScheduler().runTaskAsynchronously(creator.getPlugin(), creator.showApprovedTasksView(player, ign, 1));
-    }
-
-    private void handleSpectralArrowClick(HumanEntity player) {
-        Bukkit.getScheduler().runTaskAsynchronously(creator.getPlugin(), creator.showDashboardView(player, 1));
     }
 
     private void handleArrowClick(HumanEntity player, PersistentDataHolder holder) {

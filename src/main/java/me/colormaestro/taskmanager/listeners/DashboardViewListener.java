@@ -8,7 +8,6 @@ import org.bukkit.entity.HumanEntity;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
-import org.bukkit.inventory.InventoryView;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.persistence.PersistentDataHolder;
 import org.bukkit.persistence.PersistentDataType;
@@ -28,10 +27,13 @@ public class DashboardViewListener extends InventoryListener implements Listener
     void handleEvent(HumanEntity player, ItemStack itemStack) {
         switch (itemStack.getType()) {
             case PLAYER_HEAD -> handlePlayerHeadClick(player, itemStack.getItemMeta());
-            case ENDER_EYE -> handleEyeClick(player);
+            case ENDER_EYE -> Bukkit.getScheduler()
+                    .runTaskAsynchronously(creator.getPlugin(), creator.showSupervisedTasksView(player, 1));
             case ARROW -> handleArrowClick(player, itemStack.getItemMeta());
-            case LIGHT_GRAY_CONCRETE -> handleConcreteClick(player);
-            case CLOCK -> handleClockClick(player);
+            case LIGHT_GRAY_CONCRETE -> Bukkit.getScheduler()
+                    .runTaskAsynchronously(creator.getPlugin(), creator.showPreparedTasksView(player, 1));
+            case CLOCK -> Bukkit.getScheduler()
+                    .runTaskAsynchronously(creator.getPlugin(), creator.showIdleTasksView(player, 1));
         }
     }
 
@@ -40,20 +42,8 @@ public class DashboardViewListener extends InventoryListener implements Listener
         Bukkit.getScheduler().runTaskAsynchronously(creator.getPlugin(), creator.showActiveTasksView(player, ign, 1));
     }
 
-    private void handleEyeClick(HumanEntity player) {
-        Bukkit.getScheduler().runTaskAsynchronously(creator.getPlugin(), creator.showSupervisedTasksView(player, 1));
-    }
-
     private void handleArrowClick(HumanEntity player, PersistentDataHolder holder) {
         Bukkit.getScheduler().runTaskAsynchronously(creator.getPlugin(),
                 creator.showDashboardView(player, determineNextPage(holder)));
-    }
-
-    private void handleConcreteClick(HumanEntity player) {
-        Bukkit.getScheduler().runTaskAsynchronously(creator.getPlugin(), creator.showPreparedTasksView(player, 1));
-    }
-
-    private void handleClockClick(HumanEntity player) {
-        Bukkit.getScheduler().runTaskAsynchronously(creator.getPlugin(), creator.showIdleTasksView(player, 1));
     }
 }
