@@ -24,9 +24,7 @@ public class InventoryBuilder {
 
     public InventoryBuilder addItemStack(int position, Material material, String displayName) {
         ItemStack stack = new ItemStack(material);
-        ItemMeta meta = stack.getItemMeta();
-        assert meta != null;
-        meta.setDisplayName(displayName);
+        ItemMeta meta = new ItemMetaBuilder().setDisplayName(displayName).build();
         stack.setItemMeta(meta);
         inventory.setItem(position, stack);
         return this;
