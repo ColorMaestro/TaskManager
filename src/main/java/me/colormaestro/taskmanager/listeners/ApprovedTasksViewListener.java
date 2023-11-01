@@ -7,7 +7,6 @@ import org.bukkit.Bukkit;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.inventory.InventoryClickEvent;
-import org.bukkit.inventory.InventoryView;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.persistence.PersistentDataHolder;
 import org.bukkit.persistence.PersistentDataType;
@@ -29,7 +28,7 @@ public class ApprovedTasksViewListener extends InventoryListener {
         switch (event.getCurrentItem().getType()) {
             case LIGHT_BLUE_CONCRETE -> handleConcreteClick(player, event.getCurrentItem().getItemMeta());
             case SPECTRAL_ARROW -> handleSpectralArrowClick(player, event.getCurrentItem().getItemMeta());
-            case ARROW -> handleArrowClick(player, event.getView(), event.getCurrentItem());
+            case ARROW -> handleArrowClick(player, event.getCurrentItem());
         }
     }
 
@@ -43,7 +42,7 @@ public class ApprovedTasksViewListener extends InventoryListener {
         Bukkit.getScheduler().runTaskAsynchronously(creator.getPlugin(), creator.showActiveTasksView(player, ign, 1));
     }
 
-    private void handleArrowClick(HumanEntity player, InventoryView view, ItemStack arrow) {
+    private void handleArrowClick(HumanEntity player, ItemStack arrow) {
         String ign = extractPersistentValue(arrow.getItemMeta(), DataContainerKeys.MEMBER_NAME, PersistentDataType.STRING);
         int currentPage = extractPersistentValue(arrow.getItemMeta(), DataContainerKeys.CURRENT_PAGE, PersistentDataType.INTEGER);
         int totalPages = extractPersistentValue(arrow.getItemMeta(), DataContainerKeys.TOTAL_PAGES, PersistentDataType.INTEGER);

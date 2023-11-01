@@ -30,7 +30,7 @@ public class ActiveTasksViewListener extends InventoryListener {
             case ORANGE_CONCRETE, LIME_CONCRETE -> handleConcreteClick(player, event.getCurrentItem().getItemMeta());
             case LIGHT_BLUE_CONCRETE -> handleShowApprovedTasksClick(player, event.getCurrentItem().getItemMeta());
             case SPECTRAL_ARROW -> handleSpectralArrowClick(player);
-            case ARROW -> handleArrowClick(player, event.getView(), event.getCurrentItem());
+            case ARROW -> handleArrowClick(player, event.getCurrentItem());
         }
     }
 
@@ -48,7 +48,7 @@ public class ActiveTasksViewListener extends InventoryListener {
         Bukkit.getScheduler().runTaskAsynchronously(creator.getPlugin(), creator.showDashboardView(player, 1));
     }
 
-    private void handleArrowClick(HumanEntity player, InventoryView view, ItemStack arrow) {
+    private void handleArrowClick(HumanEntity player, ItemStack arrow) {
         String ign = extractPersistentValue(arrow.getItemMeta(), DataContainerKeys.MEMBER_NAME, PersistentDataType.STRING);
         int currentPage = extractPersistentValue(arrow.getItemMeta(), DataContainerKeys.CURRENT_PAGE, PersistentDataType.INTEGER);
         int totalPages = extractPersistentValue(arrow.getItemMeta(), DataContainerKeys.TOTAL_PAGES, PersistentDataType.INTEGER);

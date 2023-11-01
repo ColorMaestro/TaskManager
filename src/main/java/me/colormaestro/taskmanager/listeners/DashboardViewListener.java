@@ -30,7 +30,7 @@ public class DashboardViewListener extends InventoryListener implements Listener
         switch (event.getCurrentItem().getType()) {
             case PLAYER_HEAD -> handlePlayerHeadClick(player, event.getCurrentItem().getItemMeta());
             case ENDER_EYE -> handleEyeClick(player);
-            case ARROW -> handleArrowClick(player, event.getView(), event.getCurrentItem());
+            case ARROW -> handleArrowClick(player, event.getCurrentItem());
             case LIGHT_GRAY_CONCRETE -> handleConcreteClick(player);
             case CLOCK -> handleClockClick(player);
         }
@@ -45,7 +45,7 @@ public class DashboardViewListener extends InventoryListener implements Listener
         Bukkit.getScheduler().runTaskAsynchronously(creator.getPlugin(), creator.showSupervisedTasksView(player, 1));
     }
 
-    private void handleArrowClick(HumanEntity player, InventoryView view, ItemStack arrow) {
+    private void handleArrowClick(HumanEntity player, ItemStack arrow) {
         int currentPage = extractPersistentValue(arrow.getItemMeta(), DataContainerKeys.CURRENT_PAGE, PersistentDataType.INTEGER);
         int totalPages = extractPersistentValue(arrow.getItemMeta(), DataContainerKeys.TOTAL_PAGES, PersistentDataType.INTEGER);
 
