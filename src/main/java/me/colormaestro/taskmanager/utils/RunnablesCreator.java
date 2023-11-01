@@ -35,7 +35,6 @@ public class RunnablesCreator {
     private final TaskDAO taskDAO;
     private final MemberDAO memberDAO;
     private final Plugin plugin;
-
     private final ItemStackCreator stackCreator;
 
     public RunnablesCreator(Plugin plugin, TaskDAO taskDAO, MemberDAO memberDAO) {
@@ -45,7 +44,7 @@ public class RunnablesCreator {
         this.stackCreator = new ItemStackCreator(plugin);
     }
 
-    public Runnable showDashboardView(HumanEntity player, long page) {
+    public Runnable showDashboardView(HumanEntity player, int page) {
         return () -> {
             try {
                 List<MemberDashboardInfo> stats = taskDAO.fetchMembersDashboardInfo();
@@ -70,7 +69,12 @@ public class RunnablesCreator {
                         position++;
                     }
 
-                    builder.addPaginationArrows()
+                    ItemStack previousPageLink = new ItemStack(Material.ARROW);
+                    previousPageLink.setItemMeta(createPaginationItemMeta(page, totalPages, false));
+                    ItemStack nextPageLink = new ItemStack(Material.ARROW);
+                    nextPageLink.setItemMeta(createPaginationItemMeta(page, totalPages, true));
+
+                    builder.addPaginationItemStacks(previousPageLink, nextPageLink)
                             .addItemStack(LAST_ROW_MIDDLE, Material.ENDER_EYE,
                                     ChatColor.DARK_PURPLE + "Show supervised tasks")
                             .addItemStack(LAST_ROW_LEFT_FROM_MIDDLE, Material.LIGHT_GRAY_CONCRETE,
@@ -88,7 +92,7 @@ public class RunnablesCreator {
         };
     }
 
-    public Runnable showActiveTasksView(HumanEntity player, String ign, long page) {
+    public Runnable showActiveTasksView(HumanEntity player, String ign, int page) {
         return () -> {
             try {
                 Member member = memberDAO.findMember(ign);
@@ -121,7 +125,12 @@ public class RunnablesCreator {
                             .build();
                     approvedTasksLink.setItemMeta(meta);
 
-                    builder.addPaginationArrows()
+                    ItemStack previousPageLink = new ItemStack(Material.ARROW);
+                    previousPageLink.setItemMeta(createPaginationItemMeta(page, totalPages, false, ign));
+                    ItemStack nextPageLink = new ItemStack(Material.ARROW);
+                    nextPageLink.setItemMeta(createPaginationItemMeta(page, totalPages, true, ign));
+
+                    builder.addPaginationItemStacks(previousPageLink, nextPageLink)
                             .addItemStack(LAST_ROW_MIDDLE, approvedTasksLink)
                             .addItemStack(LAST_ROW_LEFT_FROM_MIDDLE, Material.SPECTRAL_ARROW,
                                     ChatColor.AQUA + "Back to dashboard");
@@ -136,7 +145,7 @@ public class RunnablesCreator {
         };
     }
 
-    public Runnable showApprovedTasksView(HumanEntity player, String ign, long page) {
+    public Runnable showApprovedTasksView(HumanEntity player, String ign, int page) {
         return () -> {
             try {
                 Member member = memberDAO.findMember(ign);
@@ -169,7 +178,13 @@ public class RunnablesCreator {
                             .build();
                     activeTasksLink.setItemMeta(meta);
 
-                    builder.addPaginationArrows().addItemStack(LAST_ROW_MIDDLE, activeTasksLink);
+                    ItemStack previousPageLink = new ItemStack(Material.ARROW);
+                    previousPageLink.setItemMeta(createPaginationItemMeta(page, totalPages, false, ign));
+                    ItemStack nextPageLink = new ItemStack(Material.ARROW);
+                    nextPageLink.setItemMeta(createPaginationItemMeta(page, totalPages, true, ign));
+
+                    builder.addPaginationItemStacks(previousPageLink, nextPageLink)
+                            .addItemStack(LAST_ROW_MIDDLE, activeTasksLink);
 
                     player.openInventory(builder.build());
                 });
@@ -181,7 +196,7 @@ public class RunnablesCreator {
         };
     }
 
-    public Runnable showSupervisedTasksView(HumanEntity player, long page) {
+    public Runnable showSupervisedTasksView(HumanEntity player, int page) {
         return () -> {
             try {
                 Member member = memberDAO.findMember(player.getName());
@@ -205,7 +220,12 @@ public class RunnablesCreator {
                         position++;
                     }
 
-                    builder.addPaginationArrows()
+                    ItemStack previousPageLink = new ItemStack(Material.ARROW);
+                    previousPageLink.setItemMeta(createPaginationItemMeta(page, totalPages, false));
+                    ItemStack nextPageLink = new ItemStack(Material.ARROW);
+                    nextPageLink.setItemMeta(createPaginationItemMeta(page, totalPages, true));
+
+                    builder.addPaginationItemStacks(previousPageLink, nextPageLink)
                             .addItemStack(LAST_ROW_MIDDLE, Material.SPECTRAL_ARROW,
                                     ChatColor.AQUA + "Back to dashboard");
 
@@ -219,7 +239,7 @@ public class RunnablesCreator {
         };
     }
 
-    public Runnable showPreparedTasksView(HumanEntity player, long page) {
+    public Runnable showPreparedTasksView(HumanEntity player, int page) {
         return () -> {
             try {
                 List<Task> tasks = taskDAO.fetchPreparedTasks();
@@ -241,7 +261,12 @@ public class RunnablesCreator {
                         position++;
                     }
 
-                    builder.addPaginationArrows()
+                    ItemStack previousPageLink = new ItemStack(Material.ARROW);
+                    previousPageLink.setItemMeta(createPaginationItemMeta(page, totalPages, false));
+                    ItemStack nextPageLink = new ItemStack(Material.ARROW);
+                    nextPageLink.setItemMeta(createPaginationItemMeta(page, totalPages, true));
+
+                    builder.addPaginationItemStacks(previousPageLink, nextPageLink)
                             .addItemStack(LAST_ROW_MIDDLE, Material.SPECTRAL_ARROW,
                                     ChatColor.AQUA + "Back to dashboard");
 
@@ -255,7 +280,7 @@ public class RunnablesCreator {
         };
     }
 
-    public Runnable showIdleTasksView(HumanEntity player, long page) {
+    public Runnable showIdleTasksView(HumanEntity player, int page) {
         return () -> {
             try {
                 List<IdleTask> tasks = taskDAO.fetchIdleTasks();
@@ -279,7 +304,12 @@ public class RunnablesCreator {
                         position++;
                     }
 
-                    builder.addPaginationArrows()
+                    ItemStack previousPageLink = new ItemStack(Material.ARROW);
+                    previousPageLink.setItemMeta(createPaginationItemMeta(page, totalPages, false));
+                    ItemStack nextPageLink = new ItemStack(Material.ARROW);
+                    nextPageLink.setItemMeta(createPaginationItemMeta(page, totalPages, true));
+
+                    builder.addPaginationItemStacks(previousPageLink, nextPageLink)
                             .addItemStack(LAST_ROW_MIDDLE, Material.SPECTRAL_ARROW,
                                     ChatColor.AQUA + "Back to dashboard");
 
@@ -398,7 +428,40 @@ public class RunnablesCreator {
         return book;
     }
 
-    private <T> List<T> getPageFromList(List<T> list, long page) {
-        return list.stream().skip((page - 1) * PAGE_SIZE).limit(PAGE_SIZE).toList();
+    private <T> List<T> getPageFromList(List<T> list, int page) {
+        return list.stream().skip((long) (page - 1) * PAGE_SIZE).limit(PAGE_SIZE).toList();
+    }
+
+    private ItemMeta createPaginationItemMeta(int currentPage, int totalPages, boolean turnNextPage) {
+        return createPaginationItemMeta(currentPage, totalPages, turnNextPage, null);
+    }
+
+    private ItemMeta createPaginationItemMeta(int currentPage, int totalPages, boolean turnNextPage, String memberName) {
+        ItemMetaBuilder builder = new ItemMetaBuilder()
+                .setDisplayName(turnNextPage ? "Next page" : "Previous page")
+                .setPersistentData(
+                        new NamespacedKey(plugin, DataContainerKeys.CURRENT_PAGE),
+                        PersistentDataType.INTEGER,
+                        currentPage)
+                .setPersistentData(
+                        new NamespacedKey(plugin, DataContainerKeys.TOTAL_PAGES),
+                        PersistentDataType.INTEGER,
+                        totalPages);
+
+        if (turnNextPage) {
+            builder.setPersistentData(
+                    new NamespacedKey(plugin, DataContainerKeys.TURN_NEXT_PAGE),
+                    PersistentDataType.STRING,
+                    "yes");
+        }
+
+        if (memberName != null) {
+            builder.setPersistentData(
+                    new NamespacedKey(plugin, DataContainerKeys.MEMBER_NAME),
+                    PersistentDataType.STRING,
+                    memberName);
+        }
+
+        return builder.build();
     }
 }

@@ -30,9 +30,9 @@ public class InventoryBuilder {
         return this;
     }
 
-    public InventoryBuilder addPaginationArrows() {
-        return addItemStack(SIXTH_ROW_FIRST_POSITION, Material.ARROW, "Previous page")
-                .addItemStack(SIXTH_ROW_LAST_POSITION, Material.ARROW, "Next page");
+    public InventoryBuilder addPaginationItemStacks(ItemStack previousPageLink, ItemStack nextPageLink) {
+        return addItemStack(SIXTH_ROW_FIRST_POSITION, previousPageLink)
+                .addItemStack(SIXTH_ROW_LAST_POSITION, nextPageLink);
     }
 
     public Inventory build() {

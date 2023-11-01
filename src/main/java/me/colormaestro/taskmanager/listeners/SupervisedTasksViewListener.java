@@ -43,9 +43,8 @@ public class SupervisedTasksViewListener extends InventoryListener {
     }
 
     private void handleArrowClick(HumanEntity player, InventoryView view, ItemStack arrow) {
-        var parts = view.getTitle().split("[()/]");
-        long currentPage = Long.parseLong(parts[1]);
-        long totalPages = Long.parseLong(parts[2]);
+        int currentPage = extractPersistentValue(arrow.getItemMeta(), DataContainerKeys.CURRENT_PAGE, PersistentDataType.INTEGER);
+        int totalPages = extractPersistentValue(arrow.getItemMeta(), DataContainerKeys.TOTAL_PAGES, PersistentDataType.INTEGER);
 
         if (arrow.getItemMeta().getDisplayName().contains("Next")) {
             currentPage++;

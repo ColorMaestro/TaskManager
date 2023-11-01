@@ -4,7 +4,6 @@ import me.colormaestro.taskmanager.utils.DataContainerKeys;
 import me.colormaestro.taskmanager.utils.Directives;
 import me.colormaestro.taskmanager.utils.RunnablesCreator;
 import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.inventory.InventoryClickEvent;
@@ -50,10 +49,9 @@ public class ActiveTasksViewListener extends InventoryListener {
     }
 
     private void handleArrowClick(HumanEntity player, InventoryView view, ItemStack arrow) {
-        var parts = view.getTitle().replaceFirst(ChatColor.BLUE + "" + ChatColor.BOLD, "").split("['()/]");
-        String ign = parts[0];
-        long currentPage = Long.parseLong(parts[2]);
-        long totalPages = Long.parseLong(parts[3]);
+        String ign = extractPersistentValue(arrow.getItemMeta(), DataContainerKeys.MEMBER_NAME, PersistentDataType.STRING);
+        int currentPage = extractPersistentValue(arrow.getItemMeta(), DataContainerKeys.CURRENT_PAGE, PersistentDataType.INTEGER);
+        int totalPages = extractPersistentValue(arrow.getItemMeta(), DataContainerKeys.TOTAL_PAGES, PersistentDataType.INTEGER);
 
         if (arrow.getItemMeta().getDisplayName().contains("Next")) {
             currentPage++;
