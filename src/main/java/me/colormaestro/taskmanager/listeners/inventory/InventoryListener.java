@@ -1,4 +1,4 @@
-package me.colormaestro.taskmanager.listeners;
+package me.colormaestro.taskmanager.listeners.inventory;
 
 import me.colormaestro.taskmanager.utils.DataContainerKeys;
 import me.colormaestro.taskmanager.utils.RunnablesCreator;

@@ -1,4 +1,4 @@
-package me.colormaestro.taskmanager.listeners;
+package me.colormaestro.taskmanager.listeners.inventory;
 
 import me.colormaestro.taskmanager.utils.DataContainerKeys;
 import me.colormaestro.taskmanager.utils.Directives;
@@ -11,10 +11,10 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.persistence.PersistentDataHolder;
 import org.bukkit.persistence.PersistentDataType;
 
-public class IdleTaskViewListener extends InventoryListener {
+public class PreparedTasksViewListener extends InventoryListener {
 
-    public IdleTaskViewListener(RunnablesCreator creator) {
-        super(creator, Directives.IDLE_TASKS);
+    public PreparedTasksViewListener(RunnablesCreator creator) {
+        super(creator, Directives.PREPARED_TASKS);
     }
 
     @EventHandler
@@ -25,7 +25,7 @@ public class IdleTaskViewListener extends InventoryListener {
     @Override
     void handleEvent(HumanEntity player, ItemStack itemStack) {
         switch (itemStack.getType()) {
-            case ORANGE_CONCRETE -> handleConcreteClick(player, itemStack.getItemMeta());
+            case LIGHT_GRAY_CONCRETE -> handleConcreteClick(player, itemStack.getItemMeta());
             case SPECTRAL_ARROW -> Bukkit.getScheduler()
                     .runTaskAsynchronously(creator.getPlugin(), creator.showDashboardView(player, 1));
             case ARROW -> handleArrowClick(player, itemStack.getItemMeta());
@@ -39,6 +39,6 @@ public class IdleTaskViewListener extends InventoryListener {
 
     private void handleArrowClick(HumanEntity player, PersistentDataHolder holder) {
         Bukkit.getScheduler().runTaskAsynchronously(creator.getPlugin(),
-                creator.showIdleTasksView(player, determineNextPage(holder)));
+                creator.showPreparedTasksView(player, determineNextPage(holder)));
     }
 }
