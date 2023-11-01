@@ -24,12 +24,11 @@ public class SupervisedTasksViewListener extends InventoryListener {
     }
 
     @Override
-    void handleEvent(InventoryClickEvent event) {
-        HumanEntity player = event.getView().getPlayer();
-        switch (event.getCurrentItem().getType()) {
-            case ORANGE_CONCRETE, LIME_CONCRETE -> handleConcreteClick(player, event.getCurrentItem().getItemMeta());
+    void handleEvent(HumanEntity player, ItemStack itemStack) {
+        switch (itemStack.getType()) {
+            case ORANGE_CONCRETE, LIME_CONCRETE -> handleConcreteClick(player, itemStack.getItemMeta());
             case SPECTRAL_ARROW -> handleSpectralArrowClick(player);
-            case ARROW -> handleArrowClick(player, event.getCurrentItem().getItemMeta());
+            case ARROW -> handleArrowClick(player, itemStack.getItemMeta());
         }
     }
 

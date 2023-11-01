@@ -25,12 +25,11 @@ public class DashboardViewListener extends InventoryListener implements Listener
     }
 
     @Override
-    void handleEvent(InventoryClickEvent event) {
-        HumanEntity player = event.getView().getPlayer();
-        switch (event.getCurrentItem().getType()) {
-            case PLAYER_HEAD -> handlePlayerHeadClick(player, event.getCurrentItem().getItemMeta());
+    void handleEvent(HumanEntity player, ItemStack itemStack) {
+        switch (itemStack.getType()) {
+            case PLAYER_HEAD -> handlePlayerHeadClick(player, itemStack.getItemMeta());
             case ENDER_EYE -> handleEyeClick(player);
-            case ARROW -> handleArrowClick(player, event.getCurrentItem().getItemMeta());
+            case ARROW -> handleArrowClick(player, itemStack.getItemMeta());
             case LIGHT_GRAY_CONCRETE -> handleConcreteClick(player);
             case CLOCK -> handleClockClick(player);
         }

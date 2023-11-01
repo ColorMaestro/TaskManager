@@ -2,8 +2,10 @@ package me.colormaestro.taskmanager.listeners;
 
 import me.colormaestro.taskmanager.utils.RunnablesCreator;
 import org.bukkit.NamespacedKey;
+import org.bukkit.entity.HumanEntity;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.persistence.PersistentDataHolder;
 import org.bukkit.persistence.PersistentDataType;
 
@@ -19,16 +21,17 @@ public abstract class InventoryListener implements Listener {
     void onInventoryClick(InventoryClickEvent event) {
         if (event.getView().getTitle().contains(directive) && event.getCurrentItem() != null) {
             event.setCancelled(true);
-            handleEvent(event);
+            handleEvent(event.getWhoClicked(), event.getCurrentItem());
         }
     }
 
     /**
      * Called when directive in event view's matches listeners directive.
      *
-     * @param event captured by handler method
+     * @param player which invoked the event
+     * @param itemStack which was clicked by player
      */
-    abstract void handleEvent(InventoryClickEvent event);
+    abstract void handleEvent(HumanEntity player, ItemStack itemStack);
 
     /**
      * Extracts value from persistent data container of holder.

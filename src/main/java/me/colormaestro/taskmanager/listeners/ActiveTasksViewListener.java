@@ -7,6 +7,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.persistence.PersistentDataHolder;
 import org.bukkit.persistence.PersistentDataType;
 
@@ -22,13 +23,12 @@ public class ActiveTasksViewListener extends InventoryListener {
     }
 
     @Override
-    void handleEvent(InventoryClickEvent event) {
-        HumanEntity player = event.getView().getPlayer();
-        switch (event.getCurrentItem().getType()) {
-            case ORANGE_CONCRETE, LIME_CONCRETE -> handleConcreteClick(player, event.getCurrentItem().getItemMeta());
-            case LIGHT_BLUE_CONCRETE -> handleShowApprovedTasksClick(player, event.getCurrentItem().getItemMeta());
+    void handleEvent(HumanEntity player, ItemStack itemStack) {
+        switch (itemStack.getType()) {
+            case ORANGE_CONCRETE, LIME_CONCRETE -> handleConcreteClick(player, itemStack.getItemMeta());
+            case LIGHT_BLUE_CONCRETE -> handleShowApprovedTasksClick(player, itemStack.getItemMeta());
             case SPECTRAL_ARROW -> handleSpectralArrowClick(player);
-            case ARROW -> handleArrowClick(player, event.getCurrentItem().getItemMeta());
+            case ARROW -> handleArrowClick(player, itemStack.getItemMeta());
         }
     }
 

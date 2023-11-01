@@ -24,12 +24,11 @@ public class PreparedTasksViewListener extends InventoryListener {
     }
 
     @Override
-    void handleEvent(InventoryClickEvent event) {
-        HumanEntity player = event.getView().getPlayer();
-        switch (event.getCurrentItem().getType()) {
-            case LIGHT_GRAY_CONCRETE -> handleConcreteClick(player, event.getCurrentItem().getItemMeta());
+    void handleEvent(HumanEntity player, ItemStack itemStack) {
+        switch (itemStack.getType()) {
+            case LIGHT_GRAY_CONCRETE -> handleConcreteClick(player, itemStack.getItemMeta());
             case SPECTRAL_ARROW -> handleSpectralArrowClick(player);
-            case ARROW -> handleArrowClick(player, event.getCurrentItem().getItemMeta());
+            case ARROW -> handleArrowClick(player, itemStack.getItemMeta());
         }
     }
 
