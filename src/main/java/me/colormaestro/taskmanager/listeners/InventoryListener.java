@@ -47,15 +47,14 @@ public abstract class InventoryListener implements Listener {
     }
 
     /**
-     * Checks whether persistent data container of holder contains value.
+     * Checks whether persistent data container contains instruction for next page in pagination process.
      *
-     * @param holder in which to check value
-     * @param key under which is the value stored
-     * @param type of value
-     * @return true if a value is present in storage for given key, false otherwise
+     * @param holder in which to check for instruction
+     * @return true if instruction is present, false otherwise
      */
-    <T, Z> boolean hasPersistentValue(PersistentDataHolder holder, String key, PersistentDataType<T, Z> type) {
-        return holder.getPersistentDataContainer().has(new NamespacedKey(creator.getPlugin(), key), type);
+    boolean isPaginationForward(PersistentDataHolder holder) {
+        return holder.getPersistentDataContainer().has(
+                new NamespacedKey(creator.getPlugin(), DataContainerKeys.TURN_NEXT_PAGE), PersistentDataType.STRING);
     }
 
     /**
@@ -68,7 +67,7 @@ public abstract class InventoryListener implements Listener {
         int currentPage = extractPersistentValue(holder, DataContainerKeys.CURRENT_PAGE, PersistentDataType.INTEGER);
         int totalPages = extractPersistentValue(holder, DataContainerKeys.TOTAL_PAGES, PersistentDataType.INTEGER);
 
-        if (hasPersistentValue(holder, DataContainerKeys.TURN_NEXT_PAGE, PersistentDataType.STRING)) {
+        if (isPaginationForward(holder)) {
             currentPage++;
         } else {
             currentPage--;
