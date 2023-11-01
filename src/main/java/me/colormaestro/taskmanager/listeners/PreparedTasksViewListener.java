@@ -59,6 +59,6 @@ public class PreparedTasksViewListener extends InventoryListener {
         }
 
         Bukkit.getScheduler().runTaskAsynchronously(creator.getPlugin(),
-                creator.showSupervisedTasksView(player, currentPage));
+                creator.showPreparedTasksView(player, currentPage));
     }
 }
