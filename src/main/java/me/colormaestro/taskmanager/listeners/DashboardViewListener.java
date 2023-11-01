@@ -19,10 +19,9 @@ public class DashboardViewListener extends InventoryListener implements Listener
         super(creator, Directives.DASHBOARD);
     }
 
-    @Override
     @EventHandler
-    void onInventoryClick(InventoryClickEvent event) {
-        super.onInventoryClick(event);
+    void onClick(InventoryClickEvent event) {
+        onInventoryClick(event);
     }
 
     @Override

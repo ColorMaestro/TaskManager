@@ -19,10 +19,9 @@ public class ApprovedTasksViewListener extends InventoryListener {
         super(creator, Directives.APPROVED_TASKS);
     }
 
-    @Override
     @EventHandler
-    void onInventoryClick(InventoryClickEvent event) {
-        super.onInventoryClick(event);
+    void onClick(InventoryClickEvent event) {
+        onInventoryClick(event);
     }
 
     @Override

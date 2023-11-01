@@ -17,7 +17,6 @@ public abstract class InventoryListener implements Listener {
         this.directive = directive;
     }
 
-    @EventHandler
     void onInventoryClick(InventoryClickEvent event) {
         if (event.getView().getTitle().contains(directive) && event.getCurrentItem() != null) {
             event.setCancelled(true);
