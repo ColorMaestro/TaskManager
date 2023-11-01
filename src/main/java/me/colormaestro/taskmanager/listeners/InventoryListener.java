@@ -2,7 +2,6 @@ package me.colormaestro.taskmanager.listeners;
 
 import me.colormaestro.taskmanager.utils.RunnablesCreator;
 import org.bukkit.NamespacedKey;
-import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.persistence.PersistentDataHolder;
@@ -41,5 +40,17 @@ public abstract class InventoryListener implements Listener {
      */
     <T, Z> Z extractPersistentValue(PersistentDataHolder holder, String key, PersistentDataType<T, Z> type) {
         return holder.getPersistentDataContainer().get(new NamespacedKey(creator.getPlugin(), key), type);
+    }
+
+    /**
+     * Checks whether persistent data container of holder contains value.
+     *
+     * @param holder in which to check value
+     * @param key under which is the value stored
+     * @param type of value
+     * @return true if a value is present in storage for given key, false otherwise
+     */
+    <T, Z> boolean hasPersistentValue(PersistentDataHolder holder, String key, PersistentDataType<T, Z> type) {
+        return holder.getPersistentDataContainer().has(new NamespacedKey(creator.getPlugin(), key), type);
     }
 }

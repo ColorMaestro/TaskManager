@@ -29,7 +29,7 @@ public class PreparedTasksViewListener extends InventoryListener {
         switch (event.getCurrentItem().getType()) {
             case LIGHT_GRAY_CONCRETE -> handleConcreteClick(player, event.getCurrentItem().getItemMeta());
             case SPECTRAL_ARROW -> handleSpectralArrowClick(player);
-            case ARROW -> handleArrowClick(player, event.getCurrentItem());
+            case ARROW -> handleArrowClick(player, event.getCurrentItem().getItemMeta());
         }
     }
 
@@ -42,11 +42,11 @@ public class PreparedTasksViewListener extends InventoryListener {
         Bukkit.getScheduler().runTaskAsynchronously(creator.getPlugin(), creator.showDashboardView(player, 1));
     }
 
-    private void handleArrowClick(HumanEntity player, ItemStack arrow) {
-        int currentPage = extractPersistentValue(arrow.getItemMeta(), DataContainerKeys.CURRENT_PAGE, PersistentDataType.INTEGER);
-        int totalPages = extractPersistentValue(arrow.getItemMeta(), DataContainerKeys.TOTAL_PAGES, PersistentDataType.INTEGER);
+    private void handleArrowClick(HumanEntity player, PersistentDataHolder holder) {
+        int currentPage = extractPersistentValue(holder, DataContainerKeys.CURRENT_PAGE, PersistentDataType.INTEGER);
+        int totalPages = extractPersistentValue(holder, DataContainerKeys.TOTAL_PAGES, PersistentDataType.INTEGER);
 
-        if (arrow.getItemMeta().getDisplayName().contains("Next")) {
+        if (hasPersistentValue(holder, DataContainerKeys.TURN_NEXT_PAGE, PersistentDataType.STRING)) {
             currentPage++;
         } else {
             currentPage--;
