@@ -48,22 +48,9 @@ public class ActiveTasksViewListener extends InventoryListener {
 
     private void handleArrowClick(HumanEntity player, PersistentDataHolder holder) {
         String ign = extractPersistentValue(holder, DataContainerKeys.MEMBER_NAME, PersistentDataType.STRING);
-        int currentPage = extractPersistentValue(holder, DataContainerKeys.CURRENT_PAGE, PersistentDataType.INTEGER);
-        int totalPages = extractPersistentValue(holder, DataContainerKeys.TOTAL_PAGES, PersistentDataType.INTEGER);
-
-        if (hasPersistentValue(holder, DataContainerKeys.TURN_NEXT_PAGE, PersistentDataType.STRING)) {
-            currentPage++;
-        } else {
-            currentPage--;
-        }
-
-        if (currentPage > totalPages) {
-            currentPage = 1;
-        } else if (currentPage < 1) {
-            currentPage = totalPages;
-        }
+        int subsequentPage = determineNextPage(holder);
 
         Bukkit.getScheduler().runTaskAsynchronously(creator.getPlugin(),
-                creator.showActiveTasksView(player, ign, currentPage));
+                creator.showActiveTasksView(player, ign, subsequentPage));
     }
 }

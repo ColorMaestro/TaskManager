@@ -45,22 +45,8 @@ public class DashboardViewListener extends InventoryListener implements Listener
     }
 
     private void handleArrowClick(HumanEntity player, PersistentDataHolder holder) {
-        int currentPage = extractPersistentValue(holder, DataContainerKeys.CURRENT_PAGE, PersistentDataType.INTEGER);
-        int totalPages = extractPersistentValue(holder, DataContainerKeys.TOTAL_PAGES, PersistentDataType.INTEGER);
-
-        if (hasPersistentValue(holder, DataContainerKeys.TURN_NEXT_PAGE, PersistentDataType.STRING)) {
-            currentPage++;
-        } else {
-            currentPage--;
-        }
-
-        if (currentPage > totalPages) {
-            currentPage = 1;
-        } else if (currentPage < 1) {
-            currentPage = totalPages;
-        }
-
-        Bukkit.getScheduler().runTaskAsynchronously(creator.getPlugin(), creator.showDashboardView(player, currentPage));
+        Bukkit.getScheduler().runTaskAsynchronously(creator.getPlugin(),
+                creator.showDashboardView(player, determineNextPage(holder)));
     }
 
     private void handleConcreteClick(HumanEntity player) {

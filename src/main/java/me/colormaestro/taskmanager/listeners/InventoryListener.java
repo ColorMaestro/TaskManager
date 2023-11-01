@@ -1,5 +1,6 @@
 package me.colormaestro.taskmanager.listeners;
 
+import me.colormaestro.taskmanager.utils.DataContainerKeys;
 import me.colormaestro.taskmanager.utils.RunnablesCreator;
 import org.bukkit.NamespacedKey;
 import org.bukkit.entity.HumanEntity;
@@ -55,5 +56,30 @@ public abstract class InventoryListener implements Listener {
      */
     <T, Z> boolean hasPersistentValue(PersistentDataHolder holder, String key, PersistentDataType<T, Z> type) {
         return holder.getPersistentDataContainer().has(new NamespacedKey(creator.getPlugin(), key), type);
+    }
+
+    /**
+     * Determines which page should be displayed according to data in provided persistent holder.
+     *
+     * @param holder from which to determine next page
+     * @return number of page which should be displayed next
+     */
+    int determineNextPage(PersistentDataHolder holder) {
+        int currentPage = extractPersistentValue(holder, DataContainerKeys.CURRENT_PAGE, PersistentDataType.INTEGER);
+        int totalPages = extractPersistentValue(holder, DataContainerKeys.TOTAL_PAGES, PersistentDataType.INTEGER);
+
+        if (hasPersistentValue(holder, DataContainerKeys.TURN_NEXT_PAGE, PersistentDataType.STRING)) {
+            currentPage++;
+        } else {
+            currentPage--;
+        }
+
+        if (currentPage > totalPages) {
+            currentPage = 1;
+        } else if (currentPage < 1) {
+            currentPage = totalPages;
+        }
+
+        return currentPage;
     }
 }
