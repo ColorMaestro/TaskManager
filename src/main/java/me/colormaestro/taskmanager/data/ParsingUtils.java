@@ -48,7 +48,7 @@ class ParsingUtils {
      * @throws SQLException if SQL error arise
      */
     static Long getLongOrNull(ResultSet resultSet, String columnName) throws SQLException {
-        long value = resultSet.getInt(columnName);
+        long value = resultSet.getLong(columnName);
         if (resultSet.wasNull()) {
             return null;
         } else {
