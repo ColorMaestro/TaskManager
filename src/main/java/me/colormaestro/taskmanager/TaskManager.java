@@ -52,7 +52,7 @@ public final class TaskManager extends JavaPlugin {
     @Override
     public void onEnable() {
         loadConfig();
-        createDAOs();
+        initDatabaseAccessors();
         performBindingsSetup();
 
         if (Bukkit.getPluginManager().isPluginEnabled("DecentHolograms")) {
@@ -84,7 +84,7 @@ public final class TaskManager extends JavaPlugin {
         }
     }
 
-    private void createDAOs() {
+    private void initDatabaseAccessors() {
         memberDAO = new MemberDAO(getDataFolder().getAbsolutePath());
         taskDAO = new TaskDAO(getDataFolder().getAbsolutePath());
     }
