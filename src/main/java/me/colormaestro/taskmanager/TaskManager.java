@@ -33,6 +33,7 @@ import me.colormaestro.taskmanager.tabcompleters.TasksTabCompleter;
 import me.colormaestro.taskmanager.utils.RunnablesCreator;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandExecutor;
+import org.bukkit.command.TabCompleter;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -56,9 +57,9 @@ public final class TaskManager extends JavaPlugin {
 
         ReloadableTabCompleter tasksTabCompleter = new TasksTabCompleter(memberDAO);
         ReloadableTabCompleter membersTabCompleter = new MembersTabCompleter(memberDAO);
-        Objects.requireNonNull(this.getCommand("tasks")).setTabCompleter(tasksTabCompleter);
-        Objects.requireNonNull(this.getCommand("addtask")).setTabCompleter(membersTabCompleter);
-        Objects.requireNonNull(this.getCommand("dashboard")).setTabCompleter(membersTabCompleter);
+        setTabCompleter("tasks", tasksTabCompleter);
+        setTabCompleter("addtask", membersTabCompleter);
+        setTabCompleter("dashboard", membersTabCompleter);
 
         registerEventListener(new PlayerJoinListener(this, taskDAO, memberDAO, tasksTabCompleter, membersTabCompleter));
         registerEventListener(new BookEditListener(this, taskDAO, memberDAO));
@@ -125,5 +126,9 @@ public final class TaskManager extends JavaPlugin {
 
     private void setCommandExecutor(String command, CommandExecutor executor) {
         Objects.requireNonNull(this.getCommand(command)).setExecutor(executor);
+    }
+
+    private void setTabCompleter(String command, TabCompleter tabCompleter) {
+        Objects.requireNonNull(this.getCommand(command)).setTabCompleter(tabCompleter);
     }
 }
