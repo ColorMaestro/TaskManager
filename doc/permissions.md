@@ -11,4 +11,4 @@ Here is list of permission nodes. They are divided into two typical intended gro
 | `taskmanager.taskinfo`     | `taskmanager.approvetask`  |
 | `taskmanager.settaskplace` | `taskmanager.returntask`   |
 | `taskmanager.linkdiscord`  | `taskmanager.transfertask` |
-| `taskmanager.establish`    |                            |
+| `taskmanager.establish`    | `taskmanager.needtasks`    |

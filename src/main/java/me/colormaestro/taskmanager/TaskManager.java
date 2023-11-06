@@ -8,6 +8,7 @@ import me.colormaestro.taskmanager.commands.Dashboard;
 import me.colormaestro.taskmanager.commands.Establish;
 import me.colormaestro.taskmanager.commands.FinishTask;
 import me.colormaestro.taskmanager.commands.LinkDiscord;
+import me.colormaestro.taskmanager.commands.NeedTasks;
 import me.colormaestro.taskmanager.commands.PrepareTask;
 import me.colormaestro.taskmanager.commands.ReturnTask;
 import me.colormaestro.taskmanager.commands.SetTaskPlace;
@@ -25,6 +26,7 @@ import me.colormaestro.taskmanager.listeners.BookEditListener;
 import me.colormaestro.taskmanager.listeners.inventory.DashboardViewListener;
 import me.colormaestro.taskmanager.listeners.inventory.IdleTaskViewListener;
 import me.colormaestro.taskmanager.listeners.PlayerJoinListener;
+import me.colormaestro.taskmanager.listeners.inventory.NeedTasksViewListener;
 import me.colormaestro.taskmanager.listeners.inventory.PreparedTasksViewListener;
 import me.colormaestro.taskmanager.listeners.inventory.SupervisedTasksViewListener;
 import me.colormaestro.taskmanager.tabcompleters.MembersTabCompleter;
@@ -106,6 +108,7 @@ public final class TaskManager extends JavaPlugin {
         registerEventListener(new ApprovedTasksViewListener(creator));
         registerEventListener(new PreparedTasksViewListener(creator));
         registerEventListener(new IdleTaskViewListener(creator));
+        registerEventListener(new NeedTasksViewListener(creator));
 
         setCommandExecutor("addmember", new AddMember(this, memberDAO, tasksTabCompleter, membersTabCompleter));
         setCommandExecutor("dashboard", new Dashboard(creator));
@@ -122,6 +125,7 @@ public final class TaskManager extends JavaPlugin {
         setCommandExecutor("establish", new Establish(taskDAO, memberDAO));
         setCommandExecutor("taskinfo", new TaskInfo(creator));
         setCommandExecutor("transfertask", new TransferTask(taskDAO, memberDAO));
+        setCommandExecutor("needtasks", new NeedTasks(this, taskDAO));
     }
 
     private void registerEventListener(Listener listener) {

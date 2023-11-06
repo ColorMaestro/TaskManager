@@ -6,16 +6,15 @@ import me.colormaestro.taskmanager.utils.RunnablesCreator;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.event.EventHandler;
-import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.persistence.PersistentDataHolder;
 import org.bukkit.persistence.PersistentDataType;
 
-public class DashboardViewListener extends InventoryListener implements Listener {
+public class NeedTasksViewListener extends InventoryListener {
 
-    public DashboardViewListener(RunnablesCreator creator) {
-        super(creator, Directives.DASHBOARD);
+    public NeedTasksViewListener(RunnablesCreator creator) {
+        super(creator, Directives.NEED_TASKS);
     }
 
     @EventHandler
@@ -27,15 +26,9 @@ public class DashboardViewListener extends InventoryListener implements Listener
     void handleEvent(HumanEntity player, ItemStack itemStack) {
         switch (itemStack.getType()) {
             case PLAYER_HEAD -> handlePlayerHeadClick(player, itemStack.getItemMeta());
-            case ENDER_EYE -> Bukkit.getScheduler()
-                    .runTaskAsynchronously(creator.getPlugin(), creator.showSupervisedTasksView(player, 1));
             case ARROW -> handleArrowClick(player, itemStack.getItemMeta());
-            case LIGHT_GRAY_CONCRETE -> Bukkit.getScheduler()
-                    .runTaskAsynchronously(creator.getPlugin(), creator.showPreparedTasksView(player, 1));
-            case CLOCK -> Bukkit.getScheduler()
-                    .runTaskAsynchronously(creator.getPlugin(), creator.showIdleTasksView(player, 1));
-            case PAPER -> Bukkit.getScheduler()
-                    .runTaskAsynchronously(creator.getPlugin(), creator.showNeedTasksView(player, 1));
+            case SPECTRAL_ARROW -> Bukkit.getScheduler()
+                    .runTaskAsynchronously(creator.getPlugin(), creator.showDashboardView(player, 1));
         }
     }
 
@@ -46,6 +39,6 @@ public class DashboardViewListener extends InventoryListener implements Listener
 
     private void handleArrowClick(HumanEntity player, PersistentDataHolder holder) {
         Bukkit.getScheduler().runTaskAsynchronously(creator.getPlugin(),
-                creator.showDashboardView(player, determineNextPage(holder)));
+                creator.showNeedTasksView(player, determineNextPage(holder)));
     }
 }

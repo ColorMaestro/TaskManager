@@ -62,6 +62,20 @@ public class ItemStackCreator {
         return lore;
     }
 
+    public ItemStack createNeedTasksStack(String uuid, String ign, int doing) {
+        ItemStack stack = new ItemStack(Material.PLAYER_HEAD);
+
+        ItemMeta meta = new SkullMetaBuilder()
+                .setOwningPlayer(Bukkit.getOfflinePlayer(UUID.fromString(uuid)))
+                .setDisplayName(ChatColor.BLUE + "" + ChatColor.BOLD + ign)
+                .setLore(List.of(ChatColor.WHITE + "" + doing + " tasks in progress"))
+                .setPersistentData(new NamespacedKey(plugin, DataContainerKeys.MEMBER_NAME), PersistentDataType.STRING, ign)
+                .build();
+
+        stack.setItemMeta(meta);
+        return stack;
+    }
+
     public ItemStack createBasicTaskStack(Integer taskId, String title, String description, TaskStatus status) {
         return createSupervisedTaskStack(taskId, title, description, status, null);
     }

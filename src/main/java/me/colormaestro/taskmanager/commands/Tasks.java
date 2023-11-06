@@ -46,6 +46,7 @@ public class Tasks implements CommandExecutor {
             {"/tasks [IGN]", "shows your or other member's tasks"},
             {"/visittask <id>", "teleports to the task workplace"},
             {"/taskinfo <id>", "obtains info in book for related task"},
+            {"/needtasks", "shows members who have less than 2 tasks in progress"},
             {"/addtask <IGN>", "creates task assignment book with blank description"},
             {"/addtask <IGN> [id]", "creates task assignment book, description is taken from selected task"},
             {"/preparetask", "creates task book for creating of prepared task"},

@@ -4,6 +4,7 @@ import me.colormaestro.taskmanager.enums.TaskStatus;
 import me.colormaestro.taskmanager.model.AdvisedTask;
 import me.colormaestro.taskmanager.model.IdleTask;
 import me.colormaestro.taskmanager.model.MemberDashboardInfo;
+import me.colormaestro.taskmanager.model.MemberInProgressTasksInfo;
 import me.colormaestro.taskmanager.model.Task;
 import org.bukkit.Location;
 import org.jetbrains.annotations.NotNull;
@@ -495,6 +496,38 @@ public class TaskDAO {
                         rs.getDate("last_login")
                 );
                 stats.add(memberDashboardInfo);
+            }
+            rs.close();
+            return stats;
+        }
+    }
+
+    /**
+     * Returns list of members who have a few tasks in progress
+     * (status {@link me.colormaestro.taskmanager.enums.TaskStatus#DOING})
+     *
+     * @return List of stats for each player
+     * @throws SQLException if SQL error arise
+     */
+    public synchronized List<MemberInProgressTasksInfo> fetchMembersWithFewTasks() throws SQLException {
+        try (Connection connection = DriverManager.getConnection(url);
+             PreparedStatement st = connection.prepareStatement(
+                     """
+                            select ign, uuid, count(tasks.id) as doing
+                            from players left join tasks on players.id = tasks.assignee_id
+                            where status = 'DOING'
+                            group by ign, uuid
+                            having doing <= 1
+                            order by upper(ign)""")) {
+            ResultSet rs = st.executeQuery();
+            List<MemberInProgressTasksInfo> stats = new ArrayList<>();
+            while (rs.next()) {
+                MemberInProgressTasksInfo memberTasksInfo = new MemberInProgressTasksInfo(
+                        rs.getString("ign"),
+                        rs.getString("uuid"),
+                        rs.getInt("doing")
+                );
+                stats.add(memberTasksInfo);
             }
             rs.close();
             return stats;

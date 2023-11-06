@@ -65,6 +65,11 @@ commands:
     usage: Usage /taskinfo <id>
     permission: taskmanager.taskinfo
     permission-message: You don't have permission to obtain task info
+  needtasks:
+    description: Gets members who are running out of tasks.
+    usage: Usage /needtasks
+    permission: taskmanager.needtasks
+    permission-message: You don't have permission to see members who need tasks
   settaskplace:
     description: Sets the spawning point for the task.
     usage: Usage /settaskplace <id>

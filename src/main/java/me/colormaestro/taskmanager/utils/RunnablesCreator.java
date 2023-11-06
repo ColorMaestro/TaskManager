@@ -7,6 +7,7 @@ import me.colormaestro.taskmanager.model.AdvisedTask;
 import me.colormaestro.taskmanager.model.IdleTask;
 import me.colormaestro.taskmanager.model.Member;
 import me.colormaestro.taskmanager.model.MemberDashboardInfo;
+import me.colormaestro.taskmanager.model.MemberInProgressTasksInfo;
 import me.colormaestro.taskmanager.model.Task;
 import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.ComponentBuilder;
@@ -31,6 +32,7 @@ public class RunnablesCreator {
     private static final int LAST_ROW_MIDDLE = 49;
     private static final int LAST_ROW_LEFT_FROM_MIDDLE = 48;
     private static final int LAST_ROW_RIGHT_FROM_MIDDLE = 50;
+    private static final int LAST_ROW_THIRD = 47;
 
     private final TaskDAO taskDAO;
     private final MemberDAO memberDAO;
@@ -80,7 +82,9 @@ public class RunnablesCreator {
                             .addItemStack(LAST_ROW_LEFT_FROM_MIDDLE, Material.LIGHT_GRAY_CONCRETE,
                                     ChatColor.GRAY + "Show prepared tasks")
                             .addItemStack(LAST_ROW_RIGHT_FROM_MIDDLE, Material.CLOCK,
-                                    ChatColor.GOLD + "Show idle tasks");
+                                    ChatColor.GOLD + "Show idle tasks")
+                            .addItemStack(LAST_ROW_THIRD, Material.PAPER,
+                                    ChatColor.WHITE + "Show members who are running out of tasks");
 
                     player.openInventory(builder.build());
                 });
@@ -300,6 +304,46 @@ public class RunnablesCreator {
                                 task.dateAssigned(),
                                 task.assigneeName(),
                                 task.advisorName());
+                        builder.addItemStack(position, stack);
+                        position++;
+                    }
+
+                    ItemStack previousPageLink = new ItemStack(Material.ARROW);
+                    previousPageLink.setItemMeta(createPaginationItemMeta(page, totalPages, false));
+                    ItemStack nextPageLink = new ItemStack(Material.ARROW);
+                    nextPageLink.setItemMeta(createPaginationItemMeta(page, totalPages, true));
+
+                    builder.addPaginationItemStacks(previousPageLink, nextPageLink)
+                            .addItemStack(LAST_ROW_MIDDLE, Material.SPECTRAL_ARROW,
+                                    ChatColor.AQUA + "Back to dashboard");
+
+                    player.openInventory(builder.build());
+                });
+            } catch (SQLException ex) {
+                Bukkit.getScheduler().runTask(plugin,
+                        () -> player.sendMessage(ChatColor.RED + ex.getMessage()));
+                ex.printStackTrace();
+            }
+        };
+    }
+    
+    public Runnable showNeedTasksView(HumanEntity player, int page) {
+        return () -> {
+            try {
+                List<MemberInProgressTasksInfo> stats = taskDAO.fetchMembersWithFewTasks();
+                int totalPages = stats.size() / PAGE_SIZE + 1;
+                List<MemberInProgressTasksInfo> finalStats = getPageFromList(stats, page);
+                Bukkit.getScheduler().runTask(plugin, () -> {
+                    String title = ChatColor.GOLD + "" + ChatColor.BOLD + "Members out of tasks" + ChatColor.RESET + " (" + page + "/" + totalPages + ") " + Directives.NEED_TASKS;
+                    InventoryBuilder builder = new InventoryBuilder(player, title);
+
+                    ItemStack stack;
+                    int position = 0;
+                    for (MemberInProgressTasksInfo memberInfo : finalStats) {
+                        stack = stackCreator.createNeedTasksStack(
+                                memberInfo.uuid(),
+                                memberInfo.ign(),
+                                memberInfo.doing());
                         builder.addItemStack(position, stack);
                         position++;
                     }
