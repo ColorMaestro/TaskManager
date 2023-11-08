@@ -1,4 +1,4 @@
-package me.colormaestro.taskmanager.data;
+package me.colormaestro.taskmanager.integrations;
 
 import eu.decentsoftware.holograms.api.DHAPI;
 import eu.decentsoftware.holograms.api.holograms.Hologram;

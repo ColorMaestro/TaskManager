@@ -2,7 +2,7 @@ package me.colormaestro.taskmanager.commands;
 
 import me.colormaestro.taskmanager.data.DataAccessException;
 import me.colormaestro.taskmanager.data.DiscordManager;
-import me.colormaestro.taskmanager.data.HologramLayer;
+import me.colormaestro.taskmanager.integrations.HologramLayer;
 import me.colormaestro.taskmanager.data.MemberDAO;
 import me.colormaestro.taskmanager.data.TaskDAO;
 import me.colormaestro.taskmanager.model.Member;

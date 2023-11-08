@@ -1,7 +1,7 @@
 package me.colormaestro.taskmanager.listeners;
 
 import me.colormaestro.taskmanager.data.DataAccessException;
-import me.colormaestro.taskmanager.data.HologramLayer;
+import me.colormaestro.taskmanager.integrations.HologramLayer;
 import me.colormaestro.taskmanager.data.MemberDAO;
 import me.colormaestro.taskmanager.data.TaskDAO;
 import me.colormaestro.taskmanager.model.Member;
@@ -17,7 +17,6 @@ import org.bukkit.plugin.Plugin;
 
 import java.sql.SQLException;
 import java.util.List;
-import java.util.UUID;
 
 public class PlayerJoinListener implements Listener {
     private final Plugin plugin;

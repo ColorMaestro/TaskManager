@@ -17,7 +17,7 @@ import me.colormaestro.taskmanager.commands.Tasks;
 import me.colormaestro.taskmanager.commands.TransferTask;
 import me.colormaestro.taskmanager.commands.VisitTask;
 import me.colormaestro.taskmanager.data.DiscordManager;
-import me.colormaestro.taskmanager.data.HologramLayer;
+import me.colormaestro.taskmanager.integrations.HologramLayer;
 import me.colormaestro.taskmanager.data.MemberDAO;
 import me.colormaestro.taskmanager.data.TaskDAO;
 import me.colormaestro.taskmanager.listeners.inventory.ActiveTasksViewListener;
