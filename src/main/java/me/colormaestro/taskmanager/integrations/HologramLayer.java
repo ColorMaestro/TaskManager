@@ -10,7 +10,7 @@ import org.bukkit.entity.Player;
 
 import java.util.List;
 
-public class HologramLayer {
+public class HologramLayer implements DecentHologramsIntegration {
     private static HologramLayer instance;
 
     private HologramLayer() {
@@ -26,6 +26,7 @@ public class HologramLayer {
         return instance;
     }
 
+    @Override
     public void establishTasksHologram(Player player) {
         Location location = player.getLocation();
         location.setY(location.getY() + 2);
@@ -36,15 +37,18 @@ public class HologramLayer {
                 + ChatColor.GOLD + ChatColor.BOLD + " /establish" + ChatColor.GREEN + " there");
     }
 
+    @Override
     public boolean hologramExists(String key) {
         return DHAPI.getHologram(key) != null;
     }
 
+    @Override
     public void teleportHologram(String key, Location location) {
         location.setY(location.getY() + 2);
         DHAPI.moveHologram(key, location);
     }
 
+    @Override
     public void setTasks(String key, List<Task> tasks) {
         Hologram hologram = DHAPI.getHologram(key);
         if (hologram == null) {
