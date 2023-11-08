@@ -11,20 +11,6 @@ import org.bukkit.entity.Player;
 import java.util.List;
 
 public class HologramLayer implements DecentHologramsIntegration {
-    private static HologramLayer instance;
-
-    private HologramLayer() {
-    }
-
-    public static void instantiate() {
-        if (instance == null) {
-            instance = new HologramLayer();
-        }
-    }
-
-    public static HologramLayer getInstance() {
-        return instance;
-    }
 
     @Override
     public void establishTasksHologram(Player player) {

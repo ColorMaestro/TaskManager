@@ -2,9 +2,9 @@ package me.colormaestro.taskmanager.commands;
 
 import me.colormaestro.taskmanager.data.DataAccessException;
 import me.colormaestro.taskmanager.data.DiscordManager;
-import me.colormaestro.taskmanager.integrations.HologramLayer;
 import me.colormaestro.taskmanager.data.MemberDAO;
 import me.colormaestro.taskmanager.data.TaskDAO;
+import me.colormaestro.taskmanager.integrations.DecentHologramsIntegration;
 import me.colormaestro.taskmanager.model.Member;
 import me.colormaestro.taskmanager.model.Task;
 import org.bukkit.Bukkit;
@@ -22,10 +22,12 @@ import java.util.UUID;
 public class FinishTask implements CommandExecutor {
     private final TaskDAO taskDAO;
     private final MemberDAO memberDAO;
+    private final DecentHologramsIntegration decentHolograms;
 
-    public FinishTask(TaskDAO taskDAO, MemberDAO memberDAO) {
+    public FinishTask(TaskDAO taskDAO, MemberDAO memberDAO, DecentHologramsIntegration decentHolograms) {
         this.taskDAO = taskDAO;
         this.memberDAO = memberDAO;
+        this.decentHolograms = decentHolograms;
     }
 
     @Override
@@ -54,9 +56,7 @@ public class FinishTask implements CommandExecutor {
                 Bukkit.getScheduler().runTask(plugin,
                         () -> {
                             p.sendMessage(ChatColor.GREEN + "Task finished.");
-                            if (Bukkit.getPluginManager().isPluginEnabled("DecentHolograms")) {
-                                HologramLayer.getInstance().setTasks(assignee.getUuid(), activeTasks);
-                            }
+                            decentHolograms.setTasks(assignee.getUuid(), activeTasks);
 
                             // Firstly we try to notify the assigner in game
                             boolean messageSent = false;

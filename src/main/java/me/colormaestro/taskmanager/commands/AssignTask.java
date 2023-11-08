@@ -2,9 +2,9 @@ package me.colormaestro.taskmanager.commands;
 
 import me.colormaestro.taskmanager.data.DataAccessException;
 import me.colormaestro.taskmanager.data.DiscordManager;
-import me.colormaestro.taskmanager.integrations.HologramLayer;
 import me.colormaestro.taskmanager.data.MemberDAO;
 import me.colormaestro.taskmanager.data.TaskDAO;
+import me.colormaestro.taskmanager.integrations.DecentHologramsIntegration;
 import me.colormaestro.taskmanager.model.Member;
 import me.colormaestro.taskmanager.model.Task;
 import org.bukkit.Bukkit;
@@ -24,11 +24,13 @@ public class AssignTask implements CommandExecutor {
     private final Plugin plugin;
     private final TaskDAO taskDAO;
     private final MemberDAO memberDAO;
+    private final DecentHologramsIntegration decentHolograms;
 
-    public AssignTask(Plugin plugin, TaskDAO taskDAO, MemberDAO memberDAO) {
+    public AssignTask(Plugin plugin, TaskDAO taskDAO, MemberDAO memberDAO, DecentHologramsIntegration decentHolograms) {
         this.plugin = plugin;
         this.taskDAO = taskDAO;
         this.memberDAO = memberDAO;
+        this.decentHolograms = decentHolograms;
     }
 
     @Override
@@ -71,9 +73,7 @@ public class AssignTask implements CommandExecutor {
 
                     // Firstly we try to notify the assignee in game
                     boolean messageSent = false;
-                    if (Bukkit.getPluginManager().isPluginEnabled("DecentHolograms")) {
-                        HologramLayer.getInstance().setTasks(assignee.getUuid(), activeTasks);
-                    }
+                    decentHolograms.setTasks(assignee.getUuid(), activeTasks);
                     for (Player target : Bukkit.getOnlinePlayers()) {
                         if (target.getUniqueId().toString().equals(assignee.getUuid())) {
                             target.sendMessage(ChatColor.GOLD + "You have new task from " + player.getName());
