@@ -19,7 +19,7 @@ import me.colormaestro.taskmanager.commands.VisitTask;
 import me.colormaestro.taskmanager.data.DiscordManager;
 import me.colormaestro.taskmanager.integrations.DecentHologramsIntegration;
 import me.colormaestro.taskmanager.integrations.EmptyHologramsOperator;
-import me.colormaestro.taskmanager.integrations.HologramLayer;
+import me.colormaestro.taskmanager.integrations.FullHologramsOperator;
 import me.colormaestro.taskmanager.data.MemberDAO;
 import me.colormaestro.taskmanager.data.TaskDAO;
 import me.colormaestro.taskmanager.listeners.inventory.ActiveTasksViewListener;
@@ -90,7 +90,7 @@ public final class TaskManager extends JavaPlugin {
         DecentHologramsIntegration decentHolograms;
         if (Bukkit.getPluginManager().isPluginEnabled("DecentHolograms")) {
             this.getLogger().info("DecentHolograms plugin detected, TaskManager will be fully functional");
-            decentHolograms = new HologramLayer();
+            decentHolograms = new FullHologramsOperator();
         } else {
             this.getLogger().info("DecentHolograms plugin was not detected, functionality will be limited");
             decentHolograms = new EmptyHologramsOperator();

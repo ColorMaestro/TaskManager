@@ -10,7 +10,7 @@ import org.bukkit.entity.Player;
 
 import java.util.List;
 
-public class HologramLayer implements DecentHologramsIntegration {
+public class FullHologramsOperator implements DecentHologramsIntegration {
 
     @Override
     public void establishTasksHologram(Player player) {
