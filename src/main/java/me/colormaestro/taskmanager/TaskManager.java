@@ -52,20 +52,11 @@ public final class TaskManager extends JavaPlugin {
     private FileConfiguration config;
     private TaskDAO taskDAO;
     private MemberDAO memberDAO;
-    private DecentHologramsIntegration decentHolograms;
 
     @Override
     public void onEnable() {
         loadConfig();
         initDatabaseAccessors();
-
-        if (Bukkit.getPluginManager().isPluginEnabled("DecentHolograms")) {
-            this.getLogger().info("DecentHolograms plugin detected, TaskManager will be fully functional");
-            decentHolograms = new HologramLayer();
-        } else {
-            this.getLogger().info("DecentHolograms plugin was not detected, functionality will be limited");
-            decentHolograms = new EmptyHologramsOperator();
-        }
         performBindingsSetup();
         DiscordManager.instantiate(config.getString("token"), memberDAO, this);
     }
@@ -96,6 +87,15 @@ public final class TaskManager extends JavaPlugin {
     }
 
     private void performBindingsSetup() {
+        DecentHologramsIntegration decentHolograms;
+        if (Bukkit.getPluginManager().isPluginEnabled("DecentHolograms")) {
+            this.getLogger().info("DecentHolograms plugin detected, TaskManager will be fully functional");
+            decentHolograms = new HologramLayer();
+        } else {
+            this.getLogger().info("DecentHolograms plugin was not detected, functionality will be limited");
+            decentHolograms = new EmptyHologramsOperator();
+        }
+
         RunnablesCreator creator = new RunnablesCreator(this, taskDAO, memberDAO);
 
         ReloadableTabCompleter tasksTabCompleter = new TasksTabCompleter(memberDAO);
