@@ -33,22 +33,20 @@ public class HologramLayer {
         DHAPI.createHologram(player.getUniqueId().toString(), location, true, lines);
         player.sendMessage(ChatColor.GREEN + "✔ Your visual task list has been established!");
         player.sendMessage(ChatColor.GREEN + "ℹ If you want to move it somewhere else, do"
-                + ChatColor.GOLD + "" + ChatColor.BOLD + " /establish" + ChatColor.GREEN + " there");
+                + ChatColor.GOLD + ChatColor.BOLD + " /establish" + ChatColor.GREEN + " there");
     }
 
     public boolean hologramExists(String key) {
-        Hologram hologram = DHAPI.getHologram(key);
-        return hologram != null;
+        return DHAPI.getHologram(key) != null;
     }
 
-    public void teleportHologram(Player player) {
-        Location location = player.getLocation();
+    public void teleportHologram(String key, Location location) {
         location.setY(location.getY() + 2);
-        DHAPI.moveHologram(player.getUniqueId().toString(), location);
+        DHAPI.moveHologram(key, location);
     }
 
-    public void setTasks(String uuid, List<Task> tasks) {
-        Hologram hologram = DHAPI.getHologram(uuid);
+    public void setTasks(String key, List<Task> tasks) {
+        Hologram hologram = DHAPI.getHologram(key);
         if (hologram == null) {
             return;
         }

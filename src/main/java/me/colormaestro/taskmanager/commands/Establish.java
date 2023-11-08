@@ -28,7 +28,7 @@ public class Establish implements CommandExecutor {
 
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
-        if (!(sender instanceof Player)) {
+        if (!(sender instanceof Player player)) {
             sender.sendMessage(ChatColor.RED + "This command can't be run from console");
             return true;
         }
@@ -38,10 +38,9 @@ public class Establish implements CommandExecutor {
             return true;
         }
 
-        Player player = (Player) sender;
         String uuid = player.getUniqueId().toString();
         if (HologramLayer.getInstance().hologramExists(uuid)) {
-            HologramLayer.getInstance().teleportHologram(player);
+            HologramLayer.getInstance().teleportHologram(uuid, player.getLocation());
         } else {
             Plugin plugin = Bukkit.getPluginManager().getPlugin("TaskManager");
             Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
@@ -50,7 +49,7 @@ public class Establish implements CommandExecutor {
                     List<Task> membersTasks = taskDAO.fetchPlayersActiveTasks(member.getId());
                     Bukkit.getScheduler().runTask(plugin, () -> {
                         HologramLayer.getInstance().establishTasksHologram(player);
-                        HologramLayer.getInstance().setTasks(player.getUniqueId().toString(), membersTasks);
+                        HologramLayer.getInstance().setTasks(uuid, membersTasks);
                     });
                 } catch (SQLException | DataAccessException e) {
                     e.printStackTrace();
