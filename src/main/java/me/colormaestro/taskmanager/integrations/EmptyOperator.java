@@ -6,7 +6,7 @@ import org.bukkit.entity.Player;
 
 import java.util.List;
 
-public class EmptyHologramsOperator implements DecentHologramsIntegration {
+public class EmptyOperator implements DecentHologramsIntegration, DynmapIntegration {
     @Override
     public void establishTasksHologram(Player player) {
 
@@ -24,6 +24,21 @@ public class EmptyHologramsOperator implements DecentHologramsIntegration {
 
     @Override
     public void setTasks(String key, List<Task> tasks) {
+
+    }
+
+    @Override
+    public void addTaskInProgressMarker(String key, String label, Location location) {
+
+    }
+
+    @Override
+    public void updateTaskFinishedMarkerIcon(String key) {
+
+    }
+
+    @Override
+    public void removeTaskMarker(String key) {
 
     }
 }

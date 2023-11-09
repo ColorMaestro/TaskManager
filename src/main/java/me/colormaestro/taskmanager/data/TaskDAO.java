@@ -80,7 +80,7 @@ public class TaskDAO {
      * @param task task to create
      * @throws SQLException if the task has already set ID
      */
-    public synchronized void createTask(Task task) throws SQLException {
+    public synchronized int createTask(Task task) throws SQLException {
         if (task.getId() != null) {
             throw new IllegalArgumentException("Creating task with set ID");
         }
@@ -104,6 +104,15 @@ public class TaskDAO {
             st.setDate(13, task.getDateAssigned());
             st.setDate(14, task.getDateCompleted());
             st.executeUpdate();
+
+            ResultSet generatedKeys = st.getGeneratedKeys();
+            if (generatedKeys.next()) {
+                int taskId = generatedKeys.getInt(1);
+                generatedKeys.close();
+                return taskId;
+            } else {
+                throw new SQLException("Failed to generate ID for record in Tasks table");
+            }
         }
     }
 

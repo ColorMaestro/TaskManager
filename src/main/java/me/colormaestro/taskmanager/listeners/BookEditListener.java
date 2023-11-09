@@ -6,6 +6,7 @@ import me.colormaestro.taskmanager.data.MemberDAO;
 import me.colormaestro.taskmanager.data.TaskDAO;
 import me.colormaestro.taskmanager.enums.TaskStatus;
 import me.colormaestro.taskmanager.integrations.DecentHologramsIntegration;
+import me.colormaestro.taskmanager.integrations.DynmapIntegration;
 import me.colormaestro.taskmanager.model.Member;
 import me.colormaestro.taskmanager.model.Task;
 import me.colormaestro.taskmanager.utils.DataContainerKeys;
@@ -30,12 +31,15 @@ public class BookEditListener implements Listener {
     private final TaskDAO taskDAO;
     private final MemberDAO memberDAO;
     private final DecentHologramsIntegration decentHolograms;
+    private final DynmapIntegration dynmap;
 
-    public BookEditListener(Plugin plugin, TaskDAO taskDAO, MemberDAO memberDAO, DecentHologramsIntegration decentHolograms) {
+    public BookEditListener(Plugin plugin, TaskDAO taskDAO, MemberDAO memberDAO,
+                            DecentHologramsIntegration decentHolograms, DynmapIntegration dynmap) {
         this.plugin = plugin;
         this.taskDAO = taskDAO;
         this.memberDAO = memberDAO;
         this.decentHolograms = decentHolograms;
+        this.dynmap = dynmap;
     }
 
     @EventHandler
@@ -111,7 +115,7 @@ public class BookEditListener implements Listener {
             Task task = new Task(title, description, advisor.getId(), assignee.getId(), advisor.getId(), x, y, z, yaw,
                     pitch, TaskStatus.DOING, currentDate, currentDate, null);
             try {
-                taskDAO.createTask(task);
+                int taskID = taskDAO.createTask(task);
                 List<Task> activeTasks = taskDAO.fetchPlayersActiveTasks(assignee.getId());
                 Bukkit.getScheduler().runTask(plugin, () -> {
                     p.sendMessage(ChatColor.GREEN + "Task added.");
@@ -119,6 +123,8 @@ public class BookEditListener implements Listener {
                     // Firstly we try to notify the assignee in game
                     boolean messageSent = false;
                     decentHolograms.setTasks(assignee.getUuid(), activeTasks);
+                    String markerLabel = "[" + taskID + "] " + title;
+                    dynmap.addTaskInProgressMarker(String.valueOf(taskID), markerLabel, p.getLocation());
                     for (Player target : Bukkit.getOnlinePlayers()) {
                         if (target.getUniqueId().toString().equals(assignee.getUuid())) {
                             target.sendMessage(ChatColor.GOLD + "You have new task from " + p.getName());

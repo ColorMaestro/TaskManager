@@ -18,8 +18,10 @@ import me.colormaestro.taskmanager.commands.TransferTask;
 import me.colormaestro.taskmanager.commands.VisitTask;
 import me.colormaestro.taskmanager.data.DiscordManager;
 import me.colormaestro.taskmanager.integrations.DecentHologramsIntegration;
-import me.colormaestro.taskmanager.integrations.EmptyHologramsOperator;
-import me.colormaestro.taskmanager.integrations.FullHologramsOperator;
+import me.colormaestro.taskmanager.integrations.DynmapIntegration;
+import me.colormaestro.taskmanager.integrations.DynmapOperator;
+import me.colormaestro.taskmanager.integrations.EmptyOperator;
+import me.colormaestro.taskmanager.integrations.DecentHologramsOperator;
 import me.colormaestro.taskmanager.data.MemberDAO;
 import me.colormaestro.taskmanager.data.TaskDAO;
 import me.colormaestro.taskmanager.listeners.inventory.ActiveTasksViewListener;
@@ -43,6 +45,7 @@ import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.dynmap.DynmapAPI;
 
 import java.io.File;
 import java.io.IOException;
@@ -89,11 +92,20 @@ public final class TaskManager extends JavaPlugin {
     private void performBindingsSetup() {
         DecentHologramsIntegration decentHolograms;
         if (Bukkit.getPluginManager().isPluginEnabled("DecentHolograms")) {
-            this.getLogger().info("DecentHolograms plugin detected, TaskManager will be fully functional");
-            decentHolograms = new FullHologramsOperator();
+            this.getLogger().info("DecentHolograms plugin detected");
+            decentHolograms = new DecentHologramsOperator();
         } else {
-            this.getLogger().info("DecentHolograms plugin was not detected, functionality will be limited");
-            decentHolograms = new EmptyHologramsOperator();
+            this.getLogger().info("DecentHolograms plugin was not detected");
+            decentHolograms = new EmptyOperator();
+        }
+
+        DynmapIntegration dynmap;
+        if (Bukkit.getPluginManager().getPlugin("dynmap") instanceof DynmapAPI dynmapAPI) {
+            this.getLogger().info("Dynmap plugin detected");
+            dynmap = new DynmapOperator(dynmapAPI);
+        } else {
+            this.getLogger().info("Dynmap plugin was not detected");
+            dynmap = new EmptyOperator();
         }
 
         RunnablesCreator creator = new RunnablesCreator(this, taskDAO, memberDAO);
@@ -105,7 +117,7 @@ public final class TaskManager extends JavaPlugin {
         setTabCompleter("dashboard", membersTabCompleter);
 
         registerEventListener(new PlayerJoinListener(this, taskDAO, memberDAO, tasksTabCompleter, membersTabCompleter, decentHolograms));
-        registerEventListener(new BookEditListener(this, taskDAO, memberDAO, decentHolograms));
+        registerEventListener(new BookEditListener(this, taskDAO, memberDAO, decentHolograms, dynmap));
         registerEventListener(new DashboardViewListener(creator));
         registerEventListener(new SupervisedTasksViewListener(creator));
         registerEventListener(new ActiveTasksViewListener(creator));
@@ -120,8 +132,8 @@ public final class TaskManager extends JavaPlugin {
         setCommandExecutor("addtask", new AddTask(this, taskDAO));
         setCommandExecutor("preparetask", new PrepareTask(this));
         setCommandExecutor("assigntask", new AssignTask(this, taskDAO, memberDAO, decentHolograms));
-        setCommandExecutor("finishtask", new FinishTask(taskDAO, memberDAO, decentHolograms));
-        setCommandExecutor("approvetask", new ApproveTask(taskDAO, memberDAO, decentHolograms));
+        setCommandExecutor("finishtask", new FinishTask(taskDAO, memberDAO, decentHolograms, dynmap));
+        setCommandExecutor("approvetask", new ApproveTask(taskDAO, memberDAO, decentHolograms, dynmap));
         setCommandExecutor("visittask", new VisitTask(creator));
         setCommandExecutor("returntask", new ReturnTask(taskDAO, memberDAO, decentHolograms));
         setCommandExecutor("settaskplace", new SetTaskPlace(taskDAO, memberDAO));

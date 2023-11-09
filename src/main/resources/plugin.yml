@@ -3,7 +3,7 @@ version: ${project.version}
 main: me.colormaestro.taskmanager.TaskManager
 api-version: 1.18
 authors: [ColorMaestro]
-softdepend: [DecentHolograms]
+softdepend: [DecentHolograms, dynmap]
 commands:
   addmember:
     description: Adds new member to system.
