@@ -55,11 +55,14 @@ public final class TaskManager extends JavaPlugin {
     private FileConfiguration config;
     private TaskDAO taskDAO;
     private MemberDAO memberDAO;
+    private DecentHologramsIntegration decentHolograms;
+    private DynmapIntegration dynmap;
 
     @Override
     public void onEnable() {
         loadConfig();
         initDatabaseAccessors();
+        resolveIntegrationsOperators();
         performBindingsSetup();
         DiscordManager.instantiate(config.getString("token"), memberDAO, this);
     }
@@ -89,8 +92,7 @@ public final class TaskManager extends JavaPlugin {
         taskDAO = new TaskDAO(getDataFolder().getAbsolutePath());
     }
 
-    private void performBindingsSetup() {
-        DecentHologramsIntegration decentHolograms;
+    private void resolveIntegrationsOperators() {
         if (Bukkit.getPluginManager().isPluginEnabled("DecentHolograms")) {
             this.getLogger().info("DecentHolograms plugin detected");
             decentHolograms = new DecentHologramsOperator();
@@ -99,7 +101,6 @@ public final class TaskManager extends JavaPlugin {
             decentHolograms = new EmptyOperator();
         }
 
-        DynmapIntegration dynmap;
         if (Bukkit.getPluginManager().getPlugin("dynmap") instanceof DynmapAPI dynmapAPI) {
             this.getLogger().info("Dynmap plugin detected");
             dynmap = new DynmapOperator(dynmapAPI);
@@ -107,7 +108,9 @@ public final class TaskManager extends JavaPlugin {
             this.getLogger().info("Dynmap plugin was not detected");
             dynmap = new EmptyOperator();
         }
+    }
 
+    private void performBindingsSetup() {
         RunnablesCreator creator = new RunnablesCreator(this, taskDAO, memberDAO);
 
         ReloadableTabCompleter tasksTabCompleter = new TasksTabCompleter(memberDAO);
