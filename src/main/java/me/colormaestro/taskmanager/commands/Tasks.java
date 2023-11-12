@@ -75,99 +75,82 @@ public class Tasks implements CommandExecutor {
             return true;
         }
 
-        if (sender instanceof Player && args.length == 1 && args[0].equals("given")) {
-            Player p = (Player) sender;
-            UUID uuid = p.getUniqueId();
+        if (!(sender instanceof Player player)) {
+            return true;
+        }
+
+        if (args.length == 1 && args[0].equals("given")) {
             Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
                 try {
-                    Member member = memberDAO.findMember(uuid);
+                    Member member = memberDAO.findMember(player.getUniqueId());
                     List<AdvisedTask> tasks = taskDAO.fetchAdvisorActiveTasks(member.getId());
-                    Bukkit.getScheduler().runTask(plugin,
-                            () -> sendAdvisorTasks(p, tasks));
+                    Bukkit.getScheduler().runTask(plugin, () -> sendAdvisorTasks(player, tasks));
                 } catch (SQLException | DataAccessException ex) {
-                    Bukkit.getScheduler().runTask(plugin,
-                            () -> p.sendMessage(ChatColor.RED + ex.getMessage()));
+                    Bukkit.getScheduler().runTask(plugin, () -> player.sendMessage(ChatColor.RED + ex.getMessage()));
                     ex.printStackTrace();
                 }
-
             });
             return true;
         }
 
-        if (sender instanceof Player && args.length == 1 && args[0].equals("stats")) {
-            Player p = (Player) sender;
+        if (args.length == 1 && args[0].equals("stats")) {
             Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
                 try {
                     List<MemberDashboardInfo> stats = taskDAO.fetchMembersDashboardInfo();
 
-                    Bukkit.getScheduler().runTask(plugin,
-                            () -> {
-                                ItemStack book = buildStatsBook(stats);
-                                p.openBook(book);
-                            });
+                    Bukkit.getScheduler().runTask(plugin, () -> {
+                        ItemStack book = buildStatsBook(stats);
+                        player.openBook(book);
+                    });
                 } catch (SQLException ex) {
-                    Bukkit.getScheduler().runTask(plugin,
-                            () -> p.sendMessage(ChatColor.RED + ex.getMessage()));
+                    Bukkit.getScheduler().runTask(plugin, () -> player.sendMessage(ChatColor.RED + ex.getMessage()));
                     ex.printStackTrace();
                 }
-
             });
             return true;
         }
 
-        if (sender instanceof Player && args.length == 1 && args[0].equals("prepared")) {
-            Player p = (Player) sender;
+        if (args.length == 1 && args[0].equals("prepared")) {
             Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
                 try {
                     List<Task> preparedTasks = taskDAO.fetchPreparedTasks();
 
-                    Bukkit.getScheduler().runTask(plugin,
-                            () -> sendPreparedTasks(p, preparedTasks));
+                    Bukkit.getScheduler().runTask(plugin, () -> sendPreparedTasks(player, preparedTasks));
                 } catch (SQLException ex) {
-                    Bukkit.getScheduler().runTask(plugin,
-                            () -> p.sendMessage(ChatColor.RED + ex.getMessage()));
+                    Bukkit.getScheduler().runTask(plugin, () -> player.sendMessage(ChatColor.RED + ex.getMessage()));
                     ex.printStackTrace();
                 }
-
             });
             return true;
         }
 
-        if (sender instanceof Player && args.length == 1 && args[0].equals("idle")) {
-            Player p = (Player) sender;
+        if (args.length == 1 && args[0].equals("idle")) {
             Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
                 try {
                     List<IdleTask> preparedTasks = taskDAO.fetchIdleTasks();
 
-                    Bukkit.getScheduler().runTask(plugin,
-                            () -> sendIdleTasks(p, preparedTasks));
+                    Bukkit.getScheduler().runTask(plugin, () -> sendIdleTasks(player, preparedTasks));
                 } catch (SQLException ex) {
-                    Bukkit.getScheduler().runTask(plugin,
-                            () -> p.sendMessage(ChatColor.RED + ex.getMessage()));
+                    Bukkit.getScheduler().runTask(plugin, () -> player.sendMessage(ChatColor.RED + ex.getMessage()));
                     ex.printStackTrace();
                 }
-
             });
             return true;
         }
 
-        if (sender instanceof Player && (args.length == 0 || args.length == 1)) {
-            Player p = (Player) sender;
-            UUID uuid = p.getUniqueId();
+        if (args.length == 0 || args.length == 1) {
             Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
                 try {
                     Member member;
                     if (args.length == 0) {
-                        member = memberDAO.findMember(uuid);
+                        member = memberDAO.findMember(player.getUniqueId());
                     } else {
                         member = memberDAO.findMember(args[0]);
                     }
                     List<Task> tasks = taskDAO.fetchPlayersActiveTasks(member.getId());
-                    Bukkit.getScheduler().runTask(plugin,
-                            () -> sendTasks(p, tasks, member.getIgn()));
+                    Bukkit.getScheduler().runTask(plugin, () -> sendTasks(player, tasks, member.getIgn()));
                 } catch (SQLException | DataAccessException ex) {
-                    Bukkit.getScheduler().runTask(plugin,
-                            () -> p.sendMessage(ChatColor.RED + ex.getMessage()));
+                    Bukkit.getScheduler().runTask(plugin, () -> player.sendMessage(ChatColor.RED + ex.getMessage()));
                     ex.printStackTrace();
                 }
             });
