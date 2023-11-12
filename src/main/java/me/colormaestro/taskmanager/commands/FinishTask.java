@@ -66,8 +66,6 @@ public class FinishTask implements CommandExecutor {
                     for (Player target : Bukkit.getOnlinePlayers()) {
                         if (target.getUniqueId().toString().equals(advisor.getUuid())) {
                             target.sendMessage(ChatColor.GREEN + player.getName() + " finished task " + taskId);
-                            target.playSound(target.getLocation(),
-                                    "minecraft:record.taskfinished", 10, 1);
                             messageSent = true;
                             break;
                         }

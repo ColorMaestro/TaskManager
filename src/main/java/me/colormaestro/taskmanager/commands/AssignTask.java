@@ -77,8 +77,6 @@ public class AssignTask implements CommandExecutor {
                     for (Player target : Bukkit.getOnlinePlayers()) {
                         if (target.getUniqueId().toString().equals(assignee.getUuid())) {
                             target.sendMessage(ChatColor.GOLD + "You have new task from " + player.getName());
-                            target.playSound(target.getLocation(),
-                                    "minecraft:record.newtask", 10, 1);
                             messageSent = true;
                             break;
                         }

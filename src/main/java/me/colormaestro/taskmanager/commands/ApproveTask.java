@@ -64,8 +64,6 @@ public class ApproveTask implements CommandExecutor {
                     for (Player target : Bukkit.getOnlinePlayers()) {
                         if (target.getUniqueId().toString().equals(assignee.getUuid())) {
                             target.sendMessage(ChatColor.GREEN + player.getName() + " has accepted your task. Great Job!");
-                            target.playSound(target.getLocation(),
-                                    "minecraft:record.taskaccepted", 10, 1);
                             messageSent = true;
                             break;
                         }
