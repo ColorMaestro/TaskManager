@@ -1,7 +1,7 @@
 package me.colormaestro.taskmanager.listeners;
 
 import me.colormaestro.taskmanager.data.DataAccessException;
-import me.colormaestro.taskmanager.data.DiscordManager;
+import me.colormaestro.taskmanager.integrations.DiscordManager;
 import me.colormaestro.taskmanager.data.MemberDAO;
 import me.colormaestro.taskmanager.data.TaskDAO;
 import me.colormaestro.taskmanager.enums.TaskStatus;

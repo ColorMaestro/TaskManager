@@ -1,6 +1,6 @@
 package me.colormaestro.taskmanager.listeners;
 
-import me.colormaestro.taskmanager.data.DiscordManager;
+import me.colormaestro.taskmanager.integrations.DiscordManager;
 import net.dv8tion.jda.api.entities.ChannelType;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;

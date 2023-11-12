@@ -1,5 +1,7 @@
-package me.colormaestro.taskmanager.data;
+package me.colormaestro.taskmanager.integrations;
 
+import me.colormaestro.taskmanager.data.DataAccessException;
+import me.colormaestro.taskmanager.data.MemberDAO;
 import me.colormaestro.taskmanager.listeners.DiscordMessageListener;
 import me.colormaestro.taskmanager.model.Task;
 import net.dv8tion.jda.api.EmbedBuilder;

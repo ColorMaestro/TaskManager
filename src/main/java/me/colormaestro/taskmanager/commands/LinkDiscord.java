@@ -1,6 +1,6 @@
 package me.colormaestro.taskmanager.commands;
 
-import me.colormaestro.taskmanager.data.DiscordManager;
+import me.colormaestro.taskmanager.integrations.DiscordManager;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;

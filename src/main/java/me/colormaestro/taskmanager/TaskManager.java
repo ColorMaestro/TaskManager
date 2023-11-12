@@ -16,7 +16,7 @@ import me.colormaestro.taskmanager.commands.TaskInfo;
 import me.colormaestro.taskmanager.commands.Tasks;
 import me.colormaestro.taskmanager.commands.TransferTask;
 import me.colormaestro.taskmanager.commands.VisitTask;
-import me.colormaestro.taskmanager.data.DiscordManager;
+import me.colormaestro.taskmanager.integrations.DiscordManager;
 import me.colormaestro.taskmanager.integrations.DecentHologramsIntegration;
 import me.colormaestro.taskmanager.integrations.DynmapIntegration;
 import me.colormaestro.taskmanager.integrations.DynmapOperator;
