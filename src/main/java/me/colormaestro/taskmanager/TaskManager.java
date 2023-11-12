@@ -16,7 +16,7 @@ import me.colormaestro.taskmanager.commands.TaskInfo;
 import me.colormaestro.taskmanager.commands.Tasks;
 import me.colormaestro.taskmanager.commands.TransferTask;
 import me.colormaestro.taskmanager.commands.VisitTask;
-import me.colormaestro.taskmanager.integrations.DiscordManager;
+import me.colormaestro.taskmanager.integrations.DiscordOperator;
 import me.colormaestro.taskmanager.integrations.DecentHologramsIntegration;
 import me.colormaestro.taskmanager.integrations.DynmapIntegration;
 import me.colormaestro.taskmanager.integrations.DynmapOperator;
@@ -64,12 +64,12 @@ public final class TaskManager extends JavaPlugin {
         initDatabaseAccessors();
         resolveIntegrationsOperators();
         performBindingsSetup();
-        DiscordManager.instantiate(config.getString("token"), memberDAO, this);
+        DiscordOperator.instantiate(config.getString("token"), memberDAO, this);
     }
 
     @Override
     public void onDisable() {
-        DiscordManager.getInstance().shutdown();
+        DiscordOperator.getInstance().shutdown();
     }
 
     private void loadConfig() {

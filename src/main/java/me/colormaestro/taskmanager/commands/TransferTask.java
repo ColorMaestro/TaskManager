@@ -1,7 +1,7 @@
 package me.colormaestro.taskmanager.commands;
 
 import me.colormaestro.taskmanager.data.DataAccessException;
-import me.colormaestro.taskmanager.integrations.DiscordManager;
+import me.colormaestro.taskmanager.integrations.DiscordOperator;
 import me.colormaestro.taskmanager.data.MemberDAO;
 import me.colormaestro.taskmanager.data.TaskDAO;
 import me.colormaestro.taskmanager.enums.TaskStatus;
@@ -85,12 +85,12 @@ public class TransferTask implements CommandExecutor {
 
                     // If the assignees are not online, sent them message to discord
                     if (!messageSentOldAssignee && oldAssignee.getDiscordID() != null) {
-                        DiscordManager.getInstance().taskTransferred(oldAssignee.getDiscordID(), p.getName(),
+                        DiscordOperator.getInstance().taskTransferred(oldAssignee.getDiscordID(), p.getName(),
                                 oldAssignee.getIgn(), args[1], task, true);
                     }
 
                     if (!messageSentNewAssignee && newAssignee.getDiscordID() != null) {
-                        DiscordManager.getInstance().taskTransferred(newAssignee.getDiscordID(), p.getName(),
+                        DiscordOperator.getInstance().taskTransferred(newAssignee.getDiscordID(), p.getName(),
                                 oldAssignee.getIgn(), args[1], task, false);
                     }
                 });

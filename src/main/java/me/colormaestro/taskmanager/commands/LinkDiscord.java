@@ -1,6 +1,6 @@
 package me.colormaestro.taskmanager.commands;
 
-import me.colormaestro.taskmanager.integrations.DiscordManager;
+import me.colormaestro.taskmanager.integrations.DiscordOperator;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -21,7 +21,7 @@ public class LinkDiscord implements CommandExecutor {
         }
 
         Player p = (Player) sender;
-        String code = DiscordManager.getInstance().generateCode(p.getUniqueId());
+        String code = DiscordOperator.getInstance().generateCode(p.getUniqueId());
         p.sendMessage(ChatColor.BLUE + "Direct message this to Task Manager bot on discord:" +
                 ChatColor.YELLOW + ChatColor.BOLD + " !code " + code);
         p.sendMessage(ChatColor.BLUE + "Be fast, code expires in 60 seconds!");

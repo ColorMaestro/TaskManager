@@ -1,7 +1,7 @@
 package me.colormaestro.taskmanager.commands;
 
 import me.colormaestro.taskmanager.data.DataAccessException;
-import me.colormaestro.taskmanager.integrations.DiscordManager;
+import me.colormaestro.taskmanager.integrations.DiscordOperator;
 import me.colormaestro.taskmanager.data.MemberDAO;
 import me.colormaestro.taskmanager.data.TaskDAO;
 import me.colormaestro.taskmanager.integrations.DecentHologramsIntegration;
@@ -69,7 +69,7 @@ public class ReturnTask implements CommandExecutor {
 
                     // If the assignee is not online, sent him message to discord
                     if (!messageSent && assignee.getDiscordID() != null) {
-                        DiscordManager.getInstance().taskReturned(assignee.getDiscordID(), p.getName(), task);
+                        DiscordOperator.getInstance().taskReturned(assignee.getDiscordID(), p.getName(), task);
                     }
                 });
             } catch (SQLException | DataAccessException | NumberFormatException ex) {

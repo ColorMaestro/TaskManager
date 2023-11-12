@@ -1,7 +1,7 @@
 package me.colormaestro.taskmanager.commands;
 
 import me.colormaestro.taskmanager.data.DataAccessException;
-import me.colormaestro.taskmanager.integrations.DiscordManager;
+import me.colormaestro.taskmanager.integrations.DiscordOperator;
 import me.colormaestro.taskmanager.data.MemberDAO;
 import me.colormaestro.taskmanager.data.TaskDAO;
 import me.colormaestro.taskmanager.integrations.DecentHologramsIntegration;
@@ -76,7 +76,7 @@ public class FinishTask implements CommandExecutor {
 
                     // If the assigner is not online, sent him message to discord
                     if (!messageSent && advisor.getDiscordID() != null) {
-                        DiscordManager.getInstance().taskFinished(advisor.getDiscordID(), p.getName(), task);
+                        DiscordOperator.getInstance().taskFinished(advisor.getDiscordID(), p.getName(), task);
                     }
                 });
             } catch (SQLException | DataAccessException | NumberFormatException ex) {

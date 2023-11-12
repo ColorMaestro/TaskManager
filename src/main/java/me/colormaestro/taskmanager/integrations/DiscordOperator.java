@@ -22,14 +22,14 @@ import java.util.Map;
 import java.util.Random;
 import java.util.UUID;
 
-public class DiscordManager {
+public class DiscordOperator {
     private final MemberDAO memberDAO;
-    private static DiscordManager instance;
+    private static DiscordOperator instance;
     private final JavaPlugin plugin;
     private final Map<String, UUID> codes;
     private JDA api = null;
 
-    private DiscordManager(String token, MemberDAO memberDAO, JavaPlugin plugin) {
+    private DiscordOperator(String token, MemberDAO memberDAO, JavaPlugin plugin) {
         try {
             api = JDABuilder.createDefault(token).addEventListeners(new DiscordMessageListener()).build();
             plugin.getLogger().info("Token provided, bot connection with Discord established");
@@ -43,11 +43,11 @@ public class DiscordManager {
 
     public static void instantiate(String token, MemberDAO memberDAO, JavaPlugin plugin) {
         if (instance == null) {
-            instance = new DiscordManager(token, memberDAO, plugin);
+            instance = new DiscordOperator(token, memberDAO, plugin);
         }
     }
 
-    public static DiscordManager getInstance() {
+    public static DiscordOperator getInstance() {
         return instance;
     }
 
