@@ -85,7 +85,7 @@ public class BookEditListener implements Listener {
      * @return Runnable (job) for execution
      */
     private Runnable createDoingTask(
-            Player p,
+            Player player,
             String ign,
             UUID uuid,
             String title,
@@ -101,11 +101,11 @@ public class BookEditListener implements Listener {
                 assignee = memberDAO.findMember(ign);
                 advisor = memberDAO.findMember(uuid);
             } catch (SQLException ex) {
-                Bukkit.getScheduler().runTask(plugin, () -> p.sendMessage(ChatColor.RED + ex.getMessage()));
+                Bukkit.getScheduler().runTask(plugin, () -> player.sendMessage(ChatColor.RED + ex.getMessage()));
                 ex.printStackTrace();
                 return;
             } catch (DataAccessException ignored) {
-                Bukkit.getScheduler().runTask(plugin, () -> p.sendMessage(ChatColor.GOLD + "Player " + ign +
+                Bukkit.getScheduler().runTask(plugin, () -> player.sendMessage(ChatColor.GOLD + "Player " + ign +
                         " is not registered as member. Use" + ChatColor.DARK_AQUA + " /addmember " + ign +
                         ChatColor.GOLD + " for adding player as member, then you can add tasks."));
                 return;
@@ -118,16 +118,16 @@ public class BookEditListener implements Listener {
                 int taskID = taskDAO.createTask(task);
                 List<Task> activeTasks = taskDAO.fetchPlayersActiveTasks(assignee.getId());
                 Bukkit.getScheduler().runTask(plugin, () -> {
-                    p.sendMessage(ChatColor.GREEN + "Task added.");
+                    player.sendMessage(ChatColor.GREEN + "Task added.");
+                    decentHolograms.setTasks(assignee.getUuid(), activeTasks);
+                    String markerLabel = "[" + taskID + "] " + title;
+                    dynmap.addTaskInProgressMarker(String.valueOf(taskID), markerLabel, player.getLocation());
 
                     // Firstly we try to notify the assignee in game
                     boolean messageSent = false;
-                    decentHolograms.setTasks(assignee.getUuid(), activeTasks);
-                    String markerLabel = "[" + taskID + "] " + title;
-                    dynmap.addTaskInProgressMarker(String.valueOf(taskID), markerLabel, p.getLocation());
                     for (Player target : Bukkit.getOnlinePlayers()) {
                         if (target.getUniqueId().toString().equals(assignee.getUuid())) {
-                            target.sendMessage(ChatColor.GOLD + "You have new task from " + p.getName());
+                            target.sendMessage(ChatColor.GOLD + "You have new task from " + player.getName());
                             messageSent = true;
                             break;
                         }
@@ -135,12 +135,12 @@ public class BookEditListener implements Listener {
 
                     // If the assignee is not online, sent him message to discord
                     if (!messageSent && assignee.getDiscordID() != null) {
-                        DiscordOperator.getInstance().taskCreated(assignee.getDiscordID(), p.getName(), task);
+                        DiscordOperator.getInstance().taskCreated(assignee.getDiscordID(), player.getName(), task);
                     }
                 });
             } catch (SQLException | IllegalArgumentException ex) {
                 Bukkit.getScheduler().runTask(plugin,
-                        () -> p.sendMessage(ChatColor.RED + ex.getMessage()));
+                        () -> player.sendMessage(ChatColor.RED + ex.getMessage()));
                 ex.printStackTrace();
             }
         };
@@ -152,7 +152,7 @@ public class BookEditListener implements Listener {
      * @return Runnable (job) for execution
      */
     private Runnable createPreparedTask(
-            Player p,
+            Player player,
             UUID uuid,
             String title,
             String description,
@@ -166,7 +166,7 @@ public class BookEditListener implements Listener {
             try {
                 creator = memberDAO.findMember(uuid);
             } catch (SQLException | DataAccessException ex) {
-                Bukkit.getScheduler().runTask(plugin, () -> p.sendMessage(ChatColor.RED + ex.getMessage()));
+                Bukkit.getScheduler().runTask(plugin, () -> player.sendMessage(ChatColor.RED + ex.getMessage()));
                 ex.printStackTrace();
                 return;
             }
@@ -175,10 +175,10 @@ public class BookEditListener implements Listener {
                     TaskStatus.PREPARED, new Date(System.currentTimeMillis()), null, null);
             try {
                 taskDAO.createTask(task);
-                Bukkit.getScheduler().runTask(plugin, () -> p.sendMessage(ChatColor.GREEN + "Task prepared."));
+                Bukkit.getScheduler().runTask(plugin, () -> player.sendMessage(ChatColor.GREEN + "Task prepared."));
             } catch (SQLException | IllegalArgumentException ex) {
                 Bukkit.getScheduler().runTask(plugin,
-                        () -> p.sendMessage(ChatColor.RED + ex.getMessage()));
+                        () -> player.sendMessage(ChatColor.RED + ex.getMessage()));
                 ex.printStackTrace();
             }
         };
