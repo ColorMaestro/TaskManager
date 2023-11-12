@@ -62,37 +62,31 @@ public class DiscordOperator {
     }
 
     public void taskFinished(long userID, String assignee, Task task) {
-        if (api != null) {
-            String message = String.format(":bellhop: %s finished task [%d] *%s*", assignee, task.getId(), task.getTitle());
-            sendMessage(userID, message);
-        }
+        String message = String.format(":bellhop: %s finished task [%d] *%s*", assignee, task.getId(), task.getTitle());
+        sendMessage(userID, message);
     }
 
     public void taskApproved(long userID, String assigner, Task task) {
-        if (api != null) {
-            String message = String.format(":white_check_mark: %s approved your task [%d] *%s*", assigner, task.getId(), task.getTitle());
-            sendMessage(userID, message);
-        }
+        String message = String.format(":white_check_mark: %s approved your task [%d] *%s*", assigner, task.getId(), task.getTitle());
+        sendMessage(userID, message);
     }
 
     public void taskReturned(long userID, String assigner, Task task) {
-        if (api != null) {
-            String message = String.format(":leftwards_arrow_with_hook: %s has returned your task [%d] *%s*", assigner, task.getId(), task.getTitle());
-            sendMessage(userID, message);
-        }
+        String message = String.format(":leftwards_arrow_with_hook: %s has returned your task [%d] *%s*", assigner, task.getId(), task.getTitle());
+        sendMessage(userID, message);
     }
 
     public void taskTransferred(long userID, String advisor, String oldAssignee, String newAssignee, Task task, boolean taken) {
-        if (api != null) {
-            String messageGiven = String.format(":inbox_tray: %s has transferred task [%d] *%s* from %s to you.", advisor, task.getId(), task.getTitle(), oldAssignee);
-            String messageTaken = String.format(":outbox_tray: %s has transferred your task [%d] *%s* to %s.", advisor, task.getId(), task.getTitle(), newAssignee);
-            sendMessage(userID, taken ? messageTaken : messageGiven);
-        }
+        String messageGiven = String.format(":inbox_tray: %s has transferred task [%d] *%s* from %s to you.", advisor, task.getId(), task.getTitle(), oldAssignee);
+        String messageTaken = String.format(":outbox_tray: %s has transferred your task [%d] *%s* to %s.", advisor, task.getId(), task.getTitle(), newAssignee);
+        sendMessage(userID, taken ? messageTaken : messageGiven);
     }
 
     private void sendMessage(long userID, String message) {
-        api.retrieveUserById(userID).flatMap(x -> x.openPrivateChannel()
-                .flatMap(channel -> channel.sendMessage(message))).queue();
+        if (api != null) {
+            api.retrieveUserById(userID).flatMap(x -> x.openPrivateChannel()
+                    .flatMap(channel -> channel.sendMessage(message))).queue();
+        }
     }
 
     /**
@@ -105,6 +99,7 @@ public class DiscordOperator {
 
     /**
      * Generates authentication code for given UUID and stores it internally for short time.
+     *
      * @param uuid of the player to authenticate
      * @return generated code
      */
@@ -128,14 +123,16 @@ public class DiscordOperator {
         Bukkit.getScheduler().runTaskLater(plugin, () -> {
             synchronized (codes) {
                 codes.remove(code);
-            }}, 1200);
+            }
+        }, 1200);
         return code;
     }
 
     /**
      * Verifies, whether given code is present for user authentication. In case it is, the code is removed and
      * discord ID in the record with corresponding UUID is updated in database.
-     * @param code code to verify
+     *
+     * @param code      code to verify
      * @param discordID discord user ID from received message
      * @return true, if code was present for user authentication, false otherwise
      */
