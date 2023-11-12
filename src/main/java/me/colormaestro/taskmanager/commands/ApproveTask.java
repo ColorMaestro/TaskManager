@@ -1,10 +1,10 @@
 package me.colormaestro.taskmanager.commands;
 
 import me.colormaestro.taskmanager.data.DataAccessException;
-import me.colormaestro.taskmanager.integrations.DiscordOperator;
 import me.colormaestro.taskmanager.data.MemberDAO;
 import me.colormaestro.taskmanager.data.TaskDAO;
 import me.colormaestro.taskmanager.integrations.DecentHologramsIntegration;
+import me.colormaestro.taskmanager.integrations.DiscordOperator;
 import me.colormaestro.taskmanager.integrations.DynmapIntegration;
 import me.colormaestro.taskmanager.model.Member;
 import me.colormaestro.taskmanager.model.Task;
@@ -35,7 +35,7 @@ public class ApproveTask implements CommandExecutor {
 
     @Override
     public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
-        if (!(sender instanceof Player)) {
+        if (!(sender instanceof Player player)) {
             sender.sendMessage(ChatColor.RED + "This command can't be run from console.");
             return true;
         }
@@ -46,26 +46,24 @@ public class ApproveTask implements CommandExecutor {
         }
 
         Plugin plugin = Bukkit.getPluginManager().getPlugin("TaskManager");
-        Player p = (Player) sender;
-        String sid = args[0];
         boolean force = args.length == 2 && args[1].equals("force");
         Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
             try {
-                int id = Integer.parseInt(sid);
-                taskDAO.approveTask(id, force);
-                Task task = taskDAO.findTask(id);
+                int taskId = Integer.parseInt(args[0]);
+                taskDAO.approveTask(taskId, force);
+                Task task = taskDAO.findTask(taskId);
                 List<Task> activeTasks = taskDAO.fetchPlayersActiveTasks(task.getAssigneeID());
                 Member assignee = memberDAO.findMember(task.getAssigneeID());
                 Bukkit.getScheduler().runTask(plugin, () -> {
-                    p.sendMessage(ChatColor.GREEN + "Task approved.");
+                    player.sendMessage(ChatColor.GREEN + "Task approved.");
                     decentHolograms.setTasks(assignee.getUuid(), activeTasks);
-                    dynmap.removeTaskMarker(String.valueOf(id));
+                    dynmap.removeTaskMarker(String.valueOf(taskId));
 
                     // Firstly we try to notify the assignee in game
                     boolean messageSent = false;
                     for (Player target : Bukkit.getOnlinePlayers()) {
                         if (target.getUniqueId().toString().equals(assignee.getUuid())) {
-                            target.sendMessage(ChatColor.GREEN + p.getName() + " has accepted your task. Great Job!");
+                            target.sendMessage(ChatColor.GREEN + player.getName() + " has accepted your task. Great Job!");
                             target.playSound(target.getLocation(),
                                     "minecraft:record.taskaccepted", 10, 1);
                             messageSent = true;
@@ -75,12 +73,12 @@ public class ApproveTask implements CommandExecutor {
 
                     // If the assignee is not online, sent him message to discord
                     if (!messageSent && assignee.getDiscordID() != null) {
-                        DiscordOperator.getInstance().taskApproved(assignee.getDiscordID(), p.getName(), task);
+                        DiscordOperator.getInstance().taskApproved(assignee.getDiscordID(), player.getName(), task);
                     }
                 });
             } catch (SQLException | DataAccessException | NumberFormatException ex) {
                 Bukkit.getScheduler().runTask(plugin,
-                        () -> p.sendMessage(ChatColor.RED + ex.getMessage()));
+                        () -> player.sendMessage(ChatColor.RED + ex.getMessage()));
                 ex.printStackTrace();
             }
         });

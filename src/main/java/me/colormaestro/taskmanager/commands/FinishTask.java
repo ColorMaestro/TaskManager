@@ -36,7 +36,7 @@ public class FinishTask implements CommandExecutor {
 
     @Override
     public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
-        if (!(sender instanceof Player)) {
+        if (!(sender instanceof Player player)) {
             sender.sendMessage(ChatColor.RED + "This command can't be run from console.");
             return true;
         }
@@ -47,26 +47,25 @@ public class FinishTask implements CommandExecutor {
         }
 
         Plugin plugin = Bukkit.getPluginManager().getPlugin("TaskManager");
-        Player p = (Player) sender;
-        UUID uuid = p.getUniqueId();
+        UUID uuid = player.getUniqueId();
         Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
             try {
                 Member assignee = memberDAO.findMember(uuid);
-                int id = Integer.parseInt(args[0]);
-                taskDAO.finishTask(id, assignee.getId());
+                int taskId = Integer.parseInt(args[0]);
+                taskDAO.finishTask(taskId, assignee.getId());
                 List<Task> activeTasks = taskDAO.fetchPlayersActiveTasks(assignee.getId());
-                Task task = taskDAO.findTask(id);
+                Task task = taskDAO.findTask(taskId);
                 Member advisor = memberDAO.findMember(task.getAdvisorID());
                 Bukkit.getScheduler().runTask(plugin, () -> {
-                    p.sendMessage(ChatColor.GREEN + "Task finished.");
+                    player.sendMessage(ChatColor.GREEN + "Task finished.");
                     decentHolograms.setTasks(assignee.getUuid(), activeTasks);
-                    dynmap.updateTaskFinishedMarkerIcon(String.valueOf(id));
+                    dynmap.updateTaskFinishedMarkerIcon(String.valueOf(taskId));
 
                     // Firstly we try to notify the assigner in game
                     boolean messageSent = false;
                     for (Player target : Bukkit.getOnlinePlayers()) {
                         if (target.getUniqueId().toString().equals(advisor.getUuid())) {
-                            target.sendMessage(ChatColor.GREEN + p.getName() + " finished task " + id);
+                            target.sendMessage(ChatColor.GREEN + player.getName() + " finished task " + taskId);
                             target.playSound(target.getLocation(),
                                     "minecraft:record.taskfinished", 10, 1);
                             messageSent = true;
@@ -76,12 +75,12 @@ public class FinishTask implements CommandExecutor {
 
                     // If the assigner is not online, sent him message to discord
                     if (!messageSent && advisor.getDiscordID() != null) {
-                        DiscordOperator.getInstance().taskFinished(advisor.getDiscordID(), p.getName(), task);
+                        DiscordOperator.getInstance().taskFinished(advisor.getDiscordID(), player.getName(), task);
                     }
                 });
             } catch (SQLException | DataAccessException | NumberFormatException ex) {
                 Bukkit.getScheduler().runTask(plugin,
-                        () -> p.sendMessage(ChatColor.RED + ex.getMessage()));
+                        () -> player.sendMessage(ChatColor.RED + ex.getMessage()));
                 ex.printStackTrace();
             }
         });

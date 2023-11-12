@@ -33,7 +33,7 @@ public class TransferTask implements CommandExecutor {
 
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
-        if (!(sender instanceof Player)) {
+        if (!(sender instanceof Player player)) {
             sender.sendMessage(ChatColor.RED + "This command can't be run from console.");
             return true;
         }
@@ -44,14 +44,13 @@ public class TransferTask implements CommandExecutor {
         }
 
         Plugin plugin = Bukkit.getPluginManager().getPlugin("TaskManager");
-        Player p = (Player) sender;
         Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
             try {
                 int id = Integer.parseInt(args[0]);
                 Task task = taskDAO.findTask(id);
                 if (task.getStatus() == TaskStatus.PREPARED) {
                     Bukkit.getScheduler().runTask(plugin, () -> {
-                        p.sendMessage(ChatColor.RED + "The task is in prepared state thus transfering is not possible");
+                        player.sendMessage(ChatColor.RED + "The task is in prepared state thus transfering is not possible");
                     });
                     return;
                 }
@@ -62,7 +61,7 @@ public class TransferTask implements CommandExecutor {
                 List<Task> activeTasksOldAssignee = taskDAO.fetchPlayersActiveTasks(oldAssigneeID);
                 List<Task> activeTasksNewAssignee = taskDAO.fetchPlayersActiveTasks(newAssignee.getId());
                 Bukkit.getScheduler().runTask(plugin, () -> {
-                    p.sendMessage(ChatColor.GREEN + "Task transferred.");
+                    player.sendMessage(ChatColor.GREEN + "Task transferred.");
                     decentHolograms.setTasks(oldAssignee.getUuid(), activeTasksOldAssignee);
                     decentHolograms.setTasks(newAssignee.getUuid(), activeTasksNewAssignee);
 
@@ -71,13 +70,13 @@ public class TransferTask implements CommandExecutor {
                     boolean messageSentNewAssignee = false;
                     for (Player target : Bukkit.getOnlinePlayers()) {
                         if (target.getUniqueId().toString().equals(oldAssignee.getUuid())) {
-                            target.sendMessage(ChatColor.GOLD + p.getName() +
+                            target.sendMessage(ChatColor.GOLD + player.getName() +
                                     " has transferred task " + id + " to " + args[1] + ".");
                             messageSentOldAssignee = true;
                         }
 
                         if (target.getUniqueId().toString().equals(newAssignee.getUuid())) {
-                            target.sendMessage(ChatColor.GOLD + p.getName() +
+                            target.sendMessage(ChatColor.GOLD + player.getName() +
                                     " has transferred task " + id + " to you.");
                             messageSentNewAssignee = true;
                         }
@@ -85,25 +84,25 @@ public class TransferTask implements CommandExecutor {
 
                     // If the assignees are not online, sent them message to discord
                     if (!messageSentOldAssignee && oldAssignee.getDiscordID() != null) {
-                        DiscordOperator.getInstance().taskTransferred(oldAssignee.getDiscordID(), p.getName(),
+                        DiscordOperator.getInstance().taskTransferred(oldAssignee.getDiscordID(), player.getName(),
                                 oldAssignee.getIgn(), args[1], task, true);
                     }
 
                     if (!messageSentNewAssignee && newAssignee.getDiscordID() != null) {
-                        DiscordOperator.getInstance().taskTransferred(newAssignee.getDiscordID(), p.getName(),
+                        DiscordOperator.getInstance().taskTransferred(newAssignee.getDiscordID(), player.getName(),
                                 oldAssignee.getIgn(), args[1], task, false);
                     }
                 });
             } catch (SQLException ex) {
                 Bukkit.getScheduler().runTask(plugin,
-                        () -> p.sendMessage(ChatColor.RED + ex.getMessage()));
+                        () -> player.sendMessage(ChatColor.RED + ex.getMessage()));
                 ex.printStackTrace();
             } catch (NumberFormatException ignored) {
                 Bukkit.getScheduler().runTask(plugin,
-                        () -> p.sendMessage(ChatColor.RED + "Tasks are marked with numerical values!"));
+                        () -> player.sendMessage(ChatColor.RED + "Tasks are marked with numerical values!"));
             } catch (DataAccessException ignored) {
                 Bukkit.getScheduler().runTask(plugin,
-                        () -> p.sendMessage(ChatColor.RED + "Invalid task ID or new assignee!"));
+                        () -> player.sendMessage(ChatColor.RED + "Invalid task ID or new assignee!"));
             }
         });
         return true;

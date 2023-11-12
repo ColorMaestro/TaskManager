@@ -32,7 +32,7 @@ public class ReturnTask implements CommandExecutor {
 
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
-        if (!(sender instanceof Player)) {
+        if (!(sender instanceof Player player)) {
             sender.sendMessage(ChatColor.RED + "This command can't be run from console.");
             return true;
         }
@@ -43,25 +43,23 @@ public class ReturnTask implements CommandExecutor {
         }
 
         Plugin plugin = Bukkit.getPluginManager().getPlugin("TaskManager");
-        Player p = (Player) sender;
-        String sid = args[0];
         boolean force = args.length == 2 && args[1].equals("force");
         Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
             try {
-                int id = Integer.parseInt(sid);
-                taskDAO.returnTask(id, force);
-                Task task = taskDAO.findTask(id);
+                int taskId = Integer.parseInt(args[0]);
+                taskDAO.returnTask(taskId, force);
+                Task task = taskDAO.findTask(taskId);
                 List<Task> activeTasks = taskDAO.fetchPlayersActiveTasks(task.getAssigneeID());
                 Member assignee = memberDAO.findMember(task.getAssigneeID());
                 Bukkit.getScheduler().runTask(plugin, () -> {
-                    p.sendMessage(ChatColor.GREEN + "Task returned.");
+                    player.sendMessage(ChatColor.GREEN + "Task returned.");
                     decentHolograms.setTasks(assignee.getUuid(), activeTasks);
 
                     // Firstly we try to notify the assignee in game
                     boolean messageSent = false;
                     for (Player target : Bukkit.getOnlinePlayers()) {
                         if (target.getUniqueId().toString().equals(assignee.getUuid())) {
-                            target.sendMessage(ChatColor.GOLD + p.getName() + " has returned your task.");
+                            target.sendMessage(ChatColor.GOLD + player.getName() + " has returned your task.");
                             messageSent = true;
                             break;
                         }
@@ -69,12 +67,12 @@ public class ReturnTask implements CommandExecutor {
 
                     // If the assignee is not online, sent him message to discord
                     if (!messageSent && assignee.getDiscordID() != null) {
-                        DiscordOperator.getInstance().taskReturned(assignee.getDiscordID(), p.getName(), task);
+                        DiscordOperator.getInstance().taskReturned(assignee.getDiscordID(), player.getName(), task);
                     }
                 });
             } catch (SQLException | DataAccessException | NumberFormatException ex) {
                 Bukkit.getScheduler().runTask(plugin,
-                        () -> p.sendMessage(ChatColor.RED + ex.getMessage()));
+                        () -> player.sendMessage(ChatColor.RED + ex.getMessage()));
                 ex.printStackTrace();
             }
         });

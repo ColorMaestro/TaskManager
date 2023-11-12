@@ -27,7 +27,7 @@ public class SetTaskPlace implements CommandExecutor {
 
     @Override
     public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
-        if (!(sender instanceof Player)) {
+        if (!(sender instanceof Player player)) {
             sender.sendMessage(ChatColor.RED + "This command can't be run from console.");
             return true;
         }
@@ -38,20 +38,18 @@ public class SetTaskPlace implements CommandExecutor {
         }
 
         Plugin plugin = Bukkit.getPluginManager().getPlugin("TaskManager");
-        Player p = (Player) sender;
-        UUID uuid = p.getUniqueId();
-        String sid = args[0];
-        Location location = p.getLocation();
+        UUID uuid = player.getUniqueId();
+        Location location = player.getLocation();
         Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
             try {
                 Member assignee = memberDAO.findMember(uuid);
-                int id = Integer.parseInt(sid);
-                taskDAO.updateTaskCords(id, assignee.getId(), location);
+                int taskId = Integer.parseInt(args[0]);
+                taskDAO.updateTaskCords(taskId, assignee.getId(), location);
                 Bukkit.getScheduler().runTask(plugin,
-                        () -> p.sendMessage(ChatColor.GREEN + "Cords updated."));
+                        () -> player.sendMessage(ChatColor.GREEN + "Cords updated."));
             } catch (SQLException | DataAccessException | NumberFormatException ex) {
                 Bukkit.getScheduler().runTask(plugin,
-                        () -> p.sendMessage(ChatColor.RED + ex.getMessage()));
+                        () -> player.sendMessage(ChatColor.RED + ex.getMessage()));
                 ex.printStackTrace();
             }
         });

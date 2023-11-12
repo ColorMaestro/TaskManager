@@ -70,10 +70,10 @@ public class AssignTask implements CommandExecutor {
                 List<Task> activeTasks = taskDAO.fetchPlayersActiveTasks(assignee.getId());
                 Bukkit.getScheduler().runTask(plugin, () -> {
                     player.sendMessage(ChatColor.GREEN + "Task assigned.");
+                    decentHolograms.setTasks(assignee.getUuid(), activeTasks);
 
                     // Firstly we try to notify the assignee in game
                     boolean messageSent = false;
-                    decentHolograms.setTasks(assignee.getUuid(), activeTasks);
                     for (Player target : Bukkit.getOnlinePlayers()) {
                         if (target.getUniqueId().toString().equals(assignee.getUuid())) {
                             target.sendMessage(ChatColor.GOLD + "You have new task from " + player.getName());
