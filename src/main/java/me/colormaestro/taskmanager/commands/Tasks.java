@@ -36,7 +36,6 @@ public class Tasks implements CommandExecutor {
 
     private final String[][] commandsAndDescriptions = {
             {"/tasks help", "shows this help"},
-            {"/addmember <IGN>", "adds player as member"},
             {"/dashboard", "shows tasks dashboard"},
             {"/dashboard <IGN>", "jumps directly in dashboard to selected member tasks"},
             {"/tasks given", "shows tasks, which you are advising"},
@@ -47,6 +46,7 @@ public class Tasks implements CommandExecutor {
             {"/visittask <id>", "teleports to the task workplace"},
             {"/taskinfo <id>", "obtains info in book for related task"},
             {"/needtasks", "shows members who have less than 2 tasks in progress"},
+            {"/addmember <IGN>", "adds player as member"},
             {"/addtask <IGN>", "creates task assignment book with blank description"},
             {"/addtask <IGN> [id]", "creates task assignment book, description is taken from selected task"},
             {"/preparetask", "creates task book for creating of prepared task"},
