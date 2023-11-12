@@ -7,6 +7,7 @@ import me.colormaestro.taskmanager.data.TaskDAO;
 import me.colormaestro.taskmanager.integrations.DecentHologramsIntegration;
 import me.colormaestro.taskmanager.model.Member;
 import me.colormaestro.taskmanager.model.Task;
+import me.colormaestro.taskmanager.utils.MessageSender;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
@@ -55,17 +56,11 @@ public class ReturnTask implements CommandExecutor {
                     player.sendMessage(ChatColor.GREEN + "Task returned.");
                     decentHolograms.setTasks(assignee.getUuid(), activeTasks);
 
-                    // Firstly we try to notify the assignee in game
-                    boolean messageSent = false;
-                    for (Player target : Bukkit.getOnlinePlayers()) {
-                        if (target.getUniqueId().toString().equals(assignee.getUuid())) {
-                            target.sendMessage(ChatColor.GOLD + player.getName() + " has returned your task.");
-                            messageSent = true;
-                            break;
-                        }
-                    }
+                    boolean messageSent = MessageSender.sendMessageIfOnline(
+                            assignee.getUuid(),
+                            ChatColor.GOLD + player.getName() + " has returned your task."
+                    );
 
-                    // If the assignee is not online, sent him message to discord
                     if (!messageSent && assignee.getDiscordID() != null) {
                         DiscordOperator.getInstance().taskReturned(assignee.getDiscordID(), player.getName(), task);
                     }

@@ -1,13 +1,14 @@
 package me.colormaestro.taskmanager.commands;
 
 import me.colormaestro.taskmanager.data.DataAccessException;
-import me.colormaestro.taskmanager.integrations.DiscordOperator;
 import me.colormaestro.taskmanager.data.MemberDAO;
 import me.colormaestro.taskmanager.data.TaskDAO;
 import me.colormaestro.taskmanager.enums.TaskStatus;
 import me.colormaestro.taskmanager.integrations.DecentHologramsIntegration;
+import me.colormaestro.taskmanager.integrations.DiscordOperator;
 import me.colormaestro.taskmanager.model.Member;
 import me.colormaestro.taskmanager.model.Task;
+import me.colormaestro.taskmanager.utils.MessageSender;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
@@ -46,18 +47,17 @@ public class TransferTask implements CommandExecutor {
         Plugin plugin = Bukkit.getPluginManager().getPlugin("TaskManager");
         Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
             try {
-                int id = Integer.parseInt(args[0]);
-                Task task = taskDAO.findTask(id);
+                int taskId = Integer.parseInt(args[0]);
+                Task task = taskDAO.findTask(taskId);
                 if (task.getStatus() == TaskStatus.PREPARED) {
-                    Bukkit.getScheduler().runTask(plugin, () -> {
-                        player.sendMessage(ChatColor.RED + "The task is in prepared state thus transfering is not possible");
-                    });
+                    Bukkit.getScheduler().runTask(plugin, () ->
+                            player.sendMessage(ChatColor.RED + "The task is in prepared state thus transfering is not possible"));
                     return;
                 }
                 int oldAssigneeID = task.getAssigneeID();
                 Member oldAssignee = memberDAO.findMember(oldAssigneeID);
                 Member newAssignee = memberDAO.findMember(args[1]);
-                taskDAO.updateTaskAssignee(id, newAssignee.getId());
+                taskDAO.updateTaskAssignee(taskId, newAssignee.getId());
                 List<Task> activeTasksOldAssignee = taskDAO.fetchPlayersActiveTasks(oldAssigneeID);
                 List<Task> activeTasksNewAssignee = taskDAO.fetchPlayersActiveTasks(newAssignee.getId());
                 Bukkit.getScheduler().runTask(plugin, () -> {
@@ -65,22 +65,15 @@ public class TransferTask implements CommandExecutor {
                     decentHolograms.setTasks(oldAssignee.getUuid(), activeTasksOldAssignee);
                     decentHolograms.setTasks(newAssignee.getUuid(), activeTasksNewAssignee);
 
-                    // Firstly we try to notify the assignees in game
-                    boolean messageSentOldAssignee = false;
-                    boolean messageSentNewAssignee = false;
-                    for (Player target : Bukkit.getOnlinePlayers()) {
-                        if (target.getUniqueId().toString().equals(oldAssignee.getUuid())) {
-                            target.sendMessage(ChatColor.GOLD + player.getName() +
-                                    " has transferred task " + id + " to " + args[1] + ".");
-                            messageSentOldAssignee = true;
-                        }
+                    boolean messageSentOldAssignee = MessageSender.sendMessageIfOnline(
+                            oldAssignee.getUuid(),
+                            ChatColor.GOLD + player.getName() + " has transferred task " + taskId + " to " + args[1] + "."
+                    );
 
-                        if (target.getUniqueId().toString().equals(newAssignee.getUuid())) {
-                            target.sendMessage(ChatColor.GOLD + player.getName() +
-                                    " has transferred task " + id + " to you.");
-                            messageSentNewAssignee = true;
-                        }
-                    }
+                    boolean messageSentNewAssignee = MessageSender.sendMessageIfOnline(
+                            newAssignee.getUuid(),
+                            ChatColor.GOLD + player.getName() + " has transferred task " + taskId + " to you."
+                    );
 
                     // If the assignees are not online, sent them message to discord
                     if (!messageSentOldAssignee && oldAssignee.getDiscordID() != null) {

@@ -8,6 +8,7 @@ import me.colormaestro.taskmanager.integrations.DecentHologramsIntegration;
 import me.colormaestro.taskmanager.integrations.DynmapIntegration;
 import me.colormaestro.taskmanager.model.Member;
 import me.colormaestro.taskmanager.model.Task;
+import me.colormaestro.taskmanager.utils.MessageSender;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
@@ -61,17 +62,11 @@ public class FinishTask implements CommandExecutor {
                     decentHolograms.setTasks(assignee.getUuid(), activeTasks);
                     dynmap.updateTaskFinishedMarkerIcon(String.valueOf(taskId));
 
-                    // Firstly we try to notify the assigner in game
-                    boolean messageSent = false;
-                    for (Player target : Bukkit.getOnlinePlayers()) {
-                        if (target.getUniqueId().toString().equals(advisor.getUuid())) {
-                            target.sendMessage(ChatColor.GREEN + player.getName() + " finished task " + taskId);
-                            messageSent = true;
-                            break;
-                        }
-                    }
+                    boolean messageSent = MessageSender.sendMessageIfOnline(
+                            advisor.getUuid(),
+                            ChatColor.GREEN + player.getName() + " finished task " + taskId
+                    );
 
-                    // If the assigner is not online, sent him message to discord
                     if (!messageSent && advisor.getDiscordID() != null) {
                         DiscordOperator.getInstance().taskFinished(advisor.getDiscordID(), player.getName(), task);
                     }

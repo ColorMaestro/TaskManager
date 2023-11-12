@@ -1,12 +1,13 @@
 package me.colormaestro.taskmanager.commands;
 
 import me.colormaestro.taskmanager.data.DataAccessException;
-import me.colormaestro.taskmanager.integrations.DiscordOperator;
 import me.colormaestro.taskmanager.data.MemberDAO;
 import me.colormaestro.taskmanager.data.TaskDAO;
 import me.colormaestro.taskmanager.integrations.DecentHologramsIntegration;
+import me.colormaestro.taskmanager.integrations.DiscordOperator;
 import me.colormaestro.taskmanager.model.Member;
 import me.colormaestro.taskmanager.model.Task;
+import me.colormaestro.taskmanager.utils.MessageSender;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
@@ -72,17 +73,11 @@ public class AssignTask implements CommandExecutor {
                     player.sendMessage(ChatColor.GREEN + "Task assigned.");
                     decentHolograms.setTasks(assignee.getUuid(), activeTasks);
 
-                    // Firstly we try to notify the assignee in game
-                    boolean messageSent = false;
-                    for (Player target : Bukkit.getOnlinePlayers()) {
-                        if (target.getUniqueId().toString().equals(assignee.getUuid())) {
-                            target.sendMessage(ChatColor.GOLD + "You have new task from " + player.getName());
-                            messageSent = true;
-                            break;
-                        }
-                    }
+                    boolean messageSent = MessageSender.sendMessageIfOnline(
+                            assignee.getUuid(),
+                            ChatColor.GOLD + "You have new task from " + player.getName()
+                    );
 
-                    // If the assignee is not online, sent him message to discord
                     if (!messageSent && assignee.getDiscordID() != null) {
                         DiscordOperator.getInstance().taskCreated(assignee.getDiscordID(), player.getName(), task);
                     }

@@ -11,6 +11,7 @@ import me.colormaestro.taskmanager.model.Member;
 import me.colormaestro.taskmanager.model.Task;
 import me.colormaestro.taskmanager.utils.DataContainerKeys;
 import me.colormaestro.taskmanager.utils.Directives;
+import me.colormaestro.taskmanager.utils.MessageSender;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.NamespacedKey;
@@ -123,17 +124,11 @@ public class BookEditListener implements Listener {
                     String markerLabel = "[" + taskID + "] " + title;
                     dynmap.addTaskInProgressMarker(String.valueOf(taskID), markerLabel, player.getLocation());
 
-                    // Firstly we try to notify the assignee in game
-                    boolean messageSent = false;
-                    for (Player target : Bukkit.getOnlinePlayers()) {
-                        if (target.getUniqueId().toString().equals(assignee.getUuid())) {
-                            target.sendMessage(ChatColor.GOLD + "You have new task from " + player.getName());
-                            messageSent = true;
-                            break;
-                        }
-                    }
+                    boolean messageSent = MessageSender.sendMessageIfOnline(
+                            assignee.getUuid(),
+                            ChatColor.GOLD + "You have new task from " + player.getName()
+                    );
 
-                    // If the assignee is not online, sent him message to discord
                     if (!messageSent && assignee.getDiscordID() != null) {
                         DiscordOperator.getInstance().taskCreated(assignee.getDiscordID(), player.getName(), task);
                     }

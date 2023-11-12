@@ -8,6 +8,7 @@ import me.colormaestro.taskmanager.integrations.DiscordOperator;
 import me.colormaestro.taskmanager.integrations.DynmapIntegration;
 import me.colormaestro.taskmanager.model.Member;
 import me.colormaestro.taskmanager.model.Task;
+import me.colormaestro.taskmanager.utils.MessageSender;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
@@ -59,17 +60,11 @@ public class ApproveTask implements CommandExecutor {
                     decentHolograms.setTasks(assignee.getUuid(), activeTasks);
                     dynmap.removeTaskMarker(String.valueOf(taskId));
 
-                    // Firstly we try to notify the assignee in game
-                    boolean messageSent = false;
-                    for (Player target : Bukkit.getOnlinePlayers()) {
-                        if (target.getUniqueId().toString().equals(assignee.getUuid())) {
-                            target.sendMessage(ChatColor.GREEN + player.getName() + " has accepted your task. Great Job!");
-                            messageSent = true;
-                            break;
-                        }
-                    }
+                    boolean messageSent = MessageSender.sendMessageIfOnline(
+                            assignee.getUuid(),
+                            ChatColor.GREEN + player.getName() + " has accepted your task. Great Job!"
+                    );
 
-                    // If the assignee is not online, sent him message to discord
                     if (!messageSent && assignee.getDiscordID() != null) {
                         DiscordOperator.getInstance().taskApproved(assignee.getDiscordID(), player.getName(), task);
                     }
