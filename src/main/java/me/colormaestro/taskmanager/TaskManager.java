@@ -8,6 +8,7 @@ import me.colormaestro.taskmanager.commands.Dashboard;
 import me.colormaestro.taskmanager.commands.Establish;
 import me.colormaestro.taskmanager.commands.FinishTask;
 import me.colormaestro.taskmanager.commands.LinkDiscord;
+import me.colormaestro.taskmanager.commands.NeedTasks;
 import me.colormaestro.taskmanager.commands.PrepareTask;
 import me.colormaestro.taskmanager.commands.ReturnTask;
 import me.colormaestro.taskmanager.commands.SetTaskPlace;
@@ -15,29 +16,36 @@ import me.colormaestro.taskmanager.commands.TaskInfo;
 import me.colormaestro.taskmanager.commands.Tasks;
 import me.colormaestro.taskmanager.commands.TransferTask;
 import me.colormaestro.taskmanager.commands.VisitTask;
-import me.colormaestro.taskmanager.data.DiscordManager;
-import me.colormaestro.taskmanager.data.HologramLayer;
+import me.colormaestro.taskmanager.integrations.DiscordOperator;
+import me.colormaestro.taskmanager.integrations.DecentHologramsIntegration;
+import me.colormaestro.taskmanager.integrations.DynmapIntegration;
+import me.colormaestro.taskmanager.integrations.DynmapOperator;
+import me.colormaestro.taskmanager.integrations.EmptyOperator;
+import me.colormaestro.taskmanager.integrations.DecentHologramsOperator;
 import me.colormaestro.taskmanager.data.MemberDAO;
 import me.colormaestro.taskmanager.data.TaskDAO;
-import me.colormaestro.taskmanager.listeners.ActiveTasksViewListener;
-import me.colormaestro.taskmanager.listeners.ApprovedTasksViewListener;
+import me.colormaestro.taskmanager.listeners.inventory.ActiveTasksViewListener;
+import me.colormaestro.taskmanager.listeners.inventory.ApprovedTasksViewListener;
 import me.colormaestro.taskmanager.listeners.BookEditListener;
-import me.colormaestro.taskmanager.listeners.DashboardViewListener;
-import me.colormaestro.taskmanager.listeners.IdleTaskViewListener;
+import me.colormaestro.taskmanager.listeners.inventory.DashboardViewListener;
+import me.colormaestro.taskmanager.listeners.inventory.IdleTaskViewListener;
 import me.colormaestro.taskmanager.listeners.PlayerJoinListener;
-import me.colormaestro.taskmanager.listeners.PreparedTasksViewListener;
-import me.colormaestro.taskmanager.listeners.SupervisedTasksViewListener;
+import me.colormaestro.taskmanager.listeners.inventory.NeedTasksViewListener;
+import me.colormaestro.taskmanager.listeners.inventory.PreparedTasksViewListener;
+import me.colormaestro.taskmanager.listeners.inventory.SupervisedTasksViewListener;
 import me.colormaestro.taskmanager.tabcompleters.MembersTabCompleter;
 import me.colormaestro.taskmanager.tabcompleters.ReloadableTabCompleter;
 import me.colormaestro.taskmanager.tabcompleters.TasksTabCompleter;
 import me.colormaestro.taskmanager.utils.RunnablesCreator;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandExecutor;
+import org.bukkit.command.TabCompleter;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.dynmap.DynmapAPI;
 
 import java.io.File;
 import java.io.IOException;
@@ -47,56 +55,21 @@ public final class TaskManager extends JavaPlugin {
     private FileConfiguration config;
     private TaskDAO taskDAO;
     private MemberDAO memberDAO;
+    private DecentHologramsIntegration decentHolograms;
+    private DynmapIntegration dynmap;
 
     @Override
     public void onEnable() {
         loadConfig();
-        createDAOs();
-        RunnablesCreator creator = new RunnablesCreator(this, taskDAO, memberDAO);
-
-        ReloadableTabCompleter tasksTabCompleter = new TasksTabCompleter(memberDAO);
-        ReloadableTabCompleter membersTabCompleter = new MembersTabCompleter(memberDAO);
-        Objects.requireNonNull(this.getCommand("tasks")).setTabCompleter(tasksTabCompleter);
-        Objects.requireNonNull(this.getCommand("addtask")).setTabCompleter(membersTabCompleter);
-        Objects.requireNonNull(this.getCommand("dashboard")).setTabCompleter(membersTabCompleter);
-
-        registerEventListener(new PlayerJoinListener(this, taskDAO, memberDAO, tasksTabCompleter, membersTabCompleter));
-        registerEventListener(new BookEditListener(this, taskDAO, memberDAO));
-        registerEventListener(new DashboardViewListener(creator));
-        registerEventListener(new SupervisedTasksViewListener(creator));
-        registerEventListener(new ActiveTasksViewListener(creator));
-        registerEventListener(new ApprovedTasksViewListener(creator));
-        registerEventListener(new PreparedTasksViewListener(creator));
-        registerEventListener(new IdleTaskViewListener(creator));
-
-        setCommandExecutor("addmember", new AddMember(this, memberDAO, tasksTabCompleter, membersTabCompleter));
-        setCommandExecutor("dashboard", new Dashboard(creator));
-        setCommandExecutor("tasks", new Tasks(this, taskDAO, memberDAO));
-        setCommandExecutor("addtask", new AddTask(this, taskDAO));
-        setCommandExecutor("preparetask", new PrepareTask(this));
-        setCommandExecutor("assigntask", new AssignTask(this, taskDAO, memberDAO));
-        setCommandExecutor("finishtask", new FinishTask(taskDAO, memberDAO));
-        setCommandExecutor("approvetask", new ApproveTask(taskDAO, memberDAO));
-        setCommandExecutor("visittask", new VisitTask(creator));
-        setCommandExecutor("returntask", new ReturnTask(taskDAO, memberDAO));
-        setCommandExecutor("settaskplace", new SetTaskPlace(taskDAO, memberDAO));
-        setCommandExecutor("linkdiscord", new LinkDiscord());
-        setCommandExecutor("establish", new Establish(taskDAO, memberDAO));
-        setCommandExecutor("taskinfo", new TaskInfo(creator));
-        setCommandExecutor("transfertask", new TransferTask(taskDAO, memberDAO));
-
-        if (Bukkit.getPluginManager().isPluginEnabled("DecentHolograms")) {
-            HologramLayer.instantiate();
-            this.getLogger().info("DecentHolograms plugin detected, TaskManager will be fully functional");
-        } else {
-            this.getLogger().info("DecentHolograms plugin was not detected, functionality will be limited");
-        }
-        DiscordManager.instantiate(config.getString("token"), memberDAO, this);
+        initDatabaseAccessors();
+        resolveIntegrationsOperators();
+        performBindingsSetup();
+        DiscordOperator.instantiate(config.getString("token"), memberDAO, this);
     }
 
     @Override
     public void onDisable() {
-        DiscordManager.getInstance().shutdown();
+        DiscordOperator.getInstance().shutdown();
     }
 
     private void loadConfig() {
@@ -114,9 +87,64 @@ public final class TaskManager extends JavaPlugin {
         }
     }
 
-    private void createDAOs() {
+    private void initDatabaseAccessors() {
         memberDAO = new MemberDAO(getDataFolder().getAbsolutePath());
         taskDAO = new TaskDAO(getDataFolder().getAbsolutePath());
+    }
+
+    private void resolveIntegrationsOperators() {
+        if (Bukkit.getPluginManager().isPluginEnabled("DecentHolograms")) {
+            this.getLogger().info("DecentHolograms plugin detected");
+            decentHolograms = new DecentHologramsOperator();
+        } else {
+            this.getLogger().info("DecentHolograms plugin was not detected");
+            decentHolograms = new EmptyOperator();
+        }
+
+        if (Bukkit.getPluginManager().getPlugin("dynmap") instanceof DynmapAPI dynmapAPI) {
+            this.getLogger().info("Dynmap plugin detected");
+            dynmap = new DynmapOperator(dynmapAPI);
+        } else {
+            this.getLogger().info("Dynmap plugin was not detected");
+            dynmap = new EmptyOperator();
+        }
+    }
+
+    private void performBindingsSetup() {
+        RunnablesCreator creator = new RunnablesCreator(this, taskDAO, memberDAO);
+
+        ReloadableTabCompleter tasksTabCompleter = new TasksTabCompleter(memberDAO);
+        ReloadableTabCompleter membersTabCompleter = new MembersTabCompleter(memberDAO);
+        setTabCompleter("tasks", tasksTabCompleter);
+        setTabCompleter("addtask", membersTabCompleter);
+        setTabCompleter("dashboard", membersTabCompleter);
+
+        registerEventListener(new PlayerJoinListener(this, taskDAO, memberDAO, tasksTabCompleter, membersTabCompleter, decentHolograms));
+        registerEventListener(new BookEditListener(this, taskDAO, memberDAO, decentHolograms, dynmap));
+        registerEventListener(new DashboardViewListener(creator));
+        registerEventListener(new SupervisedTasksViewListener(creator));
+        registerEventListener(new ActiveTasksViewListener(creator));
+        registerEventListener(new ApprovedTasksViewListener(creator));
+        registerEventListener(new PreparedTasksViewListener(creator));
+        registerEventListener(new IdleTaskViewListener(creator));
+        registerEventListener(new NeedTasksViewListener(creator));
+
+        setCommandExecutor("addmember", new AddMember(this, memberDAO, tasksTabCompleter, membersTabCompleter));
+        setCommandExecutor("dashboard", new Dashboard(creator));
+        setCommandExecutor("tasks", new Tasks(this, taskDAO, memberDAO));
+        setCommandExecutor("addtask", new AddTask(this, taskDAO));
+        setCommandExecutor("preparetask", new PrepareTask(this));
+        setCommandExecutor("assigntask", new AssignTask(this, taskDAO, memberDAO, decentHolograms));
+        setCommandExecutor("finishtask", new FinishTask(taskDAO, memberDAO, decentHolograms, dynmap));
+        setCommandExecutor("approvetask", new ApproveTask(taskDAO, memberDAO, decentHolograms, dynmap));
+        setCommandExecutor("visittask", new VisitTask(creator));
+        setCommandExecutor("returntask", new ReturnTask(taskDAO, memberDAO, decentHolograms));
+        setCommandExecutor("settaskplace", new SetTaskPlace(taskDAO, memberDAO));
+        setCommandExecutor("linkdiscord", new LinkDiscord());
+        setCommandExecutor("establish", new Establish(taskDAO, memberDAO, decentHolograms));
+        setCommandExecutor("taskinfo", new TaskInfo(creator));
+        setCommandExecutor("transfertask", new TransferTask(taskDAO, memberDAO, decentHolograms));
+        setCommandExecutor("needtasks", new NeedTasks(this, taskDAO));
     }
 
     private void registerEventListener(Listener listener) {
@@ -125,5 +153,9 @@ public final class TaskManager extends JavaPlugin {
 
     private void setCommandExecutor(String command, CommandExecutor executor) {
         Objects.requireNonNull(this.getCommand(command)).setExecutor(executor);
+    }
+
+    private void setTabCompleter(String command, TabCompleter tabCompleter) {
+        Objects.requireNonNull(this.getCommand(command)).setTabCompleter(tabCompleter);
     }
 }

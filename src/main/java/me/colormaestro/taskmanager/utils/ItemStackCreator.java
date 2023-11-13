@@ -19,7 +19,6 @@ import java.sql.Date;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
@@ -33,16 +32,25 @@ public class ItemStackCreator {
     }
 
     public ItemStack createMemberStack(String uuid, String ign, int doing, int finished, int approved, Date lastLogin) {
-        ItemStack is = new ItemStack(Material.PLAYER_HEAD, 1);
-        SkullMeta skullMeta = (SkullMeta) is.getItemMeta();
-        if (skullMeta == null) {
-            return null;
-        }
-        OfflinePlayer op = Bukkit.getOfflinePlayer(UUID.fromString(uuid));
-        skullMeta.setOwningPlayer(op);
-        skullMeta.setDisplayName(ChatColor.BLUE + "" + ChatColor.BOLD + ign);
+        ItemStack stack = new ItemStack(Material.PLAYER_HEAD);
 
-        List<String> lore = createHeadStatsLore(doing, finished, approved);
+        ItemMeta meta = new SkullMetaBuilder()
+                .setOwningPlayer(Bukkit.getOfflinePlayer(UUID.fromString(uuid)))
+                .setDisplayName(ChatColor.BLUE + "" + ChatColor.BOLD + ign)
+                .setLore(createMemberStackLore(doing, finished, approved, lastLogin))
+                .setPersistentData(new NamespacedKey(plugin, DataContainerKeys.MEMBER_NAME), PersistentDataType.STRING, ign)
+                .build();
+
+        stack.setItemMeta(meta);
+        return stack;
+    }
+
+    private List<String> createMemberStackLore(int doing, int finished, int approved, Date lastLogin) {
+        List<String> lore = new ArrayList<>();
+
+        lore.add(ChatColor.GRAY + "Opened: " + ChatColor.GOLD + doing);
+        lore.add(ChatColor.GRAY + "Finished: " + ChatColor.GREEN + finished);
+        lore.add(ChatColor.GRAY + "Approved: " + ChatColor.AQUA + approved);
 
         LocalDate currentDate = LocalDate.now();
         LocalDate sqlLocalDate = lastLogin.toLocalDate();
@@ -51,22 +59,21 @@ public class ItemStackCreator {
         lore.add("");
         lore.add(ChatColor.GRAY + "Last online: " + ChatColor.WHITE + daysDelta + " day(s) ago");
 
-        var container = skullMeta.getPersistentDataContainer();
-        container.set(new NamespacedKey(plugin, DataContainerKeys.MEMBER_NAME), PersistentDataType.STRING, ign);
-
-        skullMeta.setLore(lore);
-        is.setItemMeta(skullMeta);
-        return is;
+        return lore;
     }
 
-    private List<String> createHeadStatsLore(int doing, int finished, int approved) {
-        List<String> result = new ArrayList<>();
+    public ItemStack createNeedTasksStack(String uuid, String ign, int doing) {
+        ItemStack stack = new ItemStack(Material.PLAYER_HEAD);
 
-        result.add(ChatColor.GRAY + "Opened: " + ChatColor.GOLD + doing);
-        result.add(ChatColor.GRAY + "Finished: " + ChatColor.GREEN + finished);
-        result.add(ChatColor.GRAY + "Approved: " + ChatColor.AQUA + approved);
+        ItemMeta meta = new SkullMetaBuilder()
+                .setOwningPlayer(Bukkit.getOfflinePlayer(UUID.fromString(uuid)))
+                .setDisplayName(ChatColor.BLUE + "" + ChatColor.BOLD + ign)
+                .setLore(List.of(ChatColor.WHITE + "" + doing + " tasks in progress"))
+                .setPersistentData(new NamespacedKey(plugin, DataContainerKeys.MEMBER_NAME), PersistentDataType.STRING, ign)
+                .build();
 
-        return result;
+        stack.setItemMeta(meta);
+        return stack;
     }
 
     public ItemStack createBasicTaskStack(Integer taskId, String title, String description, TaskStatus status) {
@@ -109,35 +116,39 @@ public class ItemStackCreator {
             case APPROVED -> material = Material.LIGHT_BLUE_CONCRETE;
             case PREPARED -> material = Material.LIGHT_GRAY_CONCRETE;
         }
-        ItemStack is = new ItemStack(material, 1);
-        ItemMeta itemMeta = is.getItemMeta();
-        assert itemMeta != null;
+        ItemStack stack = new ItemStack(material);
 
-        itemMeta.setDisplayName(ChatColor.BLUE + "" + ChatColor.BOLD + title + " " + ChatColor.DARK_GRAY + "#" + taskId);
+        ItemMeta meta = new ItemMetaBuilder()
+                .setDisplayName(ChatColor.BLUE + "" + ChatColor.BOLD + title + " " + ChatColor.DARK_GRAY + "#" + taskId)
+                .setPersistentData(new NamespacedKey(plugin, DataContainerKeys.TASK_ID), PersistentDataType.INTEGER, taskId)
+                .setLore(createTaskStackLore(assigneeName, advisorName, dateAssigned, description))
+                .build();
 
-        List<String> taskDescriptionLore = createTaskDescriptionLore(description);
+        stack.setItemMeta(meta);
+        return stack;
+    }
 
+    private List<String> createTaskStackLore(String assigneeName, String advisorName, Date dateAssigned, String description) {
+        List<String> lore = new ArrayList<>();
+
+        if (assigneeName != null) {
+            lore.add(ChatColor.GRAY + "Assignee: " + ChatColor.GOLD + assigneeName);
+        }
+        if (advisorName != null) {
+            lore.add(ChatColor.GRAY + "Advisor: " + ChatColor.GOLD + advisorName);
+        }
         if (dateAssigned != null) {
             LocalDate currentDate = LocalDate.now();
             LocalDate sqlLocalDate = dateAssigned.toLocalDate();
             long daysDelta = ChronoUnit.DAYS.between(sqlLocalDate, currentDate);
-            taskDescriptionLore.add(0, ChatColor.GRAY + "Duration: " + ChatColor.GOLD + daysDelta + " days");
-        }
-        if (advisorName != null) {
-            taskDescriptionLore.add(0, ChatColor.GRAY + "Advisor: " + ChatColor.GOLD + advisorName);
-        }
-        if (assigneeName != null) {
-            taskDescriptionLore.add(0, ChatColor.GRAY + "Assignee: " + ChatColor.GOLD + assigneeName);
+            lore.add(0, ChatColor.GRAY + "Duration: " + ChatColor.GOLD + daysDelta + " days");
         }
 
-        itemMeta.setLore(taskDescriptionLore);
-        is.setItemMeta(itemMeta);
-        return is;
+        addTaskDescriptionToLore(lore, description);
+        return lore;
     }
 
-    private List<String> createTaskDescriptionLore(String input) {
-        List<String> result = new ArrayList<>();
-
+    private void addTaskDescriptionToLore(List<String> lore, String input) {
         String[] words = input.split("\\s+");
         StringBuilder currentString = new StringBuilder();
 
@@ -148,16 +159,14 @@ public class ItemStackCreator {
                 }
                 currentString.append(word);
             } else {
-                result.add(ChatColor.GRAY + currentString.toString());
+                lore.add(ChatColor.GRAY + currentString.toString());
                 currentString = new StringBuilder(word);
             }
         }
 
         if (!currentString.isEmpty()) {
-            result.add(ChatColor.GRAY + currentString.toString());
+            lore.add(ChatColor.GRAY + currentString.toString());
         }
-
-        return result;
     }
 
     /**

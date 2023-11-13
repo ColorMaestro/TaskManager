@@ -67,6 +67,7 @@ public class AddMember implements CommandExecutor {
                             ChatColor.GOLD + "Player " + ign + " has already been added as member - You can start giving tasks!"));
                 }
             } catch (SQLException ex) {
+                Bukkit.getScheduler().runTask(plugin, () -> player.sendMessage(ChatColor.RED + ex.getMessage()));
                 ex.printStackTrace();
             }
         });

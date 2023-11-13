@@ -1,12 +1,14 @@
 package me.colormaestro.taskmanager.commands;
 
 import me.colormaestro.taskmanager.data.DataAccessException;
-import me.colormaestro.taskmanager.data.DiscordManager;
-import me.colormaestro.taskmanager.data.HologramLayer;
+import me.colormaestro.taskmanager.integrations.DiscordOperator;
 import me.colormaestro.taskmanager.data.MemberDAO;
 import me.colormaestro.taskmanager.data.TaskDAO;
+import me.colormaestro.taskmanager.integrations.DecentHologramsIntegration;
+import me.colormaestro.taskmanager.integrations.DynmapIntegration;
 import me.colormaestro.taskmanager.model.Member;
 import me.colormaestro.taskmanager.model.Task;
+import me.colormaestro.taskmanager.utils.MessageSender;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
@@ -22,15 +24,20 @@ import java.util.UUID;
 public class FinishTask implements CommandExecutor {
     private final TaskDAO taskDAO;
     private final MemberDAO memberDAO;
+    private final DecentHologramsIntegration decentHolograms;
+    private final DynmapIntegration dynmap;
 
-    public FinishTask(TaskDAO taskDAO, MemberDAO memberDAO) {
+    public FinishTask(TaskDAO taskDAO, MemberDAO memberDAO, DecentHologramsIntegration decentHolograms,
+                      DynmapIntegration dynmap) {
         this.taskDAO = taskDAO;
         this.memberDAO = memberDAO;
+        this.decentHolograms = decentHolograms;
+        this.dynmap = dynmap;
     }
 
     @Override
     public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
-        if (!(sender instanceof Player)) {
+        if (!(sender instanceof Player player)) {
             sender.sendMessage(ChatColor.RED + "This command can't be run from console.");
             return true;
         }
@@ -41,44 +48,36 @@ public class FinishTask implements CommandExecutor {
         }
 
         Plugin plugin = Bukkit.getPluginManager().getPlugin("TaskManager");
-        Player p = (Player) sender;
-        UUID uuid = p.getUniqueId();
+        UUID uuid = player.getUniqueId();
         Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
             try {
                 Member assignee = memberDAO.findMember(uuid);
-                int id = Integer.parseInt(args[0]);
-                taskDAO.finishTask(id, assignee.getId());
+                int taskId = Integer.parseInt(args[0]);
+                taskDAO.finishTask(taskId, assignee.getId());
                 List<Task> activeTasks = taskDAO.fetchPlayersActiveTasks(assignee.getId());
-                Task task = taskDAO.findTask(id);
+                Task task = taskDAO.findTask(taskId);
                 Member advisor = memberDAO.findMember(task.getAdvisorID());
-                Bukkit.getScheduler().runTask(plugin,
-                        () -> {
-                            p.sendMessage(ChatColor.GREEN + "Task finished.");
-                            if (Bukkit.getPluginManager().isPluginEnabled("DecentHolograms")) {
-                                HologramLayer.getInstance().setTasks(assignee.getUuid(), activeTasks);
-                            }
+                Bukkit.getScheduler().runTask(plugin, () -> {
+                    player.sendMessage(ChatColor.GREEN + "Task finished.");
+                    decentHolograms.setTasks(assignee.getUuid(), activeTasks);
+                    dynmap.updateTaskFinishedMarkerIcon(String.valueOf(taskId));
 
-                            // Firstly we try to notify the assigner in game
-                            boolean messageSent = false;
-                            for (Player target : Bukkit.getOnlinePlayers()) {
-                                if (target.getUniqueId().toString().equals(advisor.getUuid())) {
-                                    target.sendMessage(ChatColor.GREEN + p.getName() + " finished task " + id);
-                                    target.playSound(target.getLocation(),
-                                            "minecraft:record.taskfinished", 10, 1);
-                                    messageSent = true;
-                                    break;
-                                }
-                            }
+                    boolean messageSent = MessageSender.sendMessageIfOnline(
+                            advisor.getUuid(),
+                            ChatColor.GREEN + player.getName() + " finished task " + taskId
+                    );
 
-                            // If the assigner is not online, sent him message to discord
-                            if (!messageSent && advisor.getDiscordID() != null) {
-                                DiscordManager.getInstance().taskFinished(advisor.getDiscordID(), p.getName(), task);
-                            }
-                        });
-            } catch (SQLException | DataAccessException | NumberFormatException ex) {
+                    if (!messageSent && advisor.getDiscordID() != null) {
+                        DiscordOperator.getInstance().taskFinished(advisor.getDiscordID(), player.getName(), task);
+                    }
+                });
+            } catch (SQLException | DataAccessException ex) {
                 Bukkit.getScheduler().runTask(plugin,
-                        () -> p.sendMessage(ChatColor.RED + ex.getMessage()));
+                        () -> player.sendMessage(ChatColor.RED + ex.getMessage()));
                 ex.printStackTrace();
+            } catch (NumberFormatException ex) {
+                Bukkit.getScheduler().runTask(plugin,
+                        () -> player.sendMessage(ChatColor.RED + "Task ID must be numerical value!"));
             }
         });
         return true;

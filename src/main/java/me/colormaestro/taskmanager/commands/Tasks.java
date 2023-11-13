@@ -26,7 +26,6 @@ import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Random;
-import java.util.UUID;
 
 public class Tasks implements CommandExecutor {
     private final Plugin plugin;
@@ -34,22 +33,29 @@ public class Tasks implements CommandExecutor {
     private final MemberDAO memberDAO;
     private final Random rand;
 
-    private final String[][] commandsAndDescriptions = {
-            {"/tasks help", "shows this help"},
-            {"/addmember <IGN>", "adds player as member"},
+    private final String[][] HELP_PAGE_1 = {
+            {"/tasks help [page]", "shows this help"},
             {"/dashboard", "shows tasks dashboard"},
             {"/dashboard <IGN>", "jumps directly in dashboard to selected member tasks"},
             {"/tasks given", "shows tasks, which you are advising"},
             {"/tasks stats", "shows task statistics"},
             {"/tasks prepared", "shows task which are prepared for members"},
             {"/tasks idle", "shows task on which members work too long"},
-            {"/tasks [IGN]", "shows your or other member's tasks"},
+            {"/tasks [IGN]", "shows your or other member's tasks"}
+    };
+
+    private final String[][] HELP_PAGE_2 = {
             {"/visittask <id>", "teleports to the task workplace"},
             {"/taskinfo <id>", "obtains info in book for related task"},
+            {"/needtasks", "shows members who have less than 2 tasks in progress"},
+            {"/addmember <IGN>", "adds player as member"},
             {"/addtask <IGN>", "creates task assignment book with blank description"},
             {"/addtask <IGN> [id]", "creates task assignment book, description is taken from selected task"},
             {"/preparetask", "creates task book for creating of prepared task"},
             {"/assigntask <IGN> <id>", "assigns prepared tasks to member"},
+    };
+
+    private final String[][] HELP_PAGE_3 = {
             {"/finishtask <id>", "marks task as finished"},
             {"/approvetask <id> [force]", "approves the finished task"},
             {"/returntask <id> [force]", "returns task back to given (unfinished) state"},
@@ -69,104 +75,91 @@ public class Tasks implements CommandExecutor {
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command cmd, @NotNull String label, String[] args) {
 
-        if (args.length == 1 && args[0].equals("help")) {
-            sendHelp(sender);
+        if ((args.length == 1 || args.length == 2) && args[0].equals("help")) {
+            if (args.length == 1) {
+                sendHelp(sender, "1");
+            } else {
+                sendHelp(sender, args[1]);
+            }
             return true;
         }
 
-        if (sender instanceof Player && args.length == 1 && args[0].equals("given")) {
-            Player p = (Player) sender;
-            UUID uuid = p.getUniqueId();
+        if (!(sender instanceof Player player)) {
+            return true;
+        }
+
+        if (args.length == 1 && args[0].equals("given")) {
             Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
                 try {
-                    Member member = memberDAO.findMember(uuid);
+                    Member member = memberDAO.findMember(player.getUniqueId());
                     List<AdvisedTask> tasks = taskDAO.fetchAdvisorActiveTasks(member.getId());
-                    Bukkit.getScheduler().runTask(plugin,
-                            () -> sendAdvisorTasks(p, tasks));
+                    Bukkit.getScheduler().runTask(plugin, () -> sendAdvisorTasks(player, tasks));
                 } catch (SQLException | DataAccessException ex) {
-                    Bukkit.getScheduler().runTask(plugin,
-                            () -> p.sendMessage(ChatColor.RED + ex.getMessage()));
+                    Bukkit.getScheduler().runTask(plugin, () -> player.sendMessage(ChatColor.RED + ex.getMessage()));
                     ex.printStackTrace();
                 }
-
             });
             return true;
         }
 
-        if (sender instanceof Player && args.length == 1 && args[0].equals("stats")) {
-            Player p = (Player) sender;
+        if (args.length == 1 && args[0].equals("stats")) {
             Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
                 try {
                     List<MemberDashboardInfo> stats = taskDAO.fetchMembersDashboardInfo();
 
-                    Bukkit.getScheduler().runTask(plugin,
-                            () -> {
-                                ItemStack book = buildStatsBook(stats);
-                                p.openBook(book);
-                            });
+                    Bukkit.getScheduler().runTask(plugin, () -> {
+                        ItemStack book = buildStatsBook(stats);
+                        player.openBook(book);
+                    });
                 } catch (SQLException ex) {
-                    Bukkit.getScheduler().runTask(plugin,
-                            () -> p.sendMessage(ChatColor.RED + ex.getMessage()));
+                    Bukkit.getScheduler().runTask(plugin, () -> player.sendMessage(ChatColor.RED + ex.getMessage()));
                     ex.printStackTrace();
                 }
-
             });
             return true;
         }
 
-        if (sender instanceof Player && args.length == 1 && args[0].equals("prepared")) {
-            Player p = (Player) sender;
+        if (args.length == 1 && args[0].equals("prepared")) {
             Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
                 try {
                     List<Task> preparedTasks = taskDAO.fetchPreparedTasks();
 
-                    Bukkit.getScheduler().runTask(plugin,
-                            () -> sendPreparedTasks(p, preparedTasks));
+                    Bukkit.getScheduler().runTask(plugin, () -> sendPreparedTasks(player, preparedTasks));
                 } catch (SQLException ex) {
-                    Bukkit.getScheduler().runTask(plugin,
-                            () -> p.sendMessage(ChatColor.RED + ex.getMessage()));
+                    Bukkit.getScheduler().runTask(plugin, () -> player.sendMessage(ChatColor.RED + ex.getMessage()));
                     ex.printStackTrace();
                 }
-
             });
             return true;
         }
 
-        if (sender instanceof Player && args.length == 1 && args[0].equals("idle")) {
-            Player p = (Player) sender;
+        if (args.length == 1 && args[0].equals("idle")) {
             Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
                 try {
                     List<IdleTask> preparedTasks = taskDAO.fetchIdleTasks();
 
-                    Bukkit.getScheduler().runTask(plugin,
-                            () -> sendIdleTasks(p, preparedTasks));
+                    Bukkit.getScheduler().runTask(plugin, () -> sendIdleTasks(player, preparedTasks));
                 } catch (SQLException ex) {
-                    Bukkit.getScheduler().runTask(plugin,
-                            () -> p.sendMessage(ChatColor.RED + ex.getMessage()));
+                    Bukkit.getScheduler().runTask(plugin, () -> player.sendMessage(ChatColor.RED + ex.getMessage()));
                     ex.printStackTrace();
                 }
-
             });
             return true;
         }
 
-        if (sender instanceof Player && (args.length == 0 || args.length == 1)) {
-            Player p = (Player) sender;
-            UUID uuid = p.getUniqueId();
+        if (args.length == 0 || args.length == 1) {
             Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
                 try {
                     Member member;
                     if (args.length == 0) {
-                        member = memberDAO.findMember(uuid);
+                        member = memberDAO.findMember(player.getUniqueId());
                     } else {
                         member = memberDAO.findMember(args[0]);
                     }
                     List<Task> tasks = taskDAO.fetchPlayersActiveTasks(member.getId());
-                    Bukkit.getScheduler().runTask(plugin,
-                            () -> sendTasks(p, tasks, member.getIgn()));
+                    Bukkit.getScheduler().runTask(plugin, () -> sendTasks(player, tasks, member.getIgn()));
                 } catch (SQLException | DataAccessException ex) {
-                    Bukkit.getScheduler().runTask(plugin,
-                            () -> p.sendMessage(ChatColor.RED + ex.getMessage()));
+                    Bukkit.getScheduler().runTask(plugin, () -> player.sendMessage(ChatColor.RED + ex.getMessage()));
                     ex.printStackTrace();
                 }
             });
@@ -177,10 +170,19 @@ public class Tasks implements CommandExecutor {
         return true;
     }
 
-    private void sendHelp(CommandSender sender) {
+    private void sendHelp(CommandSender sender, String page) {
+        String[][] helpItems;
+        switch (page) {
+            case "3" -> helpItems = HELP_PAGE_3;
+            case "2" -> helpItems = HELP_PAGE_2;
+            default -> {
+                helpItems = HELP_PAGE_1;
+                page = "1";  // Protection for displaying against non-integer values
+            }
+        }
         sender.sendMessage(ChatColor.AQUA + "-=-=-=-=-=- TaskManager " +
-                plugin.getDescription().getVersion() + " help -=-=-=-=-=-");
-        for (var item : commandsAndDescriptions) {
+                plugin.getDescription().getVersion() + " (" + page + "/3) help -=-=-=-=-=-");
+        for (var item : helpItems) {
             sender.sendMessage(ChatColor.GOLD + item[0] + ChatColor.WHITE + " - " + item[1]);
         }
     }

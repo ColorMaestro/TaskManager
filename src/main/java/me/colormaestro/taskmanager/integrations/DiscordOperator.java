@@ -1,5 +1,7 @@
-package me.colormaestro.taskmanager.data;
+package me.colormaestro.taskmanager.integrations;
 
+import me.colormaestro.taskmanager.data.DataAccessException;
+import me.colormaestro.taskmanager.data.MemberDAO;
 import me.colormaestro.taskmanager.listeners.DiscordMessageListener;
 import me.colormaestro.taskmanager.model.Task;
 import net.dv8tion.jda.api.EmbedBuilder;
@@ -20,14 +22,14 @@ import java.util.Map;
 import java.util.Random;
 import java.util.UUID;
 
-public class DiscordManager {
+public class DiscordOperator {
     private final MemberDAO memberDAO;
-    private static DiscordManager instance;
+    private static DiscordOperator instance;
     private final JavaPlugin plugin;
     private final Map<String, UUID> codes;
     private JDA api = null;
 
-    private DiscordManager(String token, MemberDAO memberDAO, JavaPlugin plugin) {
+    private DiscordOperator(String token, MemberDAO memberDAO, JavaPlugin plugin) {
         try {
             api = JDABuilder.createDefault(token).addEventListeners(new DiscordMessageListener()).build();
             plugin.getLogger().info("Token provided, bot connection with Discord established");
@@ -41,11 +43,11 @@ public class DiscordManager {
 
     public static void instantiate(String token, MemberDAO memberDAO, JavaPlugin plugin) {
         if (instance == null) {
-            instance = new DiscordManager(token, memberDAO, plugin);
+            instance = new DiscordOperator(token, memberDAO, plugin);
         }
     }
 
-    public static DiscordManager getInstance() {
+    public static DiscordOperator getInstance() {
         return instance;
     }
 
@@ -60,37 +62,31 @@ public class DiscordManager {
     }
 
     public void taskFinished(long userID, String assignee, Task task) {
-        if (api != null) {
-            String message = String.format(":bellhop: %s finished task [%d] *%s*", assignee, task.getId(), task.getTitle());
-            sendMessage(userID, message);
-        }
+        String message = String.format(":bellhop: %s finished task [%d] *%s*", assignee, task.getId(), task.getTitle());
+        sendMessage(userID, message);
     }
 
     public void taskApproved(long userID, String assigner, Task task) {
-        if (api != null) {
-            String message = String.format(":white_check_mark: %s approved your task [%d] *%s*", assigner, task.getId(), task.getTitle());
-            sendMessage(userID, message);
-        }
+        String message = String.format(":white_check_mark: %s approved your task [%d] *%s*", assigner, task.getId(), task.getTitle());
+        sendMessage(userID, message);
     }
 
     public void taskReturned(long userID, String assigner, Task task) {
-        if (api != null) {
-            String message = String.format(":leftwards_arrow_with_hook: %s has returned your task [%d] *%s*", assigner, task.getId(), task.getTitle());
-            sendMessage(userID, message);
-        }
+        String message = String.format(":leftwards_arrow_with_hook: %s has returned your task [%d] *%s*", assigner, task.getId(), task.getTitle());
+        sendMessage(userID, message);
     }
 
     public void taskTransferred(long userID, String advisor, String oldAssignee, String newAssignee, Task task, boolean taken) {
-        if (api != null) {
-            String messageGiven = String.format(":inbox_tray: %s has transferred task [%d] *%s* from %s to you.", advisor, task.getId(), task.getTitle(), oldAssignee);
-            String messageTaken = String.format(":outbox_tray: %s has transferred your task [%d] *%s* to %s.", advisor, task.getId(), task.getTitle(), newAssignee);
-            sendMessage(userID, taken ? messageTaken : messageGiven);
-        }
+        String messageGiven = String.format(":inbox_tray: %s has transferred task [%d] *%s* from %s to you.", advisor, task.getId(), task.getTitle(), oldAssignee);
+        String messageTaken = String.format(":outbox_tray: %s has transferred your task [%d] *%s* to %s.", advisor, task.getId(), task.getTitle(), newAssignee);
+        sendMessage(userID, taken ? messageTaken : messageGiven);
     }
 
     private void sendMessage(long userID, String message) {
-        api.retrieveUserById(userID).flatMap(x -> x.openPrivateChannel()
-                .flatMap(channel -> channel.sendMessage(message))).queue();
+        if (api != null) {
+            api.retrieveUserById(userID).flatMap(x -> x.openPrivateChannel()
+                    .flatMap(channel -> channel.sendMessage(message))).queue();
+        }
     }
 
     /**
@@ -103,6 +99,7 @@ public class DiscordManager {
 
     /**
      * Generates authentication code for given UUID and stores it internally for short time.
+     *
      * @param uuid of the player to authenticate
      * @return generated code
      */
@@ -126,14 +123,16 @@ public class DiscordManager {
         Bukkit.getScheduler().runTaskLater(plugin, () -> {
             synchronized (codes) {
                 codes.remove(code);
-            }}, 1200);
+            }
+        }, 1200);
         return code;
     }
 
     /**
      * Verifies, whether given code is present for user authentication. In case it is, the code is removed and
      * discord ID in the record with corresponding UUID is updated in database.
-     * @param code code to verify
+     *
+     * @param code      code to verify
      * @param discordID discord user ID from received message
      * @return true, if code was present for user authentication, false otherwise
      */

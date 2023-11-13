@@ -1,12 +1,13 @@
 package me.colormaestro.taskmanager.commands;
 
 import me.colormaestro.taskmanager.data.DataAccessException;
-import me.colormaestro.taskmanager.data.DiscordManager;
-import me.colormaestro.taskmanager.data.HologramLayer;
 import me.colormaestro.taskmanager.data.MemberDAO;
 import me.colormaestro.taskmanager.data.TaskDAO;
+import me.colormaestro.taskmanager.integrations.DecentHologramsIntegration;
+import me.colormaestro.taskmanager.integrations.DiscordOperator;
 import me.colormaestro.taskmanager.model.Member;
 import me.colormaestro.taskmanager.model.Task;
+import me.colormaestro.taskmanager.utils.MessageSender;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
@@ -24,11 +25,13 @@ public class AssignTask implements CommandExecutor {
     private final Plugin plugin;
     private final TaskDAO taskDAO;
     private final MemberDAO memberDAO;
+    private final DecentHologramsIntegration decentHolograms;
 
-    public AssignTask(Plugin plugin, TaskDAO taskDAO, MemberDAO memberDAO) {
+    public AssignTask(Plugin plugin, TaskDAO taskDAO, MemberDAO memberDAO, DecentHologramsIntegration decentHolograms) {
         this.plugin = plugin;
         this.taskDAO = taskDAO;
         this.memberDAO = memberDAO;
+        this.decentHolograms = decentHolograms;
     }
 
     @Override
@@ -68,31 +71,24 @@ public class AssignTask implements CommandExecutor {
                 List<Task> activeTasks = taskDAO.fetchPlayersActiveTasks(assignee.getId());
                 Bukkit.getScheduler().runTask(plugin, () -> {
                     player.sendMessage(ChatColor.GREEN + "Task assigned.");
+                    decentHolograms.setTasks(assignee.getUuid(), activeTasks);
 
-                    // Firstly we try to notify the assignee in game
-                    boolean messageSent = false;
-                    if (Bukkit.getPluginManager().isPluginEnabled("DecentHolograms")) {
-                        HologramLayer.getInstance().setTasks(assignee.getUuid(), activeTasks);
-                    }
-                    for (Player target : Bukkit.getOnlinePlayers()) {
-                        if (target.getUniqueId().toString().equals(assignee.getUuid())) {
-                            target.sendMessage(ChatColor.GOLD + "You have new task from " + player.getName());
-                            target.playSound(target.getLocation(),
-                                    "minecraft:record.newtask", 10, 1);
-                            messageSent = true;
-                            break;
-                        }
-                    }
+                    boolean messageSent = MessageSender.sendMessageIfOnline(
+                            assignee.getUuid(),
+                            ChatColor.GOLD + "You have new task from " + player.getName()
+                    );
 
-                    // If the assignee is not online, sent him message to discord
                     if (!messageSent && assignee.getDiscordID() != null) {
-                        DiscordManager.getInstance().taskCreated(assignee.getDiscordID(), player.getName(), task);
+                        DiscordOperator.getInstance().taskCreated(assignee.getDiscordID(), player.getName(), task);
                     }
                 });
-            } catch (SQLException | IllegalArgumentException | DataAccessException ex) {
+            } catch (SQLException | DataAccessException ex) {
                 Bukkit.getScheduler().runTask(plugin,
                         () -> player.sendMessage(ChatColor.RED + ex.getMessage()));
                 ex.printStackTrace();
+            } catch (NumberFormatException ex) {
+                Bukkit.getScheduler().runTask(plugin,
+                        () -> player.sendMessage(ChatColor.RED + "Task ID must be numerical value!"));
             }
         });
 

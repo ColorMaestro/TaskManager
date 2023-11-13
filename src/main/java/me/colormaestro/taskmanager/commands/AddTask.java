@@ -30,7 +30,7 @@ public class AddTask implements CommandExecutor {
     @Override
     public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
 
-        if (!(sender instanceof Player)) {
+        if (!(sender instanceof Player player)) {
             sender.sendMessage(ChatColor.RED + "This command can't be run from console.");
             return true;
         }
@@ -40,26 +40,26 @@ public class AddTask implements CommandExecutor {
             return true;
         }
 
-        Player p = (Player) sender;
         String ign = args[0];
         if (args.length == 1) {  // Empty description
             ItemStack book = stackCreator.createAssignmentBook(ign, "");
-            p.getInventory().addItem(book);
+            player.getInventory().addItem(book);
         } else {  // Description taken from selected task
-            String sid = args[1];
             Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
                 try {
-                    int id = Integer.parseInt(sid);
-                    Task task = taskDAO.findTask(id);
+                    int taskId = Integer.parseInt(args[1]);
+                    Task task = taskDAO.findTask(taskId);
+                    Bukkit.getScheduler().runTask(plugin, () -> {
+                        ItemStack book = stackCreator.createAssignmentBook(ign, task.getDescription());
+                        player.getInventory().addItem(book);
+                    });
+                } catch (SQLException | DataAccessException ex) {
                     Bukkit.getScheduler().runTask(plugin,
-                            () -> {
-                                ItemStack book = stackCreator.createAssignmentBook(ign, task.getDescription());
-                                p.getInventory().addItem(book);
-                            });
-                } catch (SQLException | DataAccessException | NumberFormatException ex) {
-                    Bukkit.getScheduler().runTask(plugin,
-                            () -> p.sendMessage(ChatColor.RED + ex.getMessage()));
+                            () -> player.sendMessage(ChatColor.RED + ex.getMessage()));
                     ex.printStackTrace();
+                } catch (NumberFormatException ex) {
+                    Bukkit.getScheduler().runTask(plugin,
+                            () -> player.sendMessage(ChatColor.RED + "Task ID must be numerical value!"));
                 }
             });
         }

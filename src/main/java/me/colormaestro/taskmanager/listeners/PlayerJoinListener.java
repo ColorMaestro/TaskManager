@@ -1,9 +1,9 @@
 package me.colormaestro.taskmanager.listeners;
 
 import me.colormaestro.taskmanager.data.DataAccessException;
-import me.colormaestro.taskmanager.data.HologramLayer;
 import me.colormaestro.taskmanager.data.MemberDAO;
 import me.colormaestro.taskmanager.data.TaskDAO;
+import me.colormaestro.taskmanager.integrations.DecentHologramsIntegration;
 import me.colormaestro.taskmanager.model.Member;
 import me.colormaestro.taskmanager.model.Task;
 import me.colormaestro.taskmanager.tabcompleters.ReloadableTabCompleter;
@@ -17,7 +17,6 @@ import org.bukkit.plugin.Plugin;
 
 import java.sql.SQLException;
 import java.util.List;
-import java.util.UUID;
 
 public class PlayerJoinListener implements Listener {
     private final Plugin plugin;
@@ -25,23 +24,24 @@ public class PlayerJoinListener implements Listener {
     private final MemberDAO memberDAO;
     private final ReloadableTabCompleter completer;
     private final ReloadableTabCompleter completerA;
+    private final DecentHologramsIntegration decentHolograms;
 
     public PlayerJoinListener(Plugin plugin, TaskDAO taskDAO, MemberDAO memberDAO,
-                              ReloadableTabCompleter completer, ReloadableTabCompleter completerA) {
+                              ReloadableTabCompleter completer, ReloadableTabCompleter completerA,
+                              DecentHologramsIntegration decentHolograms) {
         this.plugin = plugin;
         this.taskDAO = taskDAO;
         this.memberDAO = memberDAO;
         this.completer = completer;
         this.completerA = completerA;
+        this.decentHolograms = decentHolograms;
     }
 
     @EventHandler
     public void onJoin(PlayerJoinEvent event) {
         Bukkit.getScheduler().runTask(plugin, updateMemberLoginTime(event, plugin, memberDAO));
         Bukkit.getScheduler().runTaskLater(plugin, checkMemberNameUpdate(event, plugin, memberDAO, completer, completerA), 20);
-        if (Bukkit.getPluginManager().isPluginEnabled("DecentHolograms")) {
-            Bukkit.getScheduler().runTaskLater(plugin, checkHologram(event, plugin, memberDAO), 180);
-        }
+        Bukkit.getScheduler().runTaskLater(plugin, checkHologram(event, plugin, memberDAO), 180);
         Bukkit.getScheduler().runTaskLater(plugin, checkDiscordID(event, plugin, memberDAO), 190);
         Bukkit.getScheduler().runTaskLater(plugin, checkFinishedTasks(event, plugin, taskDAO, memberDAO), 200);
     }
@@ -92,14 +92,14 @@ public class PlayerJoinListener implements Listener {
         };
     }
 
-    private static Runnable checkHologram(PlayerJoinEvent event, Plugin plugin, MemberDAO memberDAO) {
+    private Runnable checkHologram(PlayerJoinEvent event, Plugin plugin, MemberDAO memberDAO) {
         return () -> {
             Player player = event.getPlayer();
             Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
                 try {
                     if (memberDAO.memberExists(player.getUniqueId().toString())) {
                         Bukkit.getScheduler().runTask(plugin, () -> {
-                            if (!HologramLayer.getInstance().hologramExists(player.getUniqueId().toString())) {
+                            if (!decentHolograms.hologramExists(player.getUniqueId().toString())) {
                                 event.getPlayer().sendMessage(ChatColor.DARK_AQUA +
                                         "⚠ Your visual task list has not been established yet");
                                 event.getPlayer().sendMessage(ChatColor.DARK_AQUA +

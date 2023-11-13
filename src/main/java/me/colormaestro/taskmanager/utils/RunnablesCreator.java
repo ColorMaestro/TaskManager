@@ -7,6 +7,7 @@ import me.colormaestro.taskmanager.model.AdvisedTask;
 import me.colormaestro.taskmanager.model.IdleTask;
 import me.colormaestro.taskmanager.model.Member;
 import me.colormaestro.taskmanager.model.MemberDashboardInfo;
+import me.colormaestro.taskmanager.model.MemberInProgressTasksInfo;
 import me.colormaestro.taskmanager.model.Task;
 import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.ComponentBuilder;
@@ -14,10 +15,13 @@ import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.NamespacedKey;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.BookMeta;
+import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.plugin.Plugin;
 
 import java.sql.SQLException;
@@ -28,11 +32,11 @@ public class RunnablesCreator {
     private static final int LAST_ROW_MIDDLE = 49;
     private static final int LAST_ROW_LEFT_FROM_MIDDLE = 48;
     private static final int LAST_ROW_RIGHT_FROM_MIDDLE = 50;
+    private static final int LAST_ROW_THIRD = 47;
 
     private final TaskDAO taskDAO;
     private final MemberDAO memberDAO;
     private final Plugin plugin;
-
     private final ItemStackCreator stackCreator;
 
     public RunnablesCreator(Plugin plugin, TaskDAO taskDAO, MemberDAO memberDAO) {
@@ -42,13 +46,13 @@ public class RunnablesCreator {
         this.stackCreator = new ItemStackCreator(plugin);
     }
 
-    public Runnable showDashboardView(HumanEntity player, long page) {
+    public Runnable showDashboardView(HumanEntity player, int page) {
         return () -> {
             try {
                 List<MemberDashboardInfo> stats = taskDAO.fetchMembersDashboardInfo();
                 int totalPages = stats.size() / PAGE_SIZE + 1;
                 // Variable used in lambda should be final or effectively final
-                List<MemberDashboardInfo> finalStats = stats.stream().skip((page - 1) * PAGE_SIZE).limit(PAGE_SIZE).toList();
+                List<MemberDashboardInfo> finalStats = getPageFromList(stats, page);
                 Bukkit.getScheduler().runTask(plugin, () -> {
                     String inventoryTitle = ChatColor.BLUE + "" + ChatColor.BOLD + "Tasks Dashboard" + ChatColor.RESET + " (" + page + "/" + totalPages + ") " + Directives.DASHBOARD;
                     InventoryBuilder builder = new InventoryBuilder(player, inventoryTitle);
@@ -67,13 +71,20 @@ public class RunnablesCreator {
                         position++;
                     }
 
-                    builder.addPaginationArrows()
+                    ItemStack previousPageLink = new ItemStack(Material.ARROW);
+                    previousPageLink.setItemMeta(createPaginationItemMeta(page, totalPages, false));
+                    ItemStack nextPageLink = new ItemStack(Material.ARROW);
+                    nextPageLink.setItemMeta(createPaginationItemMeta(page, totalPages, true));
+
+                    builder.addPaginationItemStacks(previousPageLink, nextPageLink)
                             .addItemStack(LAST_ROW_MIDDLE, Material.ENDER_EYE,
                                     ChatColor.DARK_PURPLE + "Show supervised tasks")
                             .addItemStack(LAST_ROW_LEFT_FROM_MIDDLE, Material.LIGHT_GRAY_CONCRETE,
                                     ChatColor.GRAY + "Show prepared tasks")
                             .addItemStack(LAST_ROW_RIGHT_FROM_MIDDLE, Material.CLOCK,
-                                    ChatColor.GOLD + "Show idle tasks");
+                                    ChatColor.GOLD + "Show idle tasks")
+                            .addItemStack(LAST_ROW_THIRD, Material.PAPER,
+                                    ChatColor.WHITE + "Show members who are running out of tasks");
 
                     player.openInventory(builder.build());
                 });
@@ -85,13 +96,13 @@ public class RunnablesCreator {
         };
     }
 
-    public Runnable showActiveTasksView(HumanEntity player, String ign, long page) {
+    public Runnable showActiveTasksView(HumanEntity player, String ign, int page) {
         return () -> {
             try {
                 Member member = memberDAO.findMember(ign);
                 List<Task> tasks = taskDAO.fetchPlayersActiveTasks(member.getId());
                 int totalPages = tasks.size() / PAGE_SIZE + 1;
-                List<Task> finalTasks = tasks.stream().skip((page - 1) * PAGE_SIZE).limit(PAGE_SIZE).toList();
+                List<Task> finalTasks = getPageFromList(tasks, page);
                 Bukkit.getScheduler().runTask(plugin, () -> {
                     String title = ChatColor.BLUE + "" + ChatColor.BOLD + ign + "'s tasks" + ChatColor.RESET + " (" + page + "/" + totalPages + ") " + Directives.ACTIVE_TASKS;
                     InventoryBuilder builder = new InventoryBuilder(player, title);
@@ -108,9 +119,23 @@ public class RunnablesCreator {
                         position++;
                     }
 
-                    builder.addPaginationArrows()
-                            .addItemStack(LAST_ROW_MIDDLE, Material.LIGHT_BLUE_CONCRETE,
-                                    ChatColor.AQUA + "Show " + ign + "'s approved tasks")
+                    var approvedTasksLink = new ItemStack(Material.LIGHT_BLUE_CONCRETE);
+                    ItemMeta meta = new ItemMetaBuilder()
+                            .setDisplayName(ChatColor.AQUA + "Show " + ign + "'s approved tasks")
+                            .setPersistentData(
+                                    new NamespacedKey(plugin, DataContainerKeys.MEMBER_NAME),
+                                    PersistentDataType.STRING,
+                                    ign)
+                            .build();
+                    approvedTasksLink.setItemMeta(meta);
+
+                    ItemStack previousPageLink = new ItemStack(Material.ARROW);
+                    previousPageLink.setItemMeta(createPaginationItemMeta(page, totalPages, false, ign));
+                    ItemStack nextPageLink = new ItemStack(Material.ARROW);
+                    nextPageLink.setItemMeta(createPaginationItemMeta(page, totalPages, true, ign));
+
+                    builder.addPaginationItemStacks(previousPageLink, nextPageLink)
+                            .addItemStack(LAST_ROW_MIDDLE, approvedTasksLink)
                             .addItemStack(LAST_ROW_LEFT_FROM_MIDDLE, Material.SPECTRAL_ARROW,
                                     ChatColor.AQUA + "Back to dashboard");
 
@@ -124,13 +149,13 @@ public class RunnablesCreator {
         };
     }
 
-    public Runnable showApprovedTasksView(HumanEntity player, String ign, long page) {
+    public Runnable showApprovedTasksView(HumanEntity player, String ign, int page) {
         return () -> {
             try {
                 Member member = memberDAO.findMember(ign);
                 List<Task> tasks = taskDAO.fetchPlayersApprovedTasks(member.getId());
                 int totalPages = tasks.size() / PAGE_SIZE + 1;
-                List<Task> finalTasks = tasks.stream().skip((page - 1) * PAGE_SIZE).limit(PAGE_SIZE).toList();
+                List<Task> finalTasks = getPageFromList(tasks, page);
                 Bukkit.getScheduler().runTask(plugin, () -> {
                     String title = ChatColor.DARK_AQUA + "" + ChatColor.BOLD + ign + "'s approved tasks" + ChatColor.RESET + " (" + page + "/" + totalPages + ") " + Directives.APPROVED_TASKS;
                     InventoryBuilder builder = new InventoryBuilder(player, title);
@@ -147,9 +172,23 @@ public class RunnablesCreator {
                         position++;
                     }
 
-                    builder.addPaginationArrows()
-                            .addItemStack(LAST_ROW_MIDDLE, Material.SPECTRAL_ARROW,
-                                    ChatColor.AQUA + "Back to active tasks");
+                    var activeTasksLink = new ItemStack(Material.SPECTRAL_ARROW);
+                    ItemMeta meta = new ItemMetaBuilder()
+                            .setDisplayName(ChatColor.AQUA + "Back to active tasks")
+                            .setPersistentData(
+                                    new NamespacedKey(plugin, DataContainerKeys.MEMBER_NAME),
+                                    PersistentDataType.STRING,
+                                    ign)
+                            .build();
+                    activeTasksLink.setItemMeta(meta);
+
+                    ItemStack previousPageLink = new ItemStack(Material.ARROW);
+                    previousPageLink.setItemMeta(createPaginationItemMeta(page, totalPages, false, ign));
+                    ItemStack nextPageLink = new ItemStack(Material.ARROW);
+                    nextPageLink.setItemMeta(createPaginationItemMeta(page, totalPages, true, ign));
+
+                    builder.addPaginationItemStacks(previousPageLink, nextPageLink)
+                            .addItemStack(LAST_ROW_MIDDLE, activeTasksLink);
 
                     player.openInventory(builder.build());
                 });
@@ -161,13 +200,13 @@ public class RunnablesCreator {
         };
     }
 
-    public Runnable showSupervisedTasksView(HumanEntity player, long page) {
+    public Runnable showSupervisedTasksView(HumanEntity player, int page) {
         return () -> {
             try {
                 Member member = memberDAO.findMember(player.getName());
                 List<AdvisedTask> tasks = taskDAO.fetchAdvisorActiveTasks(member.getId());
                 int totalPages = tasks.size() / PAGE_SIZE + 1;
-                List<AdvisedTask> finalTasks = tasks.stream().skip((page - 1) * PAGE_SIZE).limit(PAGE_SIZE).toList();
+                List<AdvisedTask> finalTasks = getPageFromList(tasks, page);
                 Bukkit.getScheduler().runTask(plugin, () -> {
                     String title = ChatColor.DARK_PURPLE + "" + ChatColor.BOLD + "Your supervised tasks" + ChatColor.RESET + " (" + page + "/" + totalPages + ") " + Directives.SUPERVISED_TASKS;
                     InventoryBuilder builder = new InventoryBuilder(player, title);
@@ -185,7 +224,12 @@ public class RunnablesCreator {
                         position++;
                     }
 
-                    builder.addPaginationArrows()
+                    ItemStack previousPageLink = new ItemStack(Material.ARROW);
+                    previousPageLink.setItemMeta(createPaginationItemMeta(page, totalPages, false));
+                    ItemStack nextPageLink = new ItemStack(Material.ARROW);
+                    nextPageLink.setItemMeta(createPaginationItemMeta(page, totalPages, true));
+
+                    builder.addPaginationItemStacks(previousPageLink, nextPageLink)
                             .addItemStack(LAST_ROW_MIDDLE, Material.SPECTRAL_ARROW,
                                     ChatColor.AQUA + "Back to dashboard");
 
@@ -199,12 +243,12 @@ public class RunnablesCreator {
         };
     }
 
-    public Runnable showPreparedTasksView(HumanEntity player, long page) {
+    public Runnable showPreparedTasksView(HumanEntity player, int page) {
         return () -> {
             try {
                 List<Task> tasks = taskDAO.fetchPreparedTasks();
                 int totalPages = tasks.size() / PAGE_SIZE + 1;
-                List<Task> finalTasks = tasks.stream().skip((page - 1) * PAGE_SIZE).limit(PAGE_SIZE).toList();
+                List<Task> finalTasks = getPageFromList(tasks, page);
                 Bukkit.getScheduler().runTask(plugin, () -> {
                     String title = ChatColor.DARK_GRAY + "" + ChatColor.BOLD + "Prepared tasks" + ChatColor.RESET + " (" + page + "/" + totalPages + ") " + Directives.PREPARED_TASKS;
                     InventoryBuilder builder = new InventoryBuilder(player, title);
@@ -221,7 +265,12 @@ public class RunnablesCreator {
                         position++;
                     }
 
-                    builder.addPaginationArrows()
+                    ItemStack previousPageLink = new ItemStack(Material.ARROW);
+                    previousPageLink.setItemMeta(createPaginationItemMeta(page, totalPages, false));
+                    ItemStack nextPageLink = new ItemStack(Material.ARROW);
+                    nextPageLink.setItemMeta(createPaginationItemMeta(page, totalPages, true));
+
+                    builder.addPaginationItemStacks(previousPageLink, nextPageLink)
                             .addItemStack(LAST_ROW_MIDDLE, Material.SPECTRAL_ARROW,
                                     ChatColor.AQUA + "Back to dashboard");
 
@@ -235,12 +284,12 @@ public class RunnablesCreator {
         };
     }
 
-    public Runnable showIdleTasksView(HumanEntity player, long page) {
+    public Runnable showIdleTasksView(HumanEntity player, int page) {
         return () -> {
             try {
                 List<IdleTask> tasks = taskDAO.fetchIdleTasks();
                 int totalPages = tasks.size() / PAGE_SIZE + 1;
-                List<IdleTask> finalTasks = tasks.stream().skip((page - 1) * PAGE_SIZE).limit(PAGE_SIZE).toList();
+                List<IdleTask> finalTasks = getPageFromList(tasks, page);
                 Bukkit.getScheduler().runTask(plugin, () -> {
                     String title = ChatColor.DARK_AQUA + "" + ChatColor.BOLD + "Idle tasks" + ChatColor.RESET + " (" + page + "/" + totalPages + ") " + Directives.IDLE_TASKS;
                     InventoryBuilder builder = new InventoryBuilder(player, title);
@@ -259,7 +308,52 @@ public class RunnablesCreator {
                         position++;
                     }
 
-                    builder.addPaginationArrows()
+                    ItemStack previousPageLink = new ItemStack(Material.ARROW);
+                    previousPageLink.setItemMeta(createPaginationItemMeta(page, totalPages, false));
+                    ItemStack nextPageLink = new ItemStack(Material.ARROW);
+                    nextPageLink.setItemMeta(createPaginationItemMeta(page, totalPages, true));
+
+                    builder.addPaginationItemStacks(previousPageLink, nextPageLink)
+                            .addItemStack(LAST_ROW_MIDDLE, Material.SPECTRAL_ARROW,
+                                    ChatColor.AQUA + "Back to dashboard");
+
+                    player.openInventory(builder.build());
+                });
+            } catch (SQLException ex) {
+                Bukkit.getScheduler().runTask(plugin,
+                        () -> player.sendMessage(ChatColor.RED + ex.getMessage()));
+                ex.printStackTrace();
+            }
+        };
+    }
+    
+    public Runnable showNeedTasksView(HumanEntity player, int page) {
+        return () -> {
+            try {
+                List<MemberInProgressTasksInfo> stats = taskDAO.fetchMembersWithFewTasks();
+                int totalPages = stats.size() / PAGE_SIZE + 1;
+                List<MemberInProgressTasksInfo> finalStats = getPageFromList(stats, page);
+                Bukkit.getScheduler().runTask(plugin, () -> {
+                    String title = ChatColor.GOLD + "" + ChatColor.BOLD + "Members out of tasks" + ChatColor.RESET + " (" + page + "/" + totalPages + ") " + Directives.NEED_TASKS;
+                    InventoryBuilder builder = new InventoryBuilder(player, title);
+
+                    ItemStack stack;
+                    int position = 0;
+                    for (MemberInProgressTasksInfo memberInfo : finalStats) {
+                        stack = stackCreator.createNeedTasksStack(
+                                memberInfo.uuid(),
+                                memberInfo.ign(),
+                                memberInfo.doing());
+                        builder.addItemStack(position, stack);
+                        position++;
+                    }
+
+                    ItemStack previousPageLink = new ItemStack(Material.ARROW);
+                    previousPageLink.setItemMeta(createPaginationItemMeta(page, totalPages, false));
+                    ItemStack nextPageLink = new ItemStack(Material.ARROW);
+                    nextPageLink.setItemMeta(createPaginationItemMeta(page, totalPages, true));
+
+                    builder.addPaginationItemStacks(previousPageLink, nextPageLink)
                             .addItemStack(LAST_ROW_MIDDLE, Material.SPECTRAL_ARROW,
                                     ChatColor.AQUA + "Back to dashboard");
 
@@ -273,10 +367,10 @@ public class RunnablesCreator {
         };
     }
 
-    public Runnable teleportPlayerToTask(HumanEntity player, String taskId) {
+    public Runnable teleportPlayerToTask(HumanEntity player, int taskId) {
         return () -> {
             try {
-                Task task = taskDAO.findTask(Integer.parseInt(taskId));
+                Task task = taskDAO.findTask(taskId);
                 Bukkit.getScheduler().runTask(plugin, () -> {
                     double x = task.getX();
                     double y = task.getY();
@@ -295,11 +389,10 @@ public class RunnablesCreator {
         };
     }
 
-    public Runnable givePlayerAssignmentBook(Player player, String taskId) {
+    public Runnable givePlayerAssignmentBook(Player player, int taskId) {
         return () -> {
             try {
-                int id = Integer.parseInt(taskId);
-                Task task = taskDAO.findTask(id);
+                Task task = taskDAO.findTask(taskId);
 
                 int creatorID = task.getCreatorID();
                 Integer advisorID = task.getAdvisorID();
@@ -312,7 +405,7 @@ public class RunnablesCreator {
                     ItemStack book = createTaskBook(task, creatorName, advisorName, assigneeName);
                     player.getInventory().addItem(book);
                 });
-            } catch (SQLException | DataAccessException | NumberFormatException ex) {
+            } catch (SQLException | DataAccessException ex) {
                 Bukkit.getScheduler().runTask(plugin,
                         () -> player.sendMessage(ChatColor.RED + ex.getMessage()));
                 ex.printStackTrace();
@@ -377,5 +470,42 @@ public class RunnablesCreator {
         bookMeta.setAuthor(advisorName);
         book.setItemMeta(bookMeta);
         return book;
+    }
+
+    private <T> List<T> getPageFromList(List<T> list, int page) {
+        return list.stream().skip((long) (page - 1) * PAGE_SIZE).limit(PAGE_SIZE).toList();
+    }
+
+    private ItemMeta createPaginationItemMeta(int currentPage, int totalPages, boolean turnNextPage) {
+        return createPaginationItemMeta(currentPage, totalPages, turnNextPage, null);
+    }
+
+    private ItemMeta createPaginationItemMeta(int currentPage, int totalPages, boolean turnNextPage, String memberName) {
+        ItemMetaBuilder builder = new ItemMetaBuilder()
+                .setDisplayName(turnNextPage ? "Next page" : "Previous page")
+                .setPersistentData(
+                        new NamespacedKey(plugin, DataContainerKeys.CURRENT_PAGE),
+                        PersistentDataType.INTEGER,
+                        currentPage)
+                .setPersistentData(
+                        new NamespacedKey(plugin, DataContainerKeys.TOTAL_PAGES),
+                        PersistentDataType.INTEGER,
+                        totalPages);
+
+        if (turnNextPage) {
+            builder.setPersistentData(
+                    new NamespacedKey(plugin, DataContainerKeys.TURN_NEXT_PAGE),
+                    PersistentDataType.STRING,
+                    "yes");
+        }
+
+        if (memberName != null) {
+            builder.setPersistentData(
+                    new NamespacedKey(plugin, DataContainerKeys.MEMBER_NAME),
+                    PersistentDataType.STRING,
+                    memberName);
+        }
+
+        return builder.build();
     }
 }

@@ -1,6 +1,6 @@
 package me.colormaestro.taskmanager.listeners;
 
-import me.colormaestro.taskmanager.data.DiscordManager;
+import me.colormaestro.taskmanager.integrations.DiscordOperator;
 import net.dv8tion.jda.api.entities.ChannelType;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
@@ -28,7 +28,7 @@ public class DiscordMessageListener extends ListenerAdapter {
             return;
         }
 
-        boolean result = DiscordManager.getInstance().verifyCode(code, event.getAuthor().getIdLong());
+        boolean result = DiscordOperator.getInstance().verifyCode(code, event.getAuthor().getIdLong());
         if (result) {
             event.getChannel().sendMessage(":ballot_box_with_check: Authentication done").queue();
         } else {
