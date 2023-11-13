@@ -92,7 +92,7 @@ public class TransferTask implements CommandExecutor {
                 ex.printStackTrace();
             } catch (NumberFormatException ignored) {
                 Bukkit.getScheduler().runTask(plugin,
-                        () -> player.sendMessage(ChatColor.RED + "Tasks are marked with numerical values!"));
+                        () -> player.sendMessage(ChatColor.RED + "Task ID must be numerical value!"));
             } catch (DataAccessException ignored) {
                 Bukkit.getScheduler().runTask(plugin,
                         () -> player.sendMessage(ChatColor.RED + "Invalid task ID or new assignee!"));

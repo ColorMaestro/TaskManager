@@ -28,10 +28,15 @@ public class VisitTask implements CommandExecutor {
             return true;
         }
 
-        Plugin plugin = creator.getPlugin();
-        int taskId = Integer.parseInt(args[0]);
-        Bukkit.getScheduler().runTaskAsynchronously(plugin, creator.teleportPlayerToTask(player, taskId));
-        Bukkit.getScheduler().runTaskAsynchronously(plugin, creator.givePlayerAssignmentBook(player, taskId));
+        try {
+            Plugin plugin = creator.getPlugin();
+            int taskId = Integer.parseInt(args[0]);
+            Bukkit.getScheduler().runTaskAsynchronously(plugin, creator.teleportPlayerToTask(player, taskId));
+            Bukkit.getScheduler().runTaskAsynchronously(plugin, creator.givePlayerAssignmentBook(player, taskId));
+        } catch (NumberFormatException ex) {
+            Bukkit.getScheduler().runTask(creator.getPlugin(),
+                    () -> player.sendMessage(ChatColor.RED + "Task ID must be numerical value!"));
+        }
         return true;
     }
 }

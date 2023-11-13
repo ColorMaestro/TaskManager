@@ -27,8 +27,13 @@ public class TaskInfo implements CommandExecutor {
             return true;
         }
 
-        int taskId = Integer.parseInt(args[0]);
-        Bukkit.getScheduler().runTaskAsynchronously(creator.getPlugin(), creator.givePlayerAssignmentBook(player, taskId));
+        try {
+            int taskId = Integer.parseInt(args[0]);
+            Bukkit.getScheduler().runTaskAsynchronously(creator.getPlugin(), creator.givePlayerAssignmentBook(player, taskId));
+        } catch (NumberFormatException ex) {
+            Bukkit.getScheduler().runTask(creator.getPlugin(),
+                    () -> player.sendMessage(ChatColor.RED + "Task ID must be numerical value!"));
+        }
         return true;
     }
 }

@@ -47,10 +47,13 @@ public class SetTaskPlace implements CommandExecutor {
                 taskDAO.updateTaskCords(taskId, assignee.getId(), location);
                 Bukkit.getScheduler().runTask(plugin,
                         () -> player.sendMessage(ChatColor.GREEN + "Cords updated."));
-            } catch (SQLException | DataAccessException | NumberFormatException ex) {
+            } catch (SQLException | DataAccessException ex) {
                 Bukkit.getScheduler().runTask(plugin,
                         () -> player.sendMessage(ChatColor.RED + ex.getMessage()));
                 ex.printStackTrace();
+            } catch (NumberFormatException ex) {
+                Bukkit.getScheduler().runTask(plugin,
+                        () -> player.sendMessage(ChatColor.RED + "Task ID must be numerical value!"));
             }
         });
         return true;

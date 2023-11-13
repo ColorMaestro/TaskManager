@@ -82,10 +82,13 @@ public class AssignTask implements CommandExecutor {
                         DiscordOperator.getInstance().taskCreated(assignee.getDiscordID(), player.getName(), task);
                     }
                 });
-            } catch (SQLException | IllegalArgumentException | DataAccessException ex) {
+            } catch (SQLException | DataAccessException ex) {
                 Bukkit.getScheduler().runTask(plugin,
                         () -> player.sendMessage(ChatColor.RED + ex.getMessage()));
                 ex.printStackTrace();
+            } catch (NumberFormatException ex) {
+                Bukkit.getScheduler().runTask(plugin,
+                        () -> player.sendMessage(ChatColor.RED + "Task ID must be numerical value!"));
             }
         });
 

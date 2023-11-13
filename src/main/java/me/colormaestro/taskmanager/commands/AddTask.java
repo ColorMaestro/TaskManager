@@ -53,10 +53,13 @@ public class AddTask implements CommandExecutor {
                         ItemStack book = stackCreator.createAssignmentBook(ign, task.getDescription());
                         player.getInventory().addItem(book);
                     });
-                } catch (SQLException | DataAccessException | NumberFormatException ex) {
+                } catch (SQLException | DataAccessException ex) {
                     Bukkit.getScheduler().runTask(plugin,
                             () -> player.sendMessage(ChatColor.RED + ex.getMessage()));
                     ex.printStackTrace();
+                } catch (NumberFormatException ex) {
+                    Bukkit.getScheduler().runTask(plugin,
+                            () -> player.sendMessage(ChatColor.RED + "Task ID must be numerical value!"));
                 }
             });
         }

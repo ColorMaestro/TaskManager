@@ -65,10 +65,13 @@ public class ReturnTask implements CommandExecutor {
                         DiscordOperator.getInstance().taskReturned(assignee.getDiscordID(), player.getName(), task);
                     }
                 });
-            } catch (SQLException | DataAccessException | NumberFormatException ex) {
+            } catch (SQLException | DataAccessException ex) {
                 Bukkit.getScheduler().runTask(plugin,
                         () -> player.sendMessage(ChatColor.RED + ex.getMessage()));
                 ex.printStackTrace();
+            } catch (NumberFormatException ex) {
+                Bukkit.getScheduler().runTask(plugin,
+                        () -> player.sendMessage(ChatColor.RED + "Task ID must be numerical value!"));
             }
         });
         return true;
