@@ -28,15 +28,19 @@ public class NeedTasks implements CommandExecutor {
         Player p = (Player) sender;
         Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
             try {
+                int limit = args.length > 0 ? Integer.parseInt(args[0]) : 0;
                 List<MemberDashboardInfo> members = taskDAO
                         .fetchMembersDashboardInfo()
                         .stream()
-                        .filter(memberDashboardInfo -> memberDashboardInfo.doing() <= 1)
+                        .filter(memberDashboardInfo -> memberDashboardInfo.doing() <= limit)
                         .toList();
                 Bukkit.getScheduler().runTask(plugin, () -> sendMessage(p, members));
             } catch (SQLException ex) {
                 Bukkit.getScheduler().runTask(plugin, () -> p.sendMessage(ChatColor.RED + ex.getMessage()));
                 ex.printStackTrace();
+            } catch (NumberFormatException ex) {
+                Bukkit.getScheduler().runTask(plugin,
+                        () -> p.sendMessage(ChatColor.RED + "Limit must be numerical value!"));
             }
         });
         return true;

@@ -47,7 +47,7 @@ public class Tasks implements CommandExecutor {
     private final String[][] HELP_PAGE_2 = {
             {"/visittask <id>", "teleports to the task workplace"},
             {"/taskinfo <id>", "obtains info in book for related task"},
-            {"/needtasks", "shows members who have less than 2 tasks in progress"},
+            {"/needtasks [limit]", "shows members who have up to limit tasks in progress (default is 0)"},
             {"/addmember <IGN>", "adds player as member"},
             {"/addtask <IGN>", "creates task assignment book with blank description"},
             {"/addtask <IGN> [id]", "creates task assignment book, description is taken from selected task"},
