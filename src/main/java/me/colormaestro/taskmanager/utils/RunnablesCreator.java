@@ -6,7 +6,7 @@ import me.colormaestro.taskmanager.data.TaskDAO;
 import me.colormaestro.taskmanager.model.AdvisedTask;
 import me.colormaestro.taskmanager.model.IdleTask;
 import me.colormaestro.taskmanager.model.Member;
-import me.colormaestro.taskmanager.model.MemberDashboardInfo;
+import me.colormaestro.taskmanager.model.BasicMemberInfo;
 import me.colormaestro.taskmanager.model.Task;
 import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.ComponentBuilder;
@@ -48,17 +48,17 @@ public class RunnablesCreator {
     public Runnable showDashboardView(HumanEntity player, int page) {
         return () -> {
             try {
-                List<MemberDashboardInfo> stats = taskDAO.fetchMembersDashboardInfo();
+                List<BasicMemberInfo> stats = taskDAO.fetchMembersDashboardInfo();
                 int totalPages = stats.size() / PAGE_SIZE + 1;
                 // Variable used in lambda should be final or effectively final
-                List<MemberDashboardInfo> finalStats = getPageFromList(stats, page);
+                List<BasicMemberInfo> finalStats = getPageFromList(stats, page);
                 Bukkit.getScheduler().runTask(plugin, () -> {
                     String inventoryTitle = ChatColor.BLUE + "" + ChatColor.BOLD + "Tasks Dashboard" + ChatColor.RESET + " (" + page + "/" + totalPages + ") " + Directives.DASHBOARD;
                     InventoryBuilder builder = new InventoryBuilder(player, inventoryTitle);
 
                     ItemStack stack;
                     int position = 0;
-                    for (MemberDashboardInfo memberInfo : finalStats) {
+                    for (BasicMemberInfo memberInfo : finalStats) {
                         stack = stackCreator.createMemberStack(
                                 memberInfo.uuid(),
                                 memberInfo.ign(),
@@ -329,20 +329,20 @@ public class RunnablesCreator {
     public Runnable showNeedTasksView(HumanEntity player, int page) {
         return () -> {
             try {
-                List<MemberDashboardInfo> stats = taskDAO
+                List<BasicMemberInfo> stats = taskDAO
                         .fetchMembersDashboardInfo()
                         .stream()
-                        .filter(memberDashboardInfo -> memberDashboardInfo.doing() <= 1)
+                        .filter(basicMemberInfo -> basicMemberInfo.doing() <= 1)
                         .toList();
                 int totalPages = stats.size() / PAGE_SIZE + 1;
-                List<MemberDashboardInfo> finalStats = getPageFromList(stats, page);
+                List<BasicMemberInfo> finalStats = getPageFromList(stats, page);
                 Bukkit.getScheduler().runTask(plugin, () -> {
                     String title = ChatColor.GOLD + "" + ChatColor.BOLD + "Members out of tasks" + ChatColor.RESET + " (" + page + "/" + totalPages + ") " + Directives.NEED_TASKS;
                     InventoryBuilder builder = new InventoryBuilder(player, title);
 
                     ItemStack stack;
                     int position = 0;
-                    for (MemberDashboardInfo memberInfo : finalStats) {
+                    for (BasicMemberInfo memberInfo : finalStats) {
                         stack = stackCreator.createNeedTasksStack(
                                 memberInfo.uuid(),
                                 memberInfo.ign(),

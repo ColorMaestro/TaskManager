@@ -3,7 +3,7 @@ package me.colormaestro.taskmanager.data;
 import me.colormaestro.taskmanager.enums.TaskStatus;
 import me.colormaestro.taskmanager.model.AdvisedTask;
 import me.colormaestro.taskmanager.model.IdleTask;
-import me.colormaestro.taskmanager.model.MemberDashboardInfo;
+import me.colormaestro.taskmanager.model.BasicMemberInfo;
 import me.colormaestro.taskmanager.model.Task;
 import org.bukkit.Location;
 import org.jetbrains.annotations.NotNull;
@@ -478,7 +478,7 @@ public class TaskDAO {
      * @return List of stats for each player
      * @throws SQLException if SQL error arise
      */
-    public synchronized List<MemberDashboardInfo> fetchMembersDashboardInfo() throws SQLException {
+    public synchronized List<BasicMemberInfo> fetchMembersDashboardInfo() throws SQLException {
         try (Connection connection = DriverManager.getConnection(url);
              PreparedStatement st = connection.prepareStatement(
                      """
@@ -493,9 +493,9 @@ public class TaskDAO {
                              group by ign, uuid, last_login
                              order by upper(ign)""")) {
             ResultSet rs = st.executeQuery();
-            List<MemberDashboardInfo> stats = new ArrayList<>();
+            List<BasicMemberInfo> stats = new ArrayList<>();
             while (rs.next()) {
-                MemberDashboardInfo memberDashboardInfo = new MemberDashboardInfo(
+                BasicMemberInfo basicMemberInfo = new BasicMemberInfo(
                         rs.getString("ign"),
                         rs.getString("uuid"),
                         rs.getInt("doing"),
@@ -503,7 +503,7 @@ public class TaskDAO {
                         rs.getInt("approved"),
                         rs.getDate("last_login")
                 );
-                stats.add(memberDashboardInfo);
+                stats.add(basicMemberInfo);
             }
             rs.close();
             return stats;

@@ -6,7 +6,7 @@ import me.colormaestro.taskmanager.data.TaskDAO;
 import me.colormaestro.taskmanager.model.AdvisedTask;
 import me.colormaestro.taskmanager.model.IdleTask;
 import me.colormaestro.taskmanager.model.Member;
-import me.colormaestro.taskmanager.model.MemberDashboardInfo;
+import me.colormaestro.taskmanager.model.BasicMemberInfo;
 import me.colormaestro.taskmanager.model.Task;
 import net.md_5.bungee.api.chat.ComponentBuilder;
 import org.bukkit.Bukkit;
@@ -105,7 +105,7 @@ public class Tasks implements CommandExecutor {
         if (args.length == 1 && args[0].equals("stats")) {
             Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
                 try {
-                    List<MemberDashboardInfo> stats = taskDAO.fetchMembersDashboardInfo();
+                    List<BasicMemberInfo> stats = taskDAO.fetchMembersDashboardInfo();
 
                     Bukkit.getScheduler().runTask(plugin, () -> {
                         ItemStack book = buildStatsBook(stats);
@@ -247,7 +247,7 @@ public class Tasks implements CommandExecutor {
         }
     }
 
-    private ItemStack buildStatsBook(List<MemberDashboardInfo> stats) {
+    private ItemStack buildStatsBook(List<BasicMemberInfo> stats) {
         ItemStack book = new ItemStack(Material.WRITTEN_BOOK);
         BookMeta bookMeta = (BookMeta) book.getItemMeta();
         // Generates random headline color in book
@@ -256,7 +256,7 @@ public class Tasks implements CommandExecutor {
         ComponentBuilder builder =
                 new ComponentBuilder(color + "" + ChatColor.BOLD + "Holy grail of all members\n");
         int pageRows = 0;
-        for (MemberDashboardInfo data : stats) {
+        for (BasicMemberInfo data : stats) {
             String row = data.ign() + " " + ChatColor.GOLD + data.doing() +
                     " " + ChatColor.GREEN + data.finished() +
                     " " + ChatColor.AQUA + data.approved() + "\n";
