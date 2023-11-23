@@ -1,8 +1,7 @@
 package me.colormaestro.taskmanager.commands;
 
-import me.colormaestro.taskmanager.data.MemberDAO;
 import me.colormaestro.taskmanager.data.TaskDAO;
-import me.colormaestro.taskmanager.model.MemberInProgressTasksInfo;
+import me.colormaestro.taskmanager.model.MemberDashboardInfo;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
@@ -29,7 +28,11 @@ public class NeedTasks implements CommandExecutor {
         Player p = (Player) sender;
         Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
             try {
-                List<MemberInProgressTasksInfo> members = taskDAO.fetchMembersWithFewTasks();
+                List<MemberDashboardInfo> members = taskDAO
+                        .fetchMembersDashboardInfo()
+                        .stream()
+                        .filter(memberDashboardInfo -> memberDashboardInfo.doing() <= 1)
+                        .toList();
                 Bukkit.getScheduler().runTask(plugin, () -> sendMessage(p, members));
             } catch (SQLException ex) {
                 Bukkit.getScheduler().runTask(plugin, () -> p.sendMessage(ChatColor.RED + ex.getMessage()));
@@ -39,13 +42,13 @@ public class NeedTasks implements CommandExecutor {
         return true;
     }
 
-    private void sendMessage(Player player, List<MemberInProgressTasksInfo> members) {
+    private void sendMessage(Player player, List<MemberDashboardInfo> members) {
         if (members.isEmpty()) {
             player.sendMessage(ChatColor.GREEN + "Everyone has enough tasks");
             return;
         }
         player.sendMessage(ChatColor.GOLD + "-=-=-=- Members running out of tasks -=-=-=-");
-        for (MemberInProgressTasksInfo memberInfo : members) {
+        for (MemberDashboardInfo memberInfo : members) {
             player.sendMessage(memberInfo.ign() + ChatColor.ITALIC + " (" + memberInfo.doing() + " tasks in progress)");
         }
     }

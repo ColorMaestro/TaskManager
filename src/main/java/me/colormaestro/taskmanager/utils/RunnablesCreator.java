@@ -7,7 +7,6 @@ import me.colormaestro.taskmanager.model.AdvisedTask;
 import me.colormaestro.taskmanager.model.IdleTask;
 import me.colormaestro.taskmanager.model.Member;
 import me.colormaestro.taskmanager.model.MemberDashboardInfo;
-import me.colormaestro.taskmanager.model.MemberInProgressTasksInfo;
 import me.colormaestro.taskmanager.model.Task;
 import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.ComponentBuilder;
@@ -330,16 +329,20 @@ public class RunnablesCreator {
     public Runnable showNeedTasksView(HumanEntity player, int page) {
         return () -> {
             try {
-                List<MemberInProgressTasksInfo> stats = taskDAO.fetchMembersWithFewTasks();
+                List<MemberDashboardInfo> stats = taskDAO
+                        .fetchMembersDashboardInfo()
+                        .stream()
+                        .filter(memberDashboardInfo -> memberDashboardInfo.doing() <= 1)
+                        .toList();
                 int totalPages = stats.size() / PAGE_SIZE + 1;
-                List<MemberInProgressTasksInfo> finalStats = getPageFromList(stats, page);
+                List<MemberDashboardInfo> finalStats = getPageFromList(stats, page);
                 Bukkit.getScheduler().runTask(plugin, () -> {
                     String title = ChatColor.GOLD + "" + ChatColor.BOLD + "Members out of tasks" + ChatColor.RESET + " (" + page + "/" + totalPages + ") " + Directives.NEED_TASKS;
                     InventoryBuilder builder = new InventoryBuilder(player, title);
 
                     ItemStack stack;
                     int position = 0;
-                    for (MemberInProgressTasksInfo memberInfo : finalStats) {
+                    for (MemberDashboardInfo memberInfo : finalStats) {
                         stack = stackCreator.createNeedTasksStack(
                                 memberInfo.uuid(),
                                 memberInfo.ign(),
