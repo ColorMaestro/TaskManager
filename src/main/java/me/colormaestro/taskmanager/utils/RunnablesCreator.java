@@ -83,7 +83,7 @@ public class RunnablesCreator {
                             .addItemStack(LAST_ROW_RIGHT_FROM_MIDDLE, Material.CLOCK,
                                     ChatColor.GOLD + "Show idle tasks")
                             .addItemStack(LAST_ROW_THIRD, Material.PAPER,
-                                    ChatColor.WHITE + "Show members who are running out of tasks");
+                                    ChatColor.GOLD + "Show members who need tasks");
 
                     player.openInventory(builder.build());
                 });
@@ -337,7 +337,7 @@ public class RunnablesCreator {
                 int totalPages = stats.size() / PAGE_SIZE + 1;
                 List<BasicMemberInfo> finalStats = getPageFromList(stats, page);
                 Bukkit.getScheduler().runTask(plugin, () -> {
-                    String title = ChatColor.GOLD + "" + ChatColor.BOLD + "Members out of tasks" + ChatColor.RESET + " (" + page + "/" + totalPages + ") " + Directives.NEED_TASKS;
+                    String title = ChatColor.RED + "" + ChatColor.BOLD + "Members with " + limit + " or less tasks" + ChatColor.RESET + " (" + page + "/" + totalPages + ") " + Directives.NEED_TASKS;
                     InventoryBuilder builder = new InventoryBuilder(player, title);
 
                     ItemStack stack;
