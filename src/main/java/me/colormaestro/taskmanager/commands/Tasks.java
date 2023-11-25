@@ -37,7 +37,7 @@ public class Tasks implements CommandExecutor {
             {"/tasks help [page]", "shows this help"},
             {"/dashboard", "shows tasks dashboard"},
             {"/dashboard <IGN>", "jumps directly in dashboard to selected member tasks"},
-            {"/tasks given", "shows tasks, which you are advising"},
+            {"/tasks supervised", "shows tasks, which you are advising"},
             {"/tasks stats", "shows task statistics"},
             {"/tasks prepared", "shows task which are prepared for members"},
             {"/tasks idle", "shows task on which members work too long"},
@@ -88,7 +88,7 @@ public class Tasks implements CommandExecutor {
             return true;
         }
 
-        if (args.length == 1 && args[0].equals("given")) {
+        if (args.length == 1 && args[0].equals("supervised")) {
             Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
                 try {
                     Member member = memberDAO.findMember(player.getUniqueId());

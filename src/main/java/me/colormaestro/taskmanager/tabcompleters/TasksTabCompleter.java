@@ -16,7 +16,7 @@ public class TasksTabCompleter extends MembersTabCompleter {
         try {
             names = memberDAO.getMembersNames();
             names.add("help");
-            names.add("given");
+            names.add("supervised");
             names.add("stats");
             names.add("prepared");
             names.add("idle");
