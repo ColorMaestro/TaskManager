@@ -1,14 +1,12 @@
 package me.colormaestro.taskmanager.commands;
 
-import me.colormaestro.taskmanager.data.MemberDAO;
 import me.colormaestro.taskmanager.data.TaskDAO;
-import me.colormaestro.taskmanager.model.MemberInProgressTasksInfo;
+import me.colormaestro.taskmanager.model.BasicMemberInfo;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
-import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 import org.jetbrains.annotations.NotNull;
 
@@ -26,27 +24,34 @@ public class NeedTasks implements CommandExecutor {
 
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
-        Player p = (Player) sender;
         Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
             try {
-                List<MemberInProgressTasksInfo> members = taskDAO.fetchMembersWithFewTasks();
-                Bukkit.getScheduler().runTask(plugin, () -> sendMessage(p, members));
+                int limit = args.length > 0 ? Integer.parseInt(args[0]) : 0;
+                List<BasicMemberInfo> members = taskDAO
+                        .fetchMembersDashboardInfo()
+                        .stream()
+                        .filter(basicMemberInfo -> basicMemberInfo.doing() <= limit)
+                        .toList();
+                Bukkit.getScheduler().runTask(plugin, () -> sendMessage(sender, members));
             } catch (SQLException ex) {
-                Bukkit.getScheduler().runTask(plugin, () -> p.sendMessage(ChatColor.RED + ex.getMessage()));
+                Bukkit.getScheduler().runTask(plugin, () -> sender.sendMessage(ChatColor.RED + ex.getMessage()));
                 ex.printStackTrace();
+            } catch (NumberFormatException ex) {
+                Bukkit.getScheduler().runTask(plugin,
+                        () -> sender.sendMessage(ChatColor.RED + "Limit must be numerical value!"));
             }
         });
         return true;
     }
 
-    private void sendMessage(Player player, List<MemberInProgressTasksInfo> members) {
+    private void sendMessage(CommandSender sender, List<BasicMemberInfo> members) {
         if (members.isEmpty()) {
-            player.sendMessage(ChatColor.GREEN + "Everyone has enough tasks");
+            sender.sendMessage(ChatColor.GREEN + "Everyone has enough tasks");
             return;
         }
-        player.sendMessage(ChatColor.GOLD + "-=-=-=- Members running out of tasks -=-=-=-");
-        for (MemberInProgressTasksInfo memberInfo : members) {
-            player.sendMessage(memberInfo.ign() + ChatColor.ITALIC + " (" + memberInfo.doing() + " tasks in progress)");
+        sender.sendMessage(ChatColor.GOLD + "-=-=-=- Members running out of tasks -=-=-=-");
+        for (BasicMemberInfo memberInfo : members) {
+            sender.sendMessage(memberInfo.ign() + ChatColor.ITALIC + " (" + memberInfo.doing() + " tasks in progress)");
         }
     }
 }

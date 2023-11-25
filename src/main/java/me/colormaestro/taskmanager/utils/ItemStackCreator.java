@@ -24,7 +24,6 @@ import java.util.UUID;
 
 public class ItemStackCreator {
     private final static int LORE_WIDTH_LIMIT = 40;
-
     private final Plugin plugin;
 
     public ItemStackCreator(Plugin plugin) {
@@ -48,7 +47,7 @@ public class ItemStackCreator {
     private List<String> createMemberStackLore(int doing, int finished, int approved, Date lastLogin) {
         List<String> lore = new ArrayList<>();
 
-        lore.add(ChatColor.GRAY + "Opened: " + ChatColor.GOLD + doing);
+        lore.add(ChatColor.GRAY + "In progress: " + ChatColor.GOLD + doing);
         lore.add(ChatColor.GRAY + "Finished: " + ChatColor.GREEN + finished);
         lore.add(ChatColor.GRAY + "Approved: " + ChatColor.AQUA + approved);
 

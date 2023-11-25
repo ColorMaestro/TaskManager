@@ -6,7 +6,7 @@ import me.colormaestro.taskmanager.data.TaskDAO;
 import me.colormaestro.taskmanager.model.AdvisedTask;
 import me.colormaestro.taskmanager.model.IdleTask;
 import me.colormaestro.taskmanager.model.Member;
-import me.colormaestro.taskmanager.model.MemberDashboardInfo;
+import me.colormaestro.taskmanager.model.BasicMemberInfo;
 import me.colormaestro.taskmanager.model.Task;
 import net.md_5.bungee.api.chat.ComponentBuilder;
 import org.bukkit.Bukkit;
@@ -37,7 +37,7 @@ public class Tasks implements CommandExecutor {
             {"/tasks help [page]", "shows this help"},
             {"/dashboard", "shows tasks dashboard"},
             {"/dashboard <IGN>", "jumps directly in dashboard to selected member tasks"},
-            {"/tasks given", "shows tasks, which you are advising"},
+            {"/tasks supervised", "shows tasks, which you are advising"},
             {"/tasks stats", "shows task statistics"},
             {"/tasks prepared", "shows task which are prepared for members"},
             {"/tasks idle", "shows task on which members work too long"},
@@ -47,7 +47,7 @@ public class Tasks implements CommandExecutor {
     private final String[][] HELP_PAGE_2 = {
             {"/visittask <id>", "teleports to the task workplace"},
             {"/taskinfo <id>", "obtains info in book for related task"},
-            {"/needtasks", "shows members who have less than 2 tasks in progress"},
+            {"/needtasks [limit]", "shows members who have up to limit tasks in progress (default is 0)"},
             {"/addmember <IGN>", "adds player as member"},
             {"/addtask <IGN>", "creates task assignment book with blank description"},
             {"/addtask <IGN> [id]", "creates task assignment book, description is taken from selected task"},
@@ -88,7 +88,7 @@ public class Tasks implements CommandExecutor {
             return true;
         }
 
-        if (args.length == 1 && args[0].equals("given")) {
+        if (args.length == 1 && args[0].equals("supervised")) {
             Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
                 try {
                     Member member = memberDAO.findMember(player.getUniqueId());
@@ -105,7 +105,7 @@ public class Tasks implements CommandExecutor {
         if (args.length == 1 && args[0].equals("stats")) {
             Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
                 try {
-                    List<MemberDashboardInfo> stats = taskDAO.fetchMembersDashboardInfo();
+                    List<BasicMemberInfo> stats = taskDAO.fetchMembersDashboardInfo();
 
                     Bukkit.getScheduler().runTask(plugin, () -> {
                         ItemStack book = buildStatsBook(stats);
@@ -247,7 +247,7 @@ public class Tasks implements CommandExecutor {
         }
     }
 
-    private ItemStack buildStatsBook(List<MemberDashboardInfo> stats) {
+    private ItemStack buildStatsBook(List<BasicMemberInfo> stats) {
         ItemStack book = new ItemStack(Material.WRITTEN_BOOK);
         BookMeta bookMeta = (BookMeta) book.getItemMeta();
         // Generates random headline color in book
@@ -256,7 +256,7 @@ public class Tasks implements CommandExecutor {
         ComponentBuilder builder =
                 new ComponentBuilder(color + "" + ChatColor.BOLD + "Holy grail of all members\n");
         int pageRows = 0;
-        for (MemberDashboardInfo data : stats) {
+        for (BasicMemberInfo data : stats) {
             String row = data.ign() + " " + ChatColor.GOLD + data.doing() +
                     " " + ChatColor.GREEN + data.finished() +
                     " " + ChatColor.AQUA + data.approved() + "\n";

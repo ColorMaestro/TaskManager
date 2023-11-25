@@ -6,8 +6,7 @@ import me.colormaestro.taskmanager.data.TaskDAO;
 import me.colormaestro.taskmanager.model.AdvisedTask;
 import me.colormaestro.taskmanager.model.IdleTask;
 import me.colormaestro.taskmanager.model.Member;
-import me.colormaestro.taskmanager.model.MemberDashboardInfo;
-import me.colormaestro.taskmanager.model.MemberInProgressTasksInfo;
+import me.colormaestro.taskmanager.model.BasicMemberInfo;
 import me.colormaestro.taskmanager.model.Task;
 import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.ComponentBuilder;
@@ -49,17 +48,17 @@ public class RunnablesCreator {
     public Runnable showDashboardView(HumanEntity player, int page) {
         return () -> {
             try {
-                List<MemberDashboardInfo> stats = taskDAO.fetchMembersDashboardInfo();
+                List<BasicMemberInfo> stats = taskDAO.fetchMembersDashboardInfo();
                 int totalPages = stats.size() / PAGE_SIZE + 1;
                 // Variable used in lambda should be final or effectively final
-                List<MemberDashboardInfo> finalStats = getPageFromList(stats, page);
+                List<BasicMemberInfo> finalStats = getPageFromList(stats, page);
                 Bukkit.getScheduler().runTask(plugin, () -> {
                     String inventoryTitle = ChatColor.BLUE + "" + ChatColor.BOLD + "Tasks Dashboard" + ChatColor.RESET + " (" + page + "/" + totalPages + ") " + Directives.DASHBOARD;
                     InventoryBuilder builder = new InventoryBuilder(player, inventoryTitle);
 
                     ItemStack stack;
                     int position = 0;
-                    for (MemberDashboardInfo memberInfo : finalStats) {
+                    for (BasicMemberInfo memberInfo : finalStats) {
                         stack = stackCreator.createMemberStack(
                                 memberInfo.uuid(),
                                 memberInfo.ign(),
@@ -84,7 +83,7 @@ public class RunnablesCreator {
                             .addItemStack(LAST_ROW_RIGHT_FROM_MIDDLE, Material.CLOCK,
                                     ChatColor.GOLD + "Show idle tasks")
                             .addItemStack(LAST_ROW_THIRD, Material.PAPER,
-                                    ChatColor.WHITE + "Show members who are running out of tasks");
+                                    ChatColor.GOLD + "Show members who need tasks");
 
                     player.openInventory(builder.build());
                 });
@@ -327,19 +326,23 @@ public class RunnablesCreator {
         };
     }
     
-    public Runnable showNeedTasksView(HumanEntity player, int page) {
+    public Runnable showNeedTasksView(HumanEntity player, int limit, int page) {
         return () -> {
             try {
-                List<MemberInProgressTasksInfo> stats = taskDAO.fetchMembersWithFewTasks();
+                List<BasicMemberInfo> stats = taskDAO
+                        .fetchMembersDashboardInfo()
+                        .stream()
+                        .filter(basicMemberInfo -> basicMemberInfo.doing() <= limit)
+                        .toList();
                 int totalPages = stats.size() / PAGE_SIZE + 1;
-                List<MemberInProgressTasksInfo> finalStats = getPageFromList(stats, page);
+                List<BasicMemberInfo> finalStats = getPageFromList(stats, page);
                 Bukkit.getScheduler().runTask(plugin, () -> {
-                    String title = ChatColor.GOLD + "" + ChatColor.BOLD + "Members out of tasks" + ChatColor.RESET + " (" + page + "/" + totalPages + ") " + Directives.NEED_TASKS;
+                    String title = ChatColor.RED + "" + ChatColor.BOLD + "Members with " + limit + " or less tasks" + ChatColor.RESET + " (" + page + "/" + totalPages + ") " + Directives.NEED_TASKS;
                     InventoryBuilder builder = new InventoryBuilder(player, title);
 
                     ItemStack stack;
                     int position = 0;
-                    for (MemberInProgressTasksInfo memberInfo : finalStats) {
+                    for (BasicMemberInfo memberInfo : finalStats) {
                         stack = stackCreator.createNeedTasksStack(
                                 memberInfo.uuid(),
                                 memberInfo.ign(),
@@ -353,9 +356,21 @@ public class RunnablesCreator {
                     ItemStack nextPageLink = new ItemStack(Material.ARROW);
                     nextPageLink.setItemMeta(createPaginationItemMeta(page, totalPages, true));
 
+                    ItemStack decreaseLimit = new ItemStack(Material.SMALL_AMETHYST_BUD);
+                    decreaseLimit.setItemMeta(createLimitMeta(limit, false));
+                    ItemStack increaseLimit = new ItemStack(Material.AMETHYST_CLUSTER);
+                    increaseLimit.setItemMeta(createLimitMeta(limit, true));
+
                     builder.addPaginationItemStacks(previousPageLink, nextPageLink)
+                            .addItemStack(LAST_ROW_LEFT_FROM_MIDDLE, decreaseLimit)
+                            .addItemStack(LAST_ROW_RIGHT_FROM_MIDDLE, increaseLimit)
                             .addItemStack(LAST_ROW_MIDDLE, Material.SPECTRAL_ARROW,
                                     ChatColor.AQUA + "Back to dashboard");
+
+                    player.getPersistentDataContainer().set(
+                            new NamespacedKey(plugin, DataContainerKeys.CURRENT_LIMIT),
+                            PersistentDataType.INTEGER,
+                            limit);
 
                     player.openInventory(builder.build());
                 });
@@ -505,6 +520,17 @@ public class RunnablesCreator {
                     PersistentDataType.STRING,
                     memberName);
         }
+
+        return builder.build();
+    }
+
+    private ItemMeta createLimitMeta(int currentLimit, boolean increaseLimit) {
+        ItemMetaBuilder builder = new ItemMetaBuilder()
+                .setDisplayName(increaseLimit ? "Increase limit" : "Decrease limit")
+                .setPersistentData(
+                        new NamespacedKey(plugin, DataContainerKeys.CURRENT_LIMIT),
+                        PersistentDataType.INTEGER,
+                        currentLimit);
 
         return builder.build();
     }
