@@ -12,6 +12,7 @@ import org.bukkit.persistence.PersistentDataHolder;
 import org.bukkit.persistence.PersistentDataType;
 
 public class NeedTasksViewListener extends InventoryListener {
+    private static final int MAX_LIMIT = 10;
 
     public NeedTasksViewListener(RunnablesCreator creator) {
         super(creator, Directives.NEED_TASKS);
@@ -26,6 +27,8 @@ public class NeedTasksViewListener extends InventoryListener {
     void handleEvent(HumanEntity player, ItemStack itemStack) {
         switch (itemStack.getType()) {
             case PLAYER_HEAD -> handlePlayerHeadClick(player, itemStack.getItemMeta());
+            case SMALL_AMETHYST_BUD -> decreaseLimit(player, itemStack.getItemMeta());
+            case AMETHYST_CLUSTER -> increaseLimit(player, itemStack.getItemMeta());
             case ARROW -> handleArrowClick(player, itemStack.getItemMeta());
             case SPECTRAL_ARROW -> Bukkit.getScheduler()
                     .runTaskAsynchronously(creator.getPlugin(), creator.showDashboardView(player, 1));
@@ -38,7 +41,32 @@ public class NeedTasksViewListener extends InventoryListener {
     }
 
     private void handleArrowClick(HumanEntity player, PersistentDataHolder holder) {
+        int currentLimit = extractPersistentValue(player, DataContainerKeys.CURRENT_LIMIT, PersistentDataType.INTEGER);
         Bukkit.getScheduler().runTaskAsynchronously(creator.getPlugin(),
-                creator.showNeedTasksView(player, 0, determineNextPage(holder)));
+                creator.showNeedTasksView(player, currentLimit, determineNextPage(holder)));
+    }
+
+    private void decreaseLimit(HumanEntity player, PersistentDataHolder holder) {
+        int currentLimit = extractPersistentValue(holder, DataContainerKeys.CURRENT_LIMIT, PersistentDataType.INTEGER);
+
+        currentLimit--;
+
+        if (currentLimit < 0)
+            currentLimit = 0;
+
+        Bukkit.getScheduler().runTaskAsynchronously(creator.getPlugin(),
+                creator.showNeedTasksView(player, currentLimit, 1));
+    }
+
+    private void increaseLimit(HumanEntity player, PersistentDataHolder holder) {
+        int currentLimit = extractPersistentValue(holder, DataContainerKeys.CURRENT_LIMIT, PersistentDataType.INTEGER);
+
+        currentLimit++;
+
+        if (currentLimit > MAX_LIMIT)
+            currentLimit = MAX_LIMIT;
+
+        Bukkit.getScheduler().runTaskAsynchronously(creator.getPlugin(),
+                creator.showNeedTasksView(player, currentLimit, 1));
     }
 }

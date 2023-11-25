@@ -8,4 +8,5 @@ public class DataContainerKeys {
     public final static String CURRENT_PAGE = "current_page";
     public final static String TOTAL_PAGES = "total_pages";
     public final static String TURN_NEXT_PAGE = "turn_next_page";
+    public final static String CURRENT_LIMIT = "current_limit";
 }

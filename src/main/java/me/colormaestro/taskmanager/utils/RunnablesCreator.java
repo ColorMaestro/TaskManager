@@ -356,9 +356,21 @@ public class RunnablesCreator {
                     ItemStack nextPageLink = new ItemStack(Material.ARROW);
                     nextPageLink.setItemMeta(createPaginationItemMeta(page, totalPages, true));
 
+                    ItemStack decreaseLimit = new ItemStack(Material.SMALL_AMETHYST_BUD);
+                    decreaseLimit.setItemMeta(createLimitMeta(limit, false));
+                    ItemStack increaseLimit = new ItemStack(Material.AMETHYST_CLUSTER);
+                    increaseLimit.setItemMeta(createLimitMeta(limit, true));
+
                     builder.addPaginationItemStacks(previousPageLink, nextPageLink)
+                            .addItemStack(LAST_ROW_LEFT_FROM_MIDDLE, decreaseLimit)
+                            .addItemStack(LAST_ROW_RIGHT_FROM_MIDDLE, increaseLimit)
                             .addItemStack(LAST_ROW_MIDDLE, Material.SPECTRAL_ARROW,
                                     ChatColor.AQUA + "Back to dashboard");
+
+                    player.getPersistentDataContainer().set(
+                            new NamespacedKey(plugin, DataContainerKeys.CURRENT_LIMIT),
+                            PersistentDataType.INTEGER,
+                            limit);
 
                     player.openInventory(builder.build());
                 });
@@ -508,6 +520,17 @@ public class RunnablesCreator {
                     PersistentDataType.STRING,
                     memberName);
         }
+
+        return builder.build();
+    }
+
+    private ItemMeta createLimitMeta(int currentLimit, boolean increaseLimit) {
+        ItemMetaBuilder builder = new ItemMetaBuilder()
+                .setDisplayName(increaseLimit ? "Increase limit" : "Decrease limit")
+                .setPersistentData(
+                        new NamespacedKey(plugin, DataContainerKeys.CURRENT_LIMIT),
+                        PersistentDataType.INTEGER,
+                        currentLimit);
 
         return builder.build();
     }
