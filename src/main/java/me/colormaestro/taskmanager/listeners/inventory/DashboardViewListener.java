@@ -35,7 +35,7 @@ public class DashboardViewListener extends InventoryListener implements Listener
             case CLOCK -> Bukkit.getScheduler()
                     .runTaskAsynchronously(creator.getPlugin(), creator.showIdleTasksView(player, 1));
             case PAPER -> Bukkit.getScheduler()
-                    .runTaskAsynchronously(creator.getPlugin(), creator.showNeedTasksView(player, 1));
+                    .runTaskAsynchronously(creator.getPlugin(), creator.showNeedTasksView(player, 0, 1));
         }
     }
 

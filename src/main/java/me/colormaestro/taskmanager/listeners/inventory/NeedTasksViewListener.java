@@ -39,6 +39,6 @@ public class NeedTasksViewListener extends InventoryListener {
 
     private void handleArrowClick(HumanEntity player, PersistentDataHolder holder) {
         Bukkit.getScheduler().runTaskAsynchronously(creator.getPlugin(),
-                creator.showNeedTasksView(player, determineNextPage(holder)));
+                creator.showNeedTasksView(player, 0, determineNextPage(holder)));
     }
 }

@@ -326,13 +326,13 @@ public class RunnablesCreator {
         };
     }
     
-    public Runnable showNeedTasksView(HumanEntity player, int page) {
+    public Runnable showNeedTasksView(HumanEntity player, int limit, int page) {
         return () -> {
             try {
                 List<BasicMemberInfo> stats = taskDAO
                         .fetchMembersDashboardInfo()
                         .stream()
-                        .filter(basicMemberInfo -> basicMemberInfo.doing() <= 1)
+                        .filter(basicMemberInfo -> basicMemberInfo.doing() <= limit)
                         .toList();
                 int totalPages = stats.size() / PAGE_SIZE + 1;
                 List<BasicMemberInfo> finalStats = getPageFromList(stats, page);
