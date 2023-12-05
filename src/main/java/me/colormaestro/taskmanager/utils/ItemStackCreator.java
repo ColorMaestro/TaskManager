@@ -55,8 +55,11 @@ public class ItemStackCreator {
         LocalDate sqlLocalDate = lastLogin.toLocalDate();
         long daysDelta = ChronoUnit.DAYS.between(sqlLocalDate, currentDate);
 
-        lore.add("");
         lore.add(ChatColor.GRAY + "Last online: " + ChatColor.WHITE + daysDelta + " day(s) ago");
+
+        lore.add("");
+        lore.add(ChatColor.YELLOW + "➜ Left-Click to view active tasks");
+        lore.add(ChatColor.AQUA + "➜ Right-Click to add new task");
 
         return lore;
     }
