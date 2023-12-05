@@ -135,6 +135,8 @@ public class RunnablesCreator {
 
                     builder.addPaginationItemStacks(previousPageLink, nextPageLink)
                             .addItemStack(LAST_ROW_MIDDLE, approvedTasksLink)
+                            .addItemStack(LAST_ROW_RIGHT_FROM_MIDDLE, Material.WRITABLE_BOOK,
+                                    ChatColor.GOLD + "Add new task for " + ign)
                             .addItemStack(LAST_ROW_LEFT_FROM_MIDDLE, Material.SPECTRAL_ARROW,
                                     ChatColor.AQUA + "Back to dashboard");
 
