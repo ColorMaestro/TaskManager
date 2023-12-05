@@ -2,6 +2,7 @@ package me.colormaestro.taskmanager.listeners.inventory;
 
 import me.colormaestro.taskmanager.utils.DataContainerKeys;
 import me.colormaestro.taskmanager.utils.Directives;
+import me.colormaestro.taskmanager.utils.ItemStackCreator;
 import me.colormaestro.taskmanager.utils.RunnablesCreator;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.HumanEntity;
@@ -15,8 +16,11 @@ import org.bukkit.persistence.PersistentDataType;
 
 public class DashboardViewListener extends InventoryListener implements Listener {
 
+    private final ItemStackCreator stackCreator;
+
     public DashboardViewListener(RunnablesCreator creator) {
         super(creator, Directives.DASHBOARD);
+        stackCreator = new ItemStackCreator(creator.getPlugin());
     }
 
     @EventHandler
@@ -27,7 +31,7 @@ public class DashboardViewListener extends InventoryListener implements Listener
     @Override
     void handleEvent(HumanEntity player, ItemStack itemStack, ClickType clickType) {
         switch (itemStack.getType()) {
-            case PLAYER_HEAD -> handlePlayerHeadClick(player, itemStack.getItemMeta());
+            case PLAYER_HEAD -> handlePlayerHeadClick(player, itemStack.getItemMeta(), clickType.isLeftClick());
             case ENDER_EYE -> Bukkit.getScheduler()
                     .runTaskAsynchronously(creator.getPlugin(), creator.showSupervisedTasksView(player, 1));
             case ARROW -> handleArrowClick(player, itemStack.getItemMeta());
@@ -40,9 +44,15 @@ public class DashboardViewListener extends InventoryListener implements Listener
         }
     }
 
-    private void handlePlayerHeadClick(HumanEntity player, PersistentDataHolder holder) {
+    private void handlePlayerHeadClick(HumanEntity player, PersistentDataHolder holder, boolean isLeftClick) {
         String ign = extractPersistentValue(holder, DataContainerKeys.MEMBER_NAME, PersistentDataType.STRING);
-        Bukkit.getScheduler().runTaskAsynchronously(creator.getPlugin(), creator.showActiveTasksView(player, ign, 1));
+        if (isLeftClick) {
+            Bukkit.getScheduler().runTaskAsynchronously(creator.getPlugin(), creator.showActiveTasksView(player, ign, 1));
+        } else {
+            ItemStack book = stackCreator.createAssignmentBook(ign, "");
+            player.closeInventory();
+            player.getInventory().addItem(book);
+        }
     }
 
     private void handleArrowClick(HumanEntity player, PersistentDataHolder holder) {
