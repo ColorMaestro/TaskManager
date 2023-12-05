@@ -7,6 +7,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.inventory.ClickType;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.persistence.PersistentDataHolder;
@@ -24,7 +25,7 @@ public class DashboardViewListener extends InventoryListener implements Listener
     }
 
     @Override
-    void handleEvent(HumanEntity player, ItemStack itemStack) {
+    void handleEvent(HumanEntity player, ItemStack itemStack, ClickType clickType) {
         switch (itemStack.getType()) {
             case PLAYER_HEAD -> handlePlayerHeadClick(player, itemStack.getItemMeta());
             case ENDER_EYE -> Bukkit.getScheduler()
