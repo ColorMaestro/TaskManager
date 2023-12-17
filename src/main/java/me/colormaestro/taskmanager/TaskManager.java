@@ -111,7 +111,7 @@ public final class TaskManager extends JavaPlugin {
     }
 
     private void performBindingsSetup() {
-        RunnablesCreator creator = new RunnablesCreator(this, taskDAO, memberDAO);
+        RunnablesCreator creator = new RunnablesCreator(this, taskDAO, memberDAO, decentHolograms);
 
         ReloadableTabCompleter tasksTabCompleter = new TasksTabCompleter(memberDAO);
         ReloadableTabCompleter membersTabCompleter = new MembersTabCompleter(memberDAO);
@@ -134,7 +134,7 @@ public final class TaskManager extends JavaPlugin {
         setCommandExecutor("tasks", new Tasks(this, taskDAO, memberDAO));
         setCommandExecutor("addtask", new AddTask(this, taskDAO));
         setCommandExecutor("preparetask", new PrepareTask(this));
-        setCommandExecutor("assigntask", new AssignTask(this, taskDAO, memberDAO, decentHolograms));
+        setCommandExecutor("assigntask", new AssignTask(creator));
         setCommandExecutor("finishtask", new FinishTask(taskDAO, memberDAO, decentHolograms, dynmap));
         setCommandExecutor("approvetask", new ApproveTask(taskDAO, memberDAO, decentHolograms, dynmap));
         setCommandExecutor("visittask", new VisitTask(creator));
