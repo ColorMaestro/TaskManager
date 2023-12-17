@@ -390,6 +390,61 @@ public class RunnablesCreator {
         };
     }
 
+    public Runnable showAssignTasksView(HumanEntity player, int taskId, int page) {
+        return () -> {
+            try {
+                List<BasicMemberInfo> stats = taskDAO.fetchMembersDashboardInfo();
+                int totalPages = stats.size() / PAGE_SIZE + 1;
+                // Variable used in lambda should be final or effectively final
+                List<BasicMemberInfo> finalStats = getPageFromList(stats, page);
+                Bukkit.getScheduler().runTask(plugin, () -> {
+                    String inventoryTitle = ChatColor.BLUE + "" + ChatColor.BOLD + "Select Member" + ChatColor.RESET + " (" + page + "/" + totalPages + ") " + Directives.SELECT_MEMBER;
+                    InventoryBuilder builder = new InventoryBuilder(player, inventoryTitle);
+
+                    ItemStack stack;
+                    int position = 0;
+                    for (BasicMemberInfo memberInfo : finalStats) {
+                        stack = new ItemStack(Material.PLAYER_HEAD);
+
+                        ItemMeta meta = new SkullMetaBuilder()
+                                .setOwningPlayer(Bukkit.getOfflinePlayer(UUID.fromString(memberInfo.uuid())))
+                                .setDisplayName(ChatColor.BLUE + "" + ChatColor.BOLD + memberInfo.ign())
+                                .setLore(List.of(ChatColor.YELLOW + "➜ Click to assign"))
+                                .setPersistentData(
+                                        new NamespacedKey(plugin, DataContainerKeys.MEMBER_NAME),
+                                        PersistentDataType.STRING,
+                                        memberInfo.ign())
+                                .build();
+
+                        stack.setItemMeta(meta);
+                        builder.addItemStack(position, stack);
+                        position++;
+                    }
+
+                    player.getPersistentDataContainer().set(
+                            new NamespacedKey(plugin, DataContainerKeys.TASK_ID),
+                            PersistentDataType.INTEGER,
+                            taskId);
+
+                    ItemStack previousPageLink = new ItemStack(Material.ARROW);
+                    previousPageLink.setItemMeta(createPaginationItemMeta(page, totalPages, false));
+                    ItemStack nextPageLink = new ItemStack(Material.ARROW);
+                    nextPageLink.setItemMeta(createPaginationItemMeta(page, totalPages, true));
+
+                    builder.addPaginationItemStacks(previousPageLink, nextPageLink)
+                            .addItemStack(LAST_ROW_MIDDLE, Material.SPECTRAL_ARROW,
+                                    ChatColor.GRAY + "Back to prepared tasks");
+
+                    player.openInventory(builder.build());
+                });
+            } catch (SQLException ex) {
+                Bukkit.getScheduler().runTask(plugin,
+                        () -> player.sendMessage(ChatColor.RED + ex.getMessage()));
+                ex.printStackTrace();
+            }
+        };
+    }
+
     public Runnable teleportPlayerToTask(HumanEntity player, int taskId) {
         return () -> {
             try {

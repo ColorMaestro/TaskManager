@@ -12,10 +12,10 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.persistence.PersistentDataHolder;
 import org.bukkit.persistence.PersistentDataType;
 
-public class PreparedTasksViewListener extends InventoryListener {
+public class SelectMemberListener extends InventoryListener {
 
-    public PreparedTasksViewListener(RunnablesCreator creator) {
-        super(creator, Directives.PREPARED_TASKS);
+    public SelectMemberListener(RunnablesCreator creator) {
+        super(creator, Directives.SELECT_MEMBER);
     }
 
     @EventHandler
@@ -26,24 +26,23 @@ public class PreparedTasksViewListener extends InventoryListener {
     @Override
     void handleEvent(HumanEntity player, ItemStack itemStack, ClickType clickType) {
         switch (itemStack.getType()) {
-            case LIGHT_GRAY_CONCRETE -> handleConcreteClick(player, itemStack.getItemMeta(), clickType.isLeftClick());
+            case PLAYER_HEAD -> handlePlayerHeadClick(player, itemStack.getItemMeta());
             case SPECTRAL_ARROW -> Bukkit.getScheduler()
-                    .runTaskAsynchronously(creator.getPlugin(), creator.showDashboardView(player, 1));
+                    .runTaskAsynchronously(creator.getPlugin(), creator.showPreparedTasksView(player, 1));
             case ARROW -> handleArrowClick(player, itemStack.getItemMeta());
         }
     }
 
-    private void handleConcreteClick(HumanEntity player, PersistentDataHolder holder, boolean isLeftClick) {
-        int taskId = extractPersistentValue(holder, DataContainerKeys.TASK_ID, PersistentDataType.INTEGER);
-        if (isLeftClick) {
-            Bukkit.getScheduler().runTaskAsynchronously(creator.getPlugin(), creator.teleportPlayerToTask(player, taskId));
-        } else {
-            Bukkit.getScheduler().runTaskAsynchronously(creator.getPlugin(), creator.showAssignTasksView(player, taskId, 1));
-        }
+    private void handlePlayerHeadClick(HumanEntity player, PersistentDataHolder holder) {
+        String ign = extractPersistentValue(holder, DataContainerKeys.MEMBER_NAME, PersistentDataType.STRING);
+        int taskId = extractPersistentValue(player, DataContainerKeys.TASK_ID, PersistentDataType.INTEGER);
+        Bukkit.getScheduler().runTaskAsynchronously(creator.getPlugin(), creator.assignTask(ign, player, taskId));
+        player.closeInventory();
     }
 
     private void handleArrowClick(HumanEntity player, PersistentDataHolder holder) {
+        int taskId = extractPersistentValue(player, DataContainerKeys.TASK_ID, PersistentDataType.INTEGER);
         Bukkit.getScheduler().runTaskAsynchronously(creator.getPlugin(),
-                creator.showPreparedTasksView(player, determineNextPage(holder)));
+                creator.showAssignTasksView(player, taskId, determineNextPage(holder)));
     }
 }
