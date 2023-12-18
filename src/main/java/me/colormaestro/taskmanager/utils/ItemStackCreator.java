@@ -119,13 +119,7 @@ public class ItemStackCreator {
     }
 
     private ItemStack createTaskStack(Integer taskId, String title, TaskStatus status, List<String> lore) {
-        Material material = Material.ORANGE_CONCRETE;
-        switch (status) {
-            case FINISHED -> material = Material.LIME_CONCRETE;
-            case APPROVED -> material = Material.LIGHT_BLUE_CONCRETE;
-            case PREPARED -> material = Material.LIGHT_GRAY_CONCRETE;
-        }
-        ItemStack stack = new ItemStack(material);
+        ItemStack stack = new ItemStack(status.material);
 
         ItemMeta meta = new ItemMetaBuilder()
                 .setDisplayName(ChatColor.BLUE + "" + ChatColor.BOLD + title + " " + ChatColor.DARK_GRAY + "#" + taskId)

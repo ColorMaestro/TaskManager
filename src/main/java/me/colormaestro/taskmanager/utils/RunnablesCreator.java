@@ -587,13 +587,7 @@ public class RunnablesCreator {
         bookMeta.spigot().addPage(page);
         bookMeta.spigot().addPage(page2);
         bookMeta.setTitle("blank");
-        ChatColor tittleColor = switch (task.getStatus()) {
-            case DOING -> ChatColor.GOLD;
-            case FINISHED -> ChatColor.GREEN;
-            case APPROVED -> ChatColor.AQUA;
-            case PREPARED -> ChatColor.GRAY;
-        };
-        bookMeta.setDisplayName(tittleColor + "" + ChatColor.BOLD + "Task " + task.getId());
+        bookMeta.setDisplayName(task.getStatus().color + "" + ChatColor.BOLD + "Task " + task.getId());
         bookMeta.setAuthor(advisorName);
         book.setItemMeta(bookMeta);
         return book;
