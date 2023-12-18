@@ -87,7 +87,8 @@ public class ItemStackCreator {
             TaskStatus status,
             String assigneeIgn
     ) {
-        List<String> lore = createTaskStackLore(assigneeIgn, null, null, description);
+        List<String> lore = createTaskStackLore(assigneeIgn, null, null, description,
+                List.of(ChatColor.YELLOW + "➜ Click to teleport"));
         return createTaskStack(taskId, title, status, lore);
     }
 
@@ -99,7 +100,8 @@ public class ItemStackCreator {
             String assigneeName,
             String advisorName
     ) {
-        List<String> lore = createTaskStackLore(assigneeName, advisorName, dateAssigned, description);
+        List<String> lore = createTaskStackLore(assigneeName, advisorName, dateAssigned, description,
+                List.of(ChatColor.YELLOW + "➜ Click to teleport"));
         return createTaskStack(taskId, title, TaskStatus.DOING, lore);
     }
 
@@ -122,7 +124,12 @@ public class ItemStackCreator {
         return stack;
     }
 
-    private List<String> createTaskStackLore(String assigneeName, String advisorName, Date dateAssigned, String description) {
+    private List<String> createTaskStackLore(
+            String assigneeName,
+            String advisorName,
+            Date dateAssigned,
+            String description,
+            List<String> clickHints) {
         List<String> lore = new ArrayList<>();
 
         if (assigneeName != null) {
@@ -139,6 +146,11 @@ public class ItemStackCreator {
         }
 
         lore.addAll(formatTaskDescription(description));
+
+        if (!clickHints.isEmpty()) {
+            lore.add("");
+            lore.addAll(clickHints);
+        }
         return lore;
     }
 
