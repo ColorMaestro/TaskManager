@@ -22,6 +22,7 @@ import java.util.UUID;
 
 public class ItemStackCreator {
     private final static int LORE_WIDTH_LIMIT = 40;
+    private final List<String> DEFAULT_CLICK_HINTS = List.of(ChatColor.YELLOW + "➜ Click to teleport");;
     private final Plugin plugin;
 
     public ItemStackCreator(Plugin plugin) {
@@ -68,7 +69,10 @@ public class ItemStackCreator {
         ItemMeta meta = new SkullMetaBuilder()
                 .setOwningPlayer(Bukkit.getOfflinePlayer(UUID.fromString(uuid)))
                 .setDisplayName(ChatColor.BLUE + "" + ChatColor.BOLD + ign)
-                .setLore(List.of(ChatColor.WHITE + "" + doing + " tasks in progress"))
+                .setLore(List.of(
+                        ChatColor.WHITE + "" + doing + " tasks in progress",
+                        "",
+                        ChatColor.YELLOW + "➜ Click to see active tasks"))
                 .setPersistentData(new NamespacedKey(plugin, DataContainerKeys.MEMBER_NAME), PersistentDataType.STRING, ign)
                 .build();
 
@@ -80,6 +84,17 @@ public class ItemStackCreator {
         return createSupervisedTaskStack(taskId, title, description, status, null);
     }
 
+    public ItemStack createBasicTaskStack(
+            Integer taskId,
+            String title,
+            String description,
+            TaskStatus status,
+            List<String> clickHints
+    ) {
+        List<String> lore = createTaskStackLore(null, null, null, description, clickHints);
+        return createTaskStack(taskId, title, status, lore);
+    }
+
     public ItemStack createSupervisedTaskStack(
             Integer taskId,
             String title,
@@ -87,8 +102,7 @@ public class ItemStackCreator {
             TaskStatus status,
             String assigneeIgn
     ) {
-        List<String> lore = createTaskStackLore(assigneeIgn, null, null, description,
-                List.of(ChatColor.YELLOW + "➜ Click to teleport"));
+        List<String> lore = createTaskStackLore(assigneeIgn, null, null, description, DEFAULT_CLICK_HINTS);
         return createTaskStack(taskId, title, status, lore);
     }
 
@@ -100,8 +114,7 @@ public class ItemStackCreator {
             String assigneeName,
             String advisorName
     ) {
-        List<String> lore = createTaskStackLore(assigneeName, advisorName, dateAssigned, description,
-                List.of(ChatColor.YELLOW + "➜ Click to teleport"));
+        List<String> lore = createTaskStackLore(assigneeName, advisorName, dateAssigned, description, DEFAULT_CLICK_HINTS);
         return createTaskStack(taskId, title, TaskStatus.DOING, lore);
     }
 

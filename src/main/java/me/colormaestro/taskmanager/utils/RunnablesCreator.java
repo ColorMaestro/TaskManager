@@ -267,7 +267,10 @@ public class RunnablesCreator {
                                 task.getId(),
                                 task.getTitle(),
                                 task.getDescription(),
-                                task.getStatus());
+                                task.getStatus(),
+                                List.of(ChatColor.YELLOW + "➜ Left-Click to teleport",
+                                        ChatColor.AQUA + "➜ Right-Click to assign")
+                        );
                         builder.addItemStack(position, stack);
                         position++;
                     }
