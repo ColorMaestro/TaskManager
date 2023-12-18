@@ -87,7 +87,8 @@ public class ItemStackCreator {
             TaskStatus status,
             String assigneeIgn
     ) {
-        return createTaskStack(taskId, title, description, status, null, assigneeIgn, null);
+        List<String> lore = createTaskStackLore(assigneeIgn, null, null, description);
+        return createTaskStack(taskId, title, status, lore);
     }
 
     public ItemStack createIdleTaskStack(
@@ -98,18 +99,11 @@ public class ItemStackCreator {
             String assigneeName,
             String advisorName
     ) {
-        return createTaskStack(taskId, title, description, TaskStatus.DOING, dateAssigned, assigneeName, advisorName);
+        List<String> lore = createTaskStackLore(assigneeName, advisorName, dateAssigned, description);
+        return createTaskStack(taskId, title, TaskStatus.DOING, lore);
     }
 
-    private ItemStack createTaskStack(
-            Integer taskId,
-            String title,
-            String description,
-            TaskStatus status,
-            Date dateAssigned,
-            String assigneeName,
-            String advisorName
-    ) {
+    private ItemStack createTaskStack(Integer taskId, String title, TaskStatus status, List<String> lore) {
         Material material = Material.ORANGE_CONCRETE;
         switch (status) {
             case FINISHED -> material = Material.LIME_CONCRETE;
@@ -121,7 +115,7 @@ public class ItemStackCreator {
         ItemMeta meta = new ItemMetaBuilder()
                 .setDisplayName(ChatColor.BLUE + "" + ChatColor.BOLD + title + " " + ChatColor.DARK_GRAY + "#" + taskId)
                 .setPersistentData(new NamespacedKey(plugin, DataContainerKeys.TASK_ID), PersistentDataType.INTEGER, taskId)
-                .setLore(createTaskStackLore(assigneeName, advisorName, dateAssigned, description))
+                .setLore(lore)
                 .build();
 
         stack.setItemMeta(meta);
