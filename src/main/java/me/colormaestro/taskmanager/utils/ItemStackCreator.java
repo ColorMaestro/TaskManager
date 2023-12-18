@@ -7,11 +7,9 @@ import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
-import org.bukkit.OfflinePlayer;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.BookMeta;
 import org.bukkit.inventory.meta.ItemMeta;
-import org.bukkit.inventory.meta.SkullMeta;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.plugin.Plugin;
 
@@ -146,11 +144,12 @@ public class ItemStackCreator {
             lore.add(0, ChatColor.GRAY + "Duration: " + ChatColor.GOLD + daysDelta + " days");
         }
 
-        addTaskDescriptionToLore(lore, description);
+        lore.addAll(formatTaskDescription(description));
         return lore;
     }
 
-    private void addTaskDescriptionToLore(List<String> lore, String input) {
+    private List<String> formatTaskDescription(String input) {
+        List<String> lore = new ArrayList<>();
         String[] words = input.split("\\s+");
         StringBuilder currentString = new StringBuilder();
 
@@ -169,6 +168,8 @@ public class ItemStackCreator {
         if (!currentString.isEmpty()) {
             lore.add(ChatColor.GRAY + currentString.toString());
         }
+
+        return lore;
     }
 
     /**
