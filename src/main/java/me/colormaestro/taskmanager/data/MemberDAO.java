@@ -28,6 +28,9 @@ public class MemberDAO {
         if (!tableExists()) {
             createTable();
         }
+        if (!viewExists()) {
+            createView();
+        }
     }
 
     private boolean tableExists() {
@@ -36,6 +39,15 @@ public class MemberDAO {
             return rs.next();
         } catch (SQLException ex) {
             throw new RuntimeException("Failed to detect if the table PLAYERS exist", ex);
+        }
+    }
+
+    private boolean viewExists() {
+        try (Connection connection = DriverManager.getConnection(url);
+             ResultSet rs = connection.getMetaData().getTables(null, null, "ACTIVE_MEMBERS", new String[]{"VIEW"})) {
+            return rs.next();
+        } catch (SQLException ex) {
+            throw new RuntimeException("Failed to detect if the view ACTIVE_MEMBERS exist", ex);
         }
     }
 
@@ -48,10 +60,21 @@ public class MemberDAO {
                     "uuid VARCHAR(36) NOT NULL," +
                     "ign VARCHAR(30) NOT NULL," +
                     "last_login DATE NOT NULL," +
-                    "discord_id INTEGER" +
+                    "discord_id INTEGER," +
+                    "active BOOL DEFAULT true" +
                     ")");
         } catch (SQLException ex) {
             throw new RuntimeException("Failed to create PLAYERS table", ex);
+        }
+    }
+
+    private void createView() {
+        try (Connection connection = DriverManager.getConnection(url);
+             Statement st = connection.createStatement()) {
+
+            st.executeUpdate("CREATE VIEW ACTIVE_MEMBERS AS SELECT * FROM PLAYERS WHERE active = true");
+        } catch (SQLException ex) {
+            throw new RuntimeException("Failed to create ACTIVE_MEMBERS view", ex);
         }
     }
 
