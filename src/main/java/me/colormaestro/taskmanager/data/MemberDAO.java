@@ -25,12 +25,12 @@ public class MemberDAO {
     }
 
     private void initTable() {
-        if (!tableExits()) {
+        if (!tableExists()) {
             createTable();
         }
     }
 
-    private boolean tableExits() {
+    private boolean tableExists() {
         try (Connection connection = DriverManager.getConnection(url);
              ResultSet rs = connection.getMetaData().getTables(null, null, "PLAYERS", null)) {
             return rs.next();
