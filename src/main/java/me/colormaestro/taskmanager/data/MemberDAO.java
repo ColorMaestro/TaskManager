@@ -87,7 +87,7 @@ public class MemberDAO {
     public synchronized Member findMember(int id) throws SQLException, DataAccessException {
         try (Connection connection = DriverManager.getConnection(url);
              PreparedStatement st = connection.prepareStatement(
-                     "SELECT id, uuid, ign, last_login, discord_id FROM PLAYERS WHERE id = ?")) {
+                     "SELECT id, uuid, ign, last_login, discord_id FROM ACTIVE_MEMBERS WHERE id = ?")) {
 
             st.setInt(1, id);
             ResultSet rs = st.executeQuery();
@@ -115,7 +115,7 @@ public class MemberDAO {
     public synchronized Member findMember(String ign) throws SQLException, DataAccessException {
         try (Connection connection = DriverManager.getConnection(url);
              PreparedStatement st = connection.prepareStatement(
-                     "SELECT id, uuid, ign, last_login, discord_id FROM PLAYERS WHERE ign = ?")) {
+                     "SELECT id, uuid, ign, last_login, discord_id FROM ACTIVE_MEMBERS WHERE ign = ?")) {
 
             st.setString(1, ign);
             ResultSet rs = st.executeQuery();
@@ -143,7 +143,7 @@ public class MemberDAO {
     public synchronized Member findMember(UUID uuid) throws SQLException, DataAccessException {
         try (Connection connection = DriverManager.getConnection(url);
              PreparedStatement st = connection.prepareStatement(
-                     "SELECT id, uuid, ign, last_login, discord_id FROM PLAYERS WHERE uuid = ?")) {
+                     "SELECT id, uuid, ign, last_login, discord_id FROM ACTIVE_MEMBERS WHERE uuid = ?")) {
 
             st.setString(1, uuid.toString());
             ResultSet rs = st.executeQuery();
@@ -171,7 +171,7 @@ public class MemberDAO {
     public synchronized List<String> getMembersNames() throws SQLException {
         try (Connection connection = DriverManager.getConnection(url);
              PreparedStatement st = connection.prepareStatement(
-                     "SELECT ign FROM PLAYERS")) {
+                     "SELECT ign FROM ACTIVE_MEMBERS")) {
             ResultSet rs = st.executeQuery();
             List<String> result = new ArrayList<>();
             while (rs.next()) {

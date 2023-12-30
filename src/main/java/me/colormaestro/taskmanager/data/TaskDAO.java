@@ -489,7 +489,7 @@ public class TaskDAO {
                                count(tasks.id) filter (where status = 'DOING') as "doing",
                                count(tasks.id) filter (where status = 'FINISHED') as "finished",
                                count(tasks.id) filter (where status = 'APPROVED') as "approved"
-                             from players left join tasks on players.id = tasks.assignee_id
+                             from active_members left join tasks on active_members.id = tasks.assignee_id
                              group by ign, uuid, last_login
                              order by upper(ign)""")) {
             ResultSet rs = st.executeQuery();
