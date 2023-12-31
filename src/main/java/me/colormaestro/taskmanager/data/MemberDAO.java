@@ -87,7 +87,7 @@ public class MemberDAO {
     public synchronized Member findMember(int id) throws SQLException, DataAccessException {
         try (Connection connection = DriverManager.getConnection(url);
              PreparedStatement st = connection.prepareStatement(
-                     "SELECT id, uuid, ign, last_login, discord_id FROM ACTIVE_MEMBERS WHERE id = ?")) {
+                     "SELECT id, uuid, ign, last_login, discord_id, active FROM PLAYERS WHERE id = ?")) {
 
             st.setInt(1, id);
             ResultSet rs = st.executeQuery();
@@ -98,8 +98,8 @@ public class MemberDAO {
                     rs.getString("uuid"),
                     rs.getString("ign"),
                     rs.getDate("last_login"),
-                    ParsingUtils.getLongOrNull(rs, "discord_id")
-            );
+                    ParsingUtils.getLongOrNull(rs, "discord_id"),
+                    rs.getBoolean("active"));
             member.setId(rs.getInt("id"));
             rs.close();
             return member;
@@ -115,7 +115,7 @@ public class MemberDAO {
     public synchronized Member findMember(String ign) throws SQLException, DataAccessException {
         try (Connection connection = DriverManager.getConnection(url);
              PreparedStatement st = connection.prepareStatement(
-                     "SELECT id, uuid, ign, last_login, discord_id FROM ACTIVE_MEMBERS WHERE ign = ?")) {
+                     "SELECT id, uuid, ign, last_login, discord_id, active FROM PLAYERS WHERE ign = ?")) {
 
             st.setString(1, ign);
             ResultSet rs = st.executeQuery();
@@ -126,8 +126,8 @@ public class MemberDAO {
                     rs.getString("uuid"),
                     rs.getString("ign"),
                     rs.getDate("last_login"),
-                    ParsingUtils.getLongOrNull(rs, "discord_id")
-            );
+                    ParsingUtils.getLongOrNull(rs, "discord_id"),
+                    rs.getBoolean("active"));
             member.setId(rs.getInt("id"));
             rs.close();
             return member;
@@ -143,7 +143,7 @@ public class MemberDAO {
     public synchronized Member findMember(UUID uuid) throws SQLException, DataAccessException {
         try (Connection connection = DriverManager.getConnection(url);
              PreparedStatement st = connection.prepareStatement(
-                     "SELECT id, uuid, ign, last_login, discord_id FROM ACTIVE_MEMBERS WHERE uuid = ?")) {
+                     "SELECT id, uuid, ign, last_login, discord_id, active FROM PLAYERS WHERE uuid = ?")) {
 
             st.setString(1, uuid.toString());
             ResultSet rs = st.executeQuery();
@@ -154,8 +154,8 @@ public class MemberDAO {
                     rs.getString("uuid"),
                     rs.getString("ign"),
                     rs.getDate("last_login"),
-                    ParsingUtils.getLongOrNull(rs, "discord_id")
-            );
+                    ParsingUtils.getLongOrNull(rs, "discord_id"),
+                    rs.getBoolean("active"));
             member.setId(rs.getInt("id"));
             rs.close();
             return member;
@@ -276,6 +276,26 @@ public class MemberDAO {
             st.setDate(1, new Date(System.currentTimeMillis()));
             st.setString(2, uuid.toString());
             st.executeUpdate();
+        }
+    }
+
+    /**
+     * Sets member's activity.
+     *
+     * @param ign member's name
+     * @param active whether member should be marked as active or not
+     * @throws SQLException if SQL error arise
+     */
+    public synchronized void updateActivity(String ign, boolean active) throws SQLException, DataAccessException {
+        try (Connection connection = DriverManager.getConnection(url);
+             PreparedStatement st = connection.prepareStatement(
+                     "UPDATE PLAYERS SET active = ? WHERE ign = ?")) {
+            st.setBoolean(1, active);
+            st.setString(2, ign);
+            int affected = st.executeUpdate();
+            if (affected == 0) {
+                throw new DataAccessException("Failed to update activity for member with name " + ign + ".");
+            }
         }
     }
 }

@@ -10,6 +10,7 @@ import me.colormaestro.taskmanager.commands.FinishTask;
 import me.colormaestro.taskmanager.commands.LinkDiscord;
 import me.colormaestro.taskmanager.commands.NeedTasks;
 import me.colormaestro.taskmanager.commands.PrepareTask;
+import me.colormaestro.taskmanager.commands.RemoveMember;
 import me.colormaestro.taskmanager.commands.ReturnTask;
 import me.colormaestro.taskmanager.commands.SetTaskPlace;
 import me.colormaestro.taskmanager.commands.TaskInfo;
@@ -132,6 +133,7 @@ public final class TaskManager extends JavaPlugin {
         registerEventListener(new SelectMemberListener(creator));
 
         setCommandExecutor("addmember", new AddMember(this, memberDAO, tasksTabCompleter, membersTabCompleter));
+        setCommandExecutor("removemember", new RemoveMember(this, memberDAO, tasksTabCompleter, membersTabCompleter));
         setCommandExecutor("dashboard", new Dashboard(creator));
         setCommandExecutor("tasks", new Tasks(this, taskDAO, memberDAO));
         setCommandExecutor("addtask", new AddTask(this, taskDAO));
