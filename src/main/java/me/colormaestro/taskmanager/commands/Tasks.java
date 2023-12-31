@@ -49,13 +49,14 @@ public class Tasks implements CommandExecutor {
             {"/taskinfo <id>", "obtains info in book for related task"},
             {"/needtasks [limit]", "shows members who have up to limit tasks in progress (default is 0)"},
             {"/addmember <IGN>", "adds player as member"},
+            {"/removemember <IGN>", "removes player's membership"},
             {"/addtask <IGN>", "creates task assignment book with blank description"},
             {"/addtask <IGN> [id]", "creates task assignment book, description is taken from selected task"},
             {"/preparetask", "creates task book for creating of prepared task"},
-            {"/assigntask <IGN> <id>", "assigns prepared tasks to member"},
     };
 
     private final String[][] HELP_PAGE_3 = {
+            {"/assigntask <IGN> <id>", "assigns prepared tasks to member"},
             {"/finishtask <id>", "marks task as finished"},
             {"/approvetask <id> [force]", "approves the finished task"},
             {"/returntask <id> [force]", "returns task back to given (unfinished) state"},
