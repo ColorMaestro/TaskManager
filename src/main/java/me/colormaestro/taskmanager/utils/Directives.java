@@ -10,4 +10,5 @@ public class Directives {
     public static final String PREPARED_TASKS = "⊞";
     public static final String IDLE_TASKS = "⦼";
     public static final String NEED_TASKS = "∅";
+    public static final String SELECT_MEMBER = "(((o(*°▽°*)o)))";
 }

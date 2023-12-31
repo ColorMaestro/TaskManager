@@ -8,12 +8,14 @@ public class Member {
     private final String ign;
     private final Date lastOnline;
     private final Long discordID;
+    private final boolean active;
 
-    public Member(String uuid, String ign, Date lastOnline, Long discordID) {
+    public Member(String uuid, String ign, Date lastOnline, Long discordID, boolean active) {
         this.uuid = uuid;
         this.ign = ign;
         this.lastOnline = lastOnline;
         this.discordID = discordID;
+        this.active = active;
     }
 
     public void setId(Integer id) {
@@ -38,5 +40,9 @@ public class Member {
 
     public Long getDiscordID() {
         return discordID;
+    }
+
+    public boolean isActive() {
+        return active;
     }
 }

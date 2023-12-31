@@ -10,6 +10,11 @@ commands:
     usage: Usage /<command> [player]
     permission: taskmanager.addmember
     permission-message: You don't have permission to add member
+  removemember:
+    description: Removes member from system.
+    usage: Usage /<command> [player]
+    permission: taskmanager.removemember
+    permission-message: You don't have permission to remove member
   dashboard:
     description: Shows tasks dashboard.
     usage: Usage /dashboard

@@ -3,6 +3,8 @@ package me.colormaestro.taskmanager.utils;
 import me.colormaestro.taskmanager.data.DataAccessException;
 import me.colormaestro.taskmanager.data.MemberDAO;
 import me.colormaestro.taskmanager.data.TaskDAO;
+import me.colormaestro.taskmanager.integrations.DecentHologramsIntegration;
+import me.colormaestro.taskmanager.integrations.DiscordOperator;
 import me.colormaestro.taskmanager.model.AdvisedTask;
 import me.colormaestro.taskmanager.model.IdleTask;
 import me.colormaestro.taskmanager.model.Member;
@@ -25,6 +27,7 @@ import org.bukkit.plugin.Plugin;
 
 import java.sql.SQLException;
 import java.util.List;
+import java.util.UUID;
 
 public class RunnablesCreator {
     private static final int PAGE_SIZE = 45;
@@ -36,12 +39,15 @@ public class RunnablesCreator {
     private final TaskDAO taskDAO;
     private final MemberDAO memberDAO;
     private final Plugin plugin;
+    private final DecentHologramsIntegration decentHolograms;
     private final ItemStackCreator stackCreator;
 
-    public RunnablesCreator(Plugin plugin, TaskDAO taskDAO, MemberDAO memberDAO) {
+    public RunnablesCreator(Plugin plugin, TaskDAO taskDAO, MemberDAO memberDAO,
+                            DecentHologramsIntegration decentHolograms) {
         this.plugin = plugin;
         this.taskDAO = taskDAO;
         this.memberDAO = memberDAO;
+        this.decentHolograms = decentHolograms;
         this.stackCreator = new ItemStackCreator(plugin);
     }
 
@@ -135,6 +141,8 @@ public class RunnablesCreator {
 
                     builder.addPaginationItemStacks(previousPageLink, nextPageLink)
                             .addItemStack(LAST_ROW_MIDDLE, approvedTasksLink)
+                            .addItemStack(LAST_ROW_RIGHT_FROM_MIDDLE, Material.WRITABLE_BOOK,
+                                    ChatColor.GOLD + "Add new task for " + ign)
                             .addItemStack(LAST_ROW_LEFT_FROM_MIDDLE, Material.SPECTRAL_ARROW,
                                     ChatColor.AQUA + "Back to dashboard");
 
@@ -259,7 +267,10 @@ public class RunnablesCreator {
                                 task.getId(),
                                 task.getTitle(),
                                 task.getDescription(),
-                                task.getStatus());
+                                task.getStatus(),
+                                List.of(ChatColor.YELLOW + "➜ Left-Click to teleport",
+                                        ChatColor.AQUA + "➜ Right-Click to assign")
+                        );
                         builder.addItemStack(position, stack);
                         position++;
                     }
@@ -382,6 +393,61 @@ public class RunnablesCreator {
         };
     }
 
+    public Runnable showAssignTasksView(HumanEntity player, int taskId, int page) {
+        return () -> {
+            try {
+                List<BasicMemberInfo> stats = taskDAO.fetchMembersDashboardInfo();
+                int totalPages = stats.size() / PAGE_SIZE + 1;
+                // Variable used in lambda should be final or effectively final
+                List<BasicMemberInfo> finalStats = getPageFromList(stats, page);
+                Bukkit.getScheduler().runTask(plugin, () -> {
+                    String inventoryTitle = ChatColor.BLUE + "" + ChatColor.BOLD + "Select Member" + ChatColor.RESET + " (" + page + "/" + totalPages + ") " + Directives.SELECT_MEMBER;
+                    InventoryBuilder builder = new InventoryBuilder(player, inventoryTitle);
+
+                    ItemStack stack;
+                    int position = 0;
+                    for (BasicMemberInfo memberInfo : finalStats) {
+                        stack = new ItemStack(Material.PLAYER_HEAD);
+
+                        ItemMeta meta = new SkullMetaBuilder()
+                                .setOwningPlayer(Bukkit.getOfflinePlayer(UUID.fromString(memberInfo.uuid())))
+                                .setDisplayName(ChatColor.BLUE + "" + ChatColor.BOLD + memberInfo.ign())
+                                .setLore(List.of(ChatColor.YELLOW + "➜ Click to assign"))
+                                .setPersistentData(
+                                        new NamespacedKey(plugin, DataContainerKeys.MEMBER_NAME),
+                                        PersistentDataType.STRING,
+                                        memberInfo.ign())
+                                .build();
+
+                        stack.setItemMeta(meta);
+                        builder.addItemStack(position, stack);
+                        position++;
+                    }
+
+                    player.getPersistentDataContainer().set(
+                            new NamespacedKey(plugin, DataContainerKeys.TASK_ID),
+                            PersistentDataType.INTEGER,
+                            taskId);
+
+                    ItemStack previousPageLink = new ItemStack(Material.ARROW);
+                    previousPageLink.setItemMeta(createPaginationItemMeta(page, totalPages, false));
+                    ItemStack nextPageLink = new ItemStack(Material.ARROW);
+                    nextPageLink.setItemMeta(createPaginationItemMeta(page, totalPages, true));
+
+                    builder.addPaginationItemStacks(previousPageLink, nextPageLink)
+                            .addItemStack(LAST_ROW_MIDDLE, Material.SPECTRAL_ARROW,
+                                    ChatColor.GRAY + "Back to prepared tasks");
+
+                    player.openInventory(builder.build());
+                });
+            } catch (SQLException ex) {
+                Bukkit.getScheduler().runTask(plugin,
+                        () -> player.sendMessage(ChatColor.RED + ex.getMessage()));
+                ex.printStackTrace();
+            }
+        };
+    }
+
     public Runnable teleportPlayerToTask(HumanEntity player, int taskId) {
         return () -> {
             try {
@@ -424,6 +490,52 @@ public class RunnablesCreator {
                 Bukkit.getScheduler().runTask(plugin,
                         () -> player.sendMessage(ChatColor.RED + ex.getMessage()));
                 ex.printStackTrace();
+            }
+        };
+    }
+
+    public Runnable assignTask(String ign, HumanEntity player, int taskId) {
+        return () -> {
+            UUID uuid = player.getUniqueId();
+            Member assignee, advisor;
+            try {
+                assignee = memberDAO.findMember(ign);
+                advisor = memberDAO.findMember(uuid);
+            } catch (SQLException ex) {
+                Bukkit.getScheduler().runTask(plugin, () -> player.sendMessage(ChatColor.RED + ex.getMessage()));
+                ex.printStackTrace();
+                return;
+            } catch (DataAccessException ignored) {
+                Bukkit.getScheduler().runTask(plugin, () -> player.sendMessage(ChatColor.GOLD + "Player " + ign +
+                        " is not registered as member. Use" + ChatColor.DARK_AQUA + " /addmember " + ign +
+                        ChatColor.GOLD + " for adding player as member, then you can add tasks."));
+                return;
+            }
+
+            try {
+                taskDAO.assignTask(taskId, assignee.getId(), advisor.getId());
+                Task task = taskDAO.findTask(taskId);
+                List<Task> activeTasks = taskDAO.fetchPlayersActiveTasks(assignee.getId());
+                Bukkit.getScheduler().runTask(plugin, () -> {
+                    player.sendMessage(ChatColor.GREEN + "Task assigned.");
+                    decentHolograms.setTasks(assignee.getUuid(), activeTasks);
+
+                    boolean messageSent = MessageSender.sendMessageIfOnline(
+                            assignee.getUuid(),
+                            ChatColor.GOLD + "You have new task from " + player.getName()
+                    );
+
+                    if (!messageSent && assignee.getDiscordID() != null) {
+                        DiscordOperator.getInstance().taskCreated(assignee.getDiscordID(), player.getName(), task);
+                    }
+                });
+            } catch (SQLException | DataAccessException ex) {
+                Bukkit.getScheduler().runTask(plugin,
+                        () -> player.sendMessage(ChatColor.RED + ex.getMessage()));
+                ex.printStackTrace();
+            } catch (NumberFormatException ex) {
+                Bukkit.getScheduler().runTask(plugin,
+                        () -> player.sendMessage(ChatColor.RED + "Task ID must be numerical value!"));
             }
         };
     }
@@ -475,13 +587,7 @@ public class RunnablesCreator {
         bookMeta.spigot().addPage(page);
         bookMeta.spigot().addPage(page2);
         bookMeta.setTitle("blank");
-        ChatColor tittleColor = switch (task.getStatus()) {
-            case DOING -> ChatColor.GOLD;
-            case FINISHED -> ChatColor.GREEN;
-            case APPROVED -> ChatColor.AQUA;
-            case PREPARED -> ChatColor.GRAY;
-        };
-        bookMeta.setDisplayName(tittleColor + "" + ChatColor.BOLD + "Task " + task.getId());
+        bookMeta.setDisplayName(task.getStatus().color + "" + ChatColor.BOLD + "Task " + task.getId());
         bookMeta.setAuthor(advisorName);
         book.setItemMeta(bookMeta);
         return book;

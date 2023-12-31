@@ -7,11 +7,9 @@ import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
-import org.bukkit.OfflinePlayer;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.BookMeta;
 import org.bukkit.inventory.meta.ItemMeta;
-import org.bukkit.inventory.meta.SkullMeta;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.plugin.Plugin;
 
@@ -24,6 +22,7 @@ import java.util.UUID;
 
 public class ItemStackCreator {
     private final static int LORE_WIDTH_LIMIT = 40;
+    private final List<String> DEFAULT_CLICK_HINTS = List.of(ChatColor.YELLOW + "➜ Click to teleport");;
     private final Plugin plugin;
 
     public ItemStackCreator(Plugin plugin) {
@@ -55,8 +54,11 @@ public class ItemStackCreator {
         LocalDate sqlLocalDate = lastLogin.toLocalDate();
         long daysDelta = ChronoUnit.DAYS.between(sqlLocalDate, currentDate);
 
-        lore.add("");
         lore.add(ChatColor.GRAY + "Last online: " + ChatColor.WHITE + daysDelta + " day(s) ago");
+
+        lore.add("");
+        lore.add(ChatColor.YELLOW + "➜ Left-Click to view active tasks");
+        lore.add(ChatColor.AQUA + "➜ Right-Click to add new task");
 
         return lore;
     }
@@ -67,7 +69,10 @@ public class ItemStackCreator {
         ItemMeta meta = new SkullMetaBuilder()
                 .setOwningPlayer(Bukkit.getOfflinePlayer(UUID.fromString(uuid)))
                 .setDisplayName(ChatColor.BLUE + "" + ChatColor.BOLD + ign)
-                .setLore(List.of(ChatColor.WHITE + "" + doing + " tasks in progress"))
+                .setLore(List.of(
+                        ChatColor.WHITE + "" + doing + " tasks in progress",
+                        "",
+                        ChatColor.YELLOW + "➜ Click to see active tasks"))
                 .setPersistentData(new NamespacedKey(plugin, DataContainerKeys.MEMBER_NAME), PersistentDataType.STRING, ign)
                 .build();
 
@@ -79,6 +84,17 @@ public class ItemStackCreator {
         return createSupervisedTaskStack(taskId, title, description, status, null);
     }
 
+    public ItemStack createBasicTaskStack(
+            Integer taskId,
+            String title,
+            String description,
+            TaskStatus status,
+            List<String> clickHints
+    ) {
+        List<String> lore = createTaskStackLore(null, null, null, description, clickHints);
+        return createTaskStack(taskId, title, status, lore);
+    }
+
     public ItemStack createSupervisedTaskStack(
             Integer taskId,
             String title,
@@ -86,7 +102,8 @@ public class ItemStackCreator {
             TaskStatus status,
             String assigneeIgn
     ) {
-        return createTaskStack(taskId, title, description, status, null, assigneeIgn, null);
+        List<String> lore = createTaskStackLore(assigneeIgn, null, null, description, DEFAULT_CLICK_HINTS);
+        return createTaskStack(taskId, title, status, lore);
     }
 
     public ItemStack createIdleTaskStack(
@@ -97,37 +114,29 @@ public class ItemStackCreator {
             String assigneeName,
             String advisorName
     ) {
-        return createTaskStack(taskId, title, description, TaskStatus.DOING, dateAssigned, assigneeName, advisorName);
+        List<String> lore = createTaskStackLore(assigneeName, advisorName, dateAssigned, description, DEFAULT_CLICK_HINTS);
+        return createTaskStack(taskId, title, TaskStatus.DOING, lore);
     }
 
-    private ItemStack createTaskStack(
-            Integer taskId,
-            String title,
-            String description,
-            TaskStatus status,
-            Date dateAssigned,
-            String assigneeName,
-            String advisorName
-    ) {
-        Material material = Material.ORANGE_CONCRETE;
-        switch (status) {
-            case FINISHED -> material = Material.LIME_CONCRETE;
-            case APPROVED -> material = Material.LIGHT_BLUE_CONCRETE;
-            case PREPARED -> material = Material.LIGHT_GRAY_CONCRETE;
-        }
-        ItemStack stack = new ItemStack(material);
+    private ItemStack createTaskStack(Integer taskId, String title, TaskStatus status, List<String> lore) {
+        ItemStack stack = new ItemStack(status.material);
 
         ItemMeta meta = new ItemMetaBuilder()
                 .setDisplayName(ChatColor.BLUE + "" + ChatColor.BOLD + title + " " + ChatColor.DARK_GRAY + "#" + taskId)
                 .setPersistentData(new NamespacedKey(plugin, DataContainerKeys.TASK_ID), PersistentDataType.INTEGER, taskId)
-                .setLore(createTaskStackLore(assigneeName, advisorName, dateAssigned, description))
+                .setLore(lore)
                 .build();
 
         stack.setItemMeta(meta);
         return stack;
     }
 
-    private List<String> createTaskStackLore(String assigneeName, String advisorName, Date dateAssigned, String description) {
+    private List<String> createTaskStackLore(
+            String assigneeName,
+            String advisorName,
+            Date dateAssigned,
+            String description,
+            List<String> clickHints) {
         List<String> lore = new ArrayList<>();
 
         if (assigneeName != null) {
@@ -143,11 +152,17 @@ public class ItemStackCreator {
             lore.add(0, ChatColor.GRAY + "Duration: " + ChatColor.GOLD + daysDelta + " days");
         }
 
-        addTaskDescriptionToLore(lore, description);
+        lore.addAll(formatTaskDescription(description));
+
+        if (!clickHints.isEmpty()) {
+            lore.add("");
+            lore.addAll(clickHints);
+        }
         return lore;
     }
 
-    private void addTaskDescriptionToLore(List<String> lore, String input) {
+    private List<String> formatTaskDescription(String input) {
+        List<String> lore = new ArrayList<>();
         String[] words = input.split("\\s+");
         StringBuilder currentString = new StringBuilder();
 
@@ -166,6 +181,8 @@ public class ItemStackCreator {
         if (!currentString.isEmpty()) {
             lore.add(ChatColor.GRAY + currentString.toString());
         }
+
+        return lore;
     }
 
     /**

@@ -49,13 +49,14 @@ public class Tasks implements CommandExecutor {
             {"/taskinfo <id>", "obtains info in book for related task"},
             {"/needtasks [limit]", "shows members who have up to limit tasks in progress (default is 0)"},
             {"/addmember <IGN>", "adds player as member"},
+            {"/removemember <IGN>", "removes player's membership"},
             {"/addtask <IGN>", "creates task assignment book with blank description"},
             {"/addtask <IGN> [id]", "creates task assignment book, description is taken from selected task"},
             {"/preparetask", "creates task book for creating of prepared task"},
-            {"/assigntask <IGN> <id>", "assigns prepared tasks to member"},
     };
 
     private final String[][] HELP_PAGE_3 = {
+            {"/assigntask <IGN> <id>", "assigns prepared tasks to member"},
             {"/finishtask <id>", "marks task as finished"},
             {"/approvetask <id> [force]", "approves the finished task"},
             {"/returntask <id> [force]", "returns task back to given (unfinished) state"},
@@ -194,12 +195,7 @@ public class Tasks implements CommandExecutor {
         }
         p.sendMessage(ChatColor.AQUA + "-=-=-=- " + name + "'s tasks -=-=-=-");
         for (Task task : tasks) {
-            switch (task.getStatus()) {
-                case DOING ->
-                        p.sendMessage(ChatColor.GOLD + "[" + task.getId() + "] " + ChatColor.WHITE + task.getTitle());
-                case FINISHED ->
-                        p.sendMessage(ChatColor.GREEN + "[" + task.getId() + "] " + ChatColor.WHITE + task.getTitle());
-            }
+            p.sendMessage(task.getStatus().color + "[" + task.getId() + "] " + ChatColor.WHITE + task.getTitle());
         }
     }
 
@@ -210,13 +206,8 @@ public class Tasks implements CommandExecutor {
         }
         p.sendMessage(ChatColor.LIGHT_PURPLE + "-=-=-=- " + p.getName() + "'s supervised tasks -=-=-=-");
         for (AdvisedTask task : tasks) {
-            switch (task.status()) {
-                case DOING -> p.sendMessage(ChatColor.GOLD + "[" + task.id() + "] " + ChatColor.WHITE + task.title() +
-                        ChatColor.ITALIC + " (" + task.ign() + ")");
-                case FINISHED ->
-                        p.sendMessage(ChatColor.GREEN + "[" + task.id() + "] " + ChatColor.WHITE + task.title() +
-                                ChatColor.ITALIC + " (" + task.ign() + ")");
-            }
+            p.sendMessage(task.status().color + "[" + task.id() + "] " + ChatColor.WHITE + task.title() +
+                    ChatColor.ITALIC + " (" + task.ign() + ")");
         }
     }
 

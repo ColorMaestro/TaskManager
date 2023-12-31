@@ -10,6 +10,7 @@ import me.colormaestro.taskmanager.commands.FinishTask;
 import me.colormaestro.taskmanager.commands.LinkDiscord;
 import me.colormaestro.taskmanager.commands.NeedTasks;
 import me.colormaestro.taskmanager.commands.PrepareTask;
+import me.colormaestro.taskmanager.commands.RemoveMember;
 import me.colormaestro.taskmanager.commands.ReturnTask;
 import me.colormaestro.taskmanager.commands.SetTaskPlace;
 import me.colormaestro.taskmanager.commands.TaskInfo;
@@ -32,6 +33,7 @@ import me.colormaestro.taskmanager.listeners.inventory.IdleTaskViewListener;
 import me.colormaestro.taskmanager.listeners.PlayerJoinListener;
 import me.colormaestro.taskmanager.listeners.inventory.NeedTasksViewListener;
 import me.colormaestro.taskmanager.listeners.inventory.PreparedTasksViewListener;
+import me.colormaestro.taskmanager.listeners.inventory.SelectMemberListener;
 import me.colormaestro.taskmanager.listeners.inventory.SupervisedTasksViewListener;
 import me.colormaestro.taskmanager.tabcompleters.MembersTabCompleter;
 import me.colormaestro.taskmanager.tabcompleters.ReloadableTabCompleter;
@@ -111,7 +113,7 @@ public final class TaskManager extends JavaPlugin {
     }
 
     private void performBindingsSetup() {
-        RunnablesCreator creator = new RunnablesCreator(this, taskDAO, memberDAO);
+        RunnablesCreator creator = new RunnablesCreator(this, taskDAO, memberDAO, decentHolograms);
 
         ReloadableTabCompleter tasksTabCompleter = new TasksTabCompleter(memberDAO);
         ReloadableTabCompleter membersTabCompleter = new MembersTabCompleter(memberDAO);
@@ -128,13 +130,15 @@ public final class TaskManager extends JavaPlugin {
         registerEventListener(new PreparedTasksViewListener(creator));
         registerEventListener(new IdleTaskViewListener(creator));
         registerEventListener(new NeedTasksViewListener(creator));
+        registerEventListener(new SelectMemberListener(creator));
 
         setCommandExecutor("addmember", new AddMember(this, memberDAO, tasksTabCompleter, membersTabCompleter));
+        setCommandExecutor("removemember", new RemoveMember(this, memberDAO, tasksTabCompleter, membersTabCompleter));
         setCommandExecutor("dashboard", new Dashboard(creator));
         setCommandExecutor("tasks", new Tasks(this, taskDAO, memberDAO));
         setCommandExecutor("addtask", new AddTask(this, taskDAO));
         setCommandExecutor("preparetask", new PrepareTask(this));
-        setCommandExecutor("assigntask", new AssignTask(this, taskDAO, memberDAO, decentHolograms));
+        setCommandExecutor("assigntask", new AssignTask(creator));
         setCommandExecutor("finishtask", new FinishTask(taskDAO, memberDAO, decentHolograms, dynmap));
         setCommandExecutor("approvetask", new ApproveTask(taskDAO, memberDAO, decentHolograms, dynmap));
         setCommandExecutor("visittask", new VisitTask(creator));
