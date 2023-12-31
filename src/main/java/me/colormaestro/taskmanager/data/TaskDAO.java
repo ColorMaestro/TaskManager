@@ -64,9 +64,9 @@ public class TaskDAO {
                     "date_created DATE NOT NULL ," +
                     "date_given DATE," +
                     "date_finished DATE," +
-                    "FOREIGN KEY (creator_id) REFERENCES PLAYERS (id)," +
-                    "FOREIGN KEY (assignee_id) REFERENCES PLAYERS (id)," +
-                    "FOREIGN KEY (advisor_id) REFERENCES PLAYERS (id)" +
+                    "FOREIGN KEY (creator_id) REFERENCES MEMBERS (id)," +
+                    "FOREIGN KEY (assignee_id) REFERENCES MEMBERS (id)," +
+                    "FOREIGN KEY (advisor_id) REFERENCES MEMBERS (id)" +
                     ")");
         } catch (SQLException ex) {
             throw new RuntimeException("Failed to create TASKS table", ex);
@@ -366,7 +366,7 @@ public class TaskDAO {
         try (Connection connection = DriverManager.getConnection(url);
              PreparedStatement st = connection.prepareStatement(
                      "SELECT tasks.id AS task_id, title, description, status, assignee.ign AS ign " +
-                             "FROM PLAYERS advisor JOIN PLAYERS assignee JOIN TASKS " +
+                             "FROM MEMBERS advisor JOIN MEMBERS assignee JOIN TASKS " +
                              "ON advisor.id = TASKS.advisor_id AND assignee.id = TASKS.assignee_id " +
                              "WHERE advisor_id = ? AND status != 'APPROVED' AND status != 'PREPARED'")) {
 
@@ -399,7 +399,7 @@ public class TaskDAO {
         try (Connection connection = DriverManager.getConnection(url);
              PreparedStatement st = connection.prepareStatement(
                      "SELECT tasks.id AS task_id, title, description, date_given, assignee.ign AS assignee_ign, " +
-                             "advisor.ign AS advisor_ign FROM PLAYERS advisor JOIN PLAYERS assignee JOIN TASKS " +
+                             "advisor.ign AS advisor_ign FROM MEMBERS advisor JOIN MEMBERS assignee JOIN TASKS " +
                              "ON advisor.id = TASKS.advisor_id AND assignee.id = TASKS.assignee_id " +
                              "WHERE (julianday('now') - julianday(date_given / 1000, 'unixepoch')) > 30 " +
                              "AND status == 'DOING'")) {
