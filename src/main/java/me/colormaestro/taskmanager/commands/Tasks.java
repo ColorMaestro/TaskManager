@@ -188,44 +188,27 @@ public class Tasks implements CommandExecutor {
     }
 
     private void sendTasks(Player p, List<? extends StringReporter> tasks, String name) {
-        if (tasks.isEmpty()) {
-            p.sendMessage(ChatColor.GREEN + name + " has no tasks");
-            return;
-        }
-        p.sendMessage(ChatColor.AQUA + "-=-=-=- " + name + "'s tasks -=-=-=-");
-        for (StringReporter task : tasks) {
-            p.sendMessage(task.getReport());
-        }
+        send(p, tasks, name + " has no tasks", ChatColor.AQUA + "-=-=-=- " + name + "'s tasks -=-=-=-");
     }
 
     private void sendAdvisorTasks(Player p, List<? extends StringReporter> tasks) {
-        if (tasks.isEmpty()) {
-            p.sendMessage(ChatColor.GREEN + "No active supervised tasks");
-            return;
-        }
-        p.sendMessage(ChatColor.LIGHT_PURPLE + "-=-=-=- " + p.getName() + "'s supervised tasks -=-=-=-");
-        for (StringReporter task : tasks) {
-            p.sendMessage(task.getReport());
-        }
+        send(p, tasks, "No active supervised tasks", ChatColor.LIGHT_PURPLE + "-=-=-=- " + p.getName() + "'s supervised tasks -=-=-=-");
     }
 
     private void sendPreparedTasks(Player p, List<? extends StringReporter> tasks) {
-        if (tasks.isEmpty()) {
-            p.sendMessage(ChatColor.GREEN + "No prepared tasks");
-            return;
-        }
-        p.sendMessage(ChatColor.GRAY + "-=-=-=- Prepared tasks -=-=-=-");
-        for (StringReporter task : tasks) {
-            p.sendMessage(task.getReport());
-        }
+        send(p, tasks, "No prepared tasks", ChatColor.GRAY + "-=-=-=- Prepared tasks -=-=-=-");
     }
 
     private void sendIdleTasks(Player p, List<? extends StringReporter> tasks) {
+        send(p, tasks, "No idle tasks", ChatColor.DARK_AQUA + "-=-=-=- Idle tasks -=-=-=-");
+    }
+
+    private void send(Player p, List<? extends StringReporter> tasks, String emptyMessage, String headline) {
         if (tasks.isEmpty()) {
-            p.sendMessage(ChatColor.GREEN + "No idle tasks");
+            p.sendMessage(ChatColor.GREEN + emptyMessage);
             return;
         }
-        p.sendMessage(ChatColor.DARK_AQUA + "-=-=-=- Idle tasks -=-=-=-");
+        p.sendMessage(headline);
         for (StringReporter task : tasks) {
             p.sendMessage(task.getReport());
         }
