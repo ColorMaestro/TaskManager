@@ -23,6 +23,7 @@ import org.bukkit.plugin.Plugin;
 import org.jetbrains.annotations.NotNull;
 
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
@@ -93,7 +94,8 @@ public class Tasks implements CommandExecutor {
                 try {
                     Member member = memberDAO.findMember(player.getUniqueId());
                     List<AdvisedTask> tasks = taskDAO.fetchAdvisorActiveTasks(member.getId());
-                    Bukkit.getScheduler().runTask(plugin, () -> sendAdvisorTasks(player, tasks));
+                    String[] messages = formatMessages(tasks, "No active supervised tasks", ChatColor.LIGHT_PURPLE + "-=-=-=- " + player.getName() + "'s supervised tasks -=-=-=-");
+                    Bukkit.getScheduler().runTask(plugin, () -> player.sendMessage(messages));
                 } catch (SQLException | DataAccessException ex) {
                     Bukkit.getScheduler().runTask(plugin, () -> player.sendMessage(ChatColor.RED + ex.getMessage()));
                     ex.printStackTrace();
@@ -123,8 +125,9 @@ public class Tasks implements CommandExecutor {
             Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
                 try {
                     List<Task> preparedTasks = taskDAO.fetchPreparedTasks();
+                    String[] messages = formatMessages(preparedTasks, "No prepared tasks", ChatColor.GRAY + "-=-=-=- Prepared tasks -=-=-=-");
 
-                    Bukkit.getScheduler().runTask(plugin, () -> sendPreparedTasks(player, preparedTasks));
+                    Bukkit.getScheduler().runTask(plugin, () -> player.sendMessage(messages));
                 } catch (SQLException ex) {
                     Bukkit.getScheduler().runTask(plugin, () -> player.sendMessage(ChatColor.RED + ex.getMessage()));
                     ex.printStackTrace();
@@ -137,8 +140,9 @@ public class Tasks implements CommandExecutor {
             Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
                 try {
                     List<IdleTask> preparedTasks = taskDAO.fetchIdleTasks();
+                    String[] messages = formatMessages(preparedTasks, "No idle tasks", ChatColor.DARK_AQUA + "-=-=-=- Idle tasks -=-=-=-");
 
-                    Bukkit.getScheduler().runTask(plugin, () -> sendIdleTasks(player, preparedTasks));
+                    Bukkit.getScheduler().runTask(plugin, () -> player.sendMessage(messages));
                 } catch (SQLException ex) {
                     Bukkit.getScheduler().runTask(plugin, () -> player.sendMessage(ChatColor.RED + ex.getMessage()));
                     ex.printStackTrace();
@@ -157,7 +161,8 @@ public class Tasks implements CommandExecutor {
                         member = memberDAO.findMember(args[0]);
                     }
                     List<Task> tasks = taskDAO.fetchPlayersActiveTasks(member.getId());
-                    Bukkit.getScheduler().runTask(plugin, () -> sendTasks(player, tasks, member.getIgn()));
+                    String[] messages = formatMessages(tasks, member.getIgn() + " has no tasks", ChatColor.AQUA + "-=-=-=- " + member.getIgn() + "'s tasks -=-=-=-");
+                    Bukkit.getScheduler().runTask(plugin, () -> player.sendMessage(messages));
                 } catch (SQLException | DataAccessException ex) {
                     Bukkit.getScheduler().runTask(plugin, () -> player.sendMessage(ChatColor.RED + ex.getMessage()));
                     ex.printStackTrace();
@@ -187,31 +192,14 @@ public class Tasks implements CommandExecutor {
         }
     }
 
-    private void sendTasks(Player p, List<? extends StringReporter> tasks, String name) {
-        send(p, tasks, name + " has no tasks", ChatColor.AQUA + "-=-=-=- " + name + "'s tasks -=-=-=-");
-    }
-
-    private void sendAdvisorTasks(Player p, List<? extends StringReporter> tasks) {
-        send(p, tasks, "No active supervised tasks", ChatColor.LIGHT_PURPLE + "-=-=-=- " + p.getName() + "'s supervised tasks -=-=-=-");
-    }
-
-    private void sendPreparedTasks(Player p, List<? extends StringReporter> tasks) {
-        send(p, tasks, "No prepared tasks", ChatColor.GRAY + "-=-=-=- Prepared tasks -=-=-=-");
-    }
-
-    private void sendIdleTasks(Player p, List<? extends StringReporter> tasks) {
-        send(p, tasks, "No idle tasks", ChatColor.DARK_AQUA + "-=-=-=- Idle tasks -=-=-=-");
-    }
-
-    private void send(Player p, List<? extends StringReporter> tasks, String emptyMessage, String headline) {
+    private String[] formatMessages(List<? extends StringReporter> tasks, String emptyMessage, String headline) {
         if (tasks.isEmpty()) {
-            p.sendMessage(ChatColor.GREEN + emptyMessage);
-            return;
+            return new String[]{ChatColor.GREEN + emptyMessage};
         }
-        p.sendMessage(headline);
-        for (StringReporter task : tasks) {
-            p.sendMessage(task.getReport());
-        }
+        List<String> messages = new ArrayList<>();
+        messages.add(headline);
+        tasks.forEach(task -> messages.add(task.getReport()));
+        return messages.toArray(new String[0]);
     }
 
     private ItemStack buildStatsBook(List<BasicMemberInfo> stats) {
