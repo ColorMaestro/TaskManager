@@ -1,10 +1,11 @@
 package me.colormaestro.taskmanager.model;
 
 import me.colormaestro.taskmanager.enums.TaskStatus;
+import org.bukkit.ChatColor;
 
 import java.sql.Date;
 
-public class Task {
+public class Task implements StringReporter {
     private Integer id;
     private final String title;
     private final String description;
@@ -102,5 +103,10 @@ public class Task {
 
     public float getPitch() {
         return pitch;
+    }
+
+    @Override
+    public String getReport() {
+        return status.color + "[" + id + "] " + ChatColor.WHITE + title;
     }
 }

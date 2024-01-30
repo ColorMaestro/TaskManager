@@ -4,9 +4,10 @@ import me.colormaestro.taskmanager.data.DataAccessException;
 import me.colormaestro.taskmanager.data.MemberDAO;
 import me.colormaestro.taskmanager.data.TaskDAO;
 import me.colormaestro.taskmanager.model.AdvisedTask;
+import me.colormaestro.taskmanager.model.BasicMemberInfo;
 import me.colormaestro.taskmanager.model.IdleTask;
 import me.colormaestro.taskmanager.model.Member;
-import me.colormaestro.taskmanager.model.BasicMemberInfo;
+import me.colormaestro.taskmanager.model.StringReporter;
 import me.colormaestro.taskmanager.model.Task;
 import net.md_5.bungee.api.chat.ComponentBuilder;
 import org.bukkit.Bukkit;
@@ -22,8 +23,6 @@ import org.bukkit.plugin.Plugin;
 import org.jetbrains.annotations.NotNull;
 
 import java.sql.SQLException;
-import java.time.LocalDate;
-import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Random;
 
@@ -188,53 +187,47 @@ public class Tasks implements CommandExecutor {
         }
     }
 
-    private void sendTasks(Player p, List<Task> tasks, String name) {
+    private void sendTasks(Player p, List<? extends StringReporter> tasks, String name) {
         if (tasks.isEmpty()) {
             p.sendMessage(ChatColor.GREEN + name + " has no tasks");
             return;
         }
         p.sendMessage(ChatColor.AQUA + "-=-=-=- " + name + "'s tasks -=-=-=-");
-        for (Task task : tasks) {
-            p.sendMessage(task.getStatus().color + "[" + task.getId() + "] " + ChatColor.WHITE + task.getTitle());
+        for (StringReporter task : tasks) {
+            p.sendMessage(task.getReport());
         }
     }
 
-    private void sendAdvisorTasks(Player p, List<AdvisedTask> tasks) {
+    private void sendAdvisorTasks(Player p, List<? extends StringReporter> tasks) {
         if (tasks.isEmpty()) {
             p.sendMessage(ChatColor.GREEN + "No active supervised tasks");
             return;
         }
         p.sendMessage(ChatColor.LIGHT_PURPLE + "-=-=-=- " + p.getName() + "'s supervised tasks -=-=-=-");
-        for (AdvisedTask task : tasks) {
-            p.sendMessage(task.status().color + "[" + task.id() + "] " + ChatColor.WHITE + task.title() +
-                    ChatColor.ITALIC + " (" + task.ign() + ")");
+        for (StringReporter task : tasks) {
+            p.sendMessage(task.getReport());
         }
     }
 
-    private void sendPreparedTasks(Player p, List<Task> tasks) {
+    private void sendPreparedTasks(Player p, List<? extends StringReporter> tasks) {
         if (tasks.isEmpty()) {
             p.sendMessage(ChatColor.GREEN + "No prepared tasks");
             return;
         }
         p.sendMessage(ChatColor.GRAY + "-=-=-=- Prepared tasks -=-=-=-");
-        for (Task task : tasks) {
-            p.sendMessage(ChatColor.GRAY + "[" + task.getId() + "] " + ChatColor.WHITE + task.getTitle());
+        for (StringReporter task : tasks) {
+            p.sendMessage(task.getReport());
         }
     }
 
-    private void sendIdleTasks(Player p, List<IdleTask> tasks) {
+    private void sendIdleTasks(Player p, List<? extends StringReporter> tasks) {
         if (tasks.isEmpty()) {
             p.sendMessage(ChatColor.GREEN + "No idle tasks");
             return;
         }
-        LocalDate currentDate = LocalDate.now();
-        LocalDate sqlLocalDate;
         p.sendMessage(ChatColor.DARK_AQUA + "-=-=-=- Idle tasks -=-=-=-");
-        for (IdleTask task : tasks) {
-            sqlLocalDate = task.dateAssigned().toLocalDate();
-            long daysDelta = ChronoUnit.DAYS.between(sqlLocalDate, currentDate);
-            p.sendMessage(ChatColor.GOLD + "[" + task.id() + "] " + ChatColor.WHITE + task.title() +
-                    ChatColor.ITALIC + " (" + daysDelta + " days)");
+        for (StringReporter task : tasks) {
+            p.sendMessage(task.getReport());
         }
     }
 
