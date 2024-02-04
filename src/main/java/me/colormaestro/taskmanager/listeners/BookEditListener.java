@@ -117,12 +117,12 @@ public class BookEditListener implements Listener {
                     pitch, TaskStatus.DOING, currentDate, currentDate, null);
             try {
                 int taskID = taskDAO.createTask(task);
+                task.setId(taskID);
                 List<Task> activeTasks = taskDAO.fetchPlayersActiveTasks(assignee.getId());
                 Bukkit.getScheduler().runTask(plugin, () -> {
                     player.sendMessage(ChatColor.GREEN + "Task added.");
                     decentHolograms.setTasks(assignee.getUuid(), activeTasks);
-                    String markerLabel = "[" + taskID + "] " + title;
-                    dynmap.addTaskInProgressMarker(String.valueOf(taskID), markerLabel, player.getLocation());
+                    dynmap.addInProgressTask(task, player.getLocation());
 
                     boolean messageSent = MessageSender.sendMessageIfOnline(
                             assignee.getUuid(),

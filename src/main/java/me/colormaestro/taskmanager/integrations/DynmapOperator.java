@@ -1,5 +1,7 @@
 package me.colormaestro.taskmanager.integrations;
 
+import me.colormaestro.taskmanager.enums.TaskStatus;
+import me.colormaestro.taskmanager.model.Task;
 import org.bukkit.Location;
 import org.dynmap.DynmapAPI;
 import org.dynmap.markers.Marker;
@@ -23,7 +25,16 @@ public class DynmapOperator implements DynmapIntegration {
     }
 
     @Override
-    public void addTaskInProgressMarker(String key, String label, Location location) {
+    public void addInProgressTask(Task task, Location location) {
+        int taskID = task.getId();
+        if (task.getId() == null) {
+            throw new IllegalArgumentException("Task is missing id");
+        } else if (task.getStatus() != TaskStatus.DOING) {
+            throw new IllegalArgumentException("Task is not in in-progress state");
+        }
+
+        String key = String.valueOf(taskID);
+        String label = "[" + taskID + "] " + task.getTitle();;
         double x = location.getX();
         double y = location.getY();
         double z = location.getZ();
