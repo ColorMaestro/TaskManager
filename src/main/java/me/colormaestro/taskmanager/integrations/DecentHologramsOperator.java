@@ -2,7 +2,6 @@ package me.colormaestro.taskmanager.integrations;
 
 import eu.decentsoftware.holograms.api.DHAPI;
 import eu.decentsoftware.holograms.api.holograms.Hologram;
-import me.colormaestro.taskmanager.enums.TaskStatus;
 import me.colormaestro.taskmanager.model.Task;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
@@ -45,8 +44,7 @@ public class DecentHologramsOperator implements DecentHologramsIntegration {
             DHAPI.removeHologramLine(hologram, 1);
         }
         for (Task task : tasks) {
-            ChatColor color = task.getStatus() == TaskStatus.FINISHED ? ChatColor.GREEN : ChatColor.GOLD;
-            String line = color + "[" + task.getId() + "] " + ChatColor.WHITE + task.getTitle();
+            String line = task.getStatus().color + "[" + task.getId() + "] " + ChatColor.WHITE + task.getTitle();
             DHAPI.addHologramLine(hologram, line);
         }
     }
