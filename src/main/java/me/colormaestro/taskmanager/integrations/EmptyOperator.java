@@ -2,13 +2,12 @@ package me.colormaestro.taskmanager.integrations;
 
 import me.colormaestro.taskmanager.model.Task;
 import org.bukkit.Location;
-import org.bukkit.entity.Player;
 
 import java.util.List;
 
 public class EmptyOperator implements DecentHologramsIntegration, DynmapIntegration {
     @Override
-    public void establishTasksHologram(Player player) {
+    public void establishTasksHologram(String key, String memberName, Location location) {
 
     }
 

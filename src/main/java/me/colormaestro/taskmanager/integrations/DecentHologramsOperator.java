@@ -5,21 +5,16 @@ import eu.decentsoftware.holograms.api.holograms.Hologram;
 import me.colormaestro.taskmanager.model.Task;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
-import org.bukkit.entity.Player;
 
 import java.util.List;
 
 public class DecentHologramsOperator implements DecentHologramsIntegration {
 
     @Override
-    public void establishTasksHologram(Player player) {
-        Location location = player.getLocation();
+    public void establishTasksHologram(String key, String memberName, Location location) {
         location.setY(location.getY() + 2);
-        List<String> lines = List.of(ChatColor.BLUE + "" + ChatColor.BOLD + player.getName() + "'s task list");
-        DHAPI.createHologram(player.getUniqueId().toString(), location, true, lines);
-        player.sendMessage(ChatColor.GREEN + "✔ Your visual task list has been established!");
-        player.sendMessage(ChatColor.GREEN + "ℹ If you want to move it somewhere else, do"
-                + ChatColor.GOLD + ChatColor.BOLD + " /establish" + ChatColor.GREEN + " there");
+        List<String> lines = List.of(ChatColor.BLUE + "" + ChatColor.BOLD + memberName + "'s task list");
+        DHAPI.createHologram(key, location, true, lines);
     }
 
     @Override

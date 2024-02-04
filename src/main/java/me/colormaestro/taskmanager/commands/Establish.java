@@ -50,8 +50,14 @@ public class Establish implements CommandExecutor {
                     Member member = memberDAO.findMember(player.getUniqueId());
                     List<Task> membersTasks = taskDAO.fetchPlayersActiveTasks(member.getId());
                     Bukkit.getScheduler().runTask(plugin, () -> {
-                        decentHolograms.establishTasksHologram(player);
+                        decentHolograms.establishTasksHologram(
+                                player.getUniqueId().toString(),
+                                player.getName(),
+                                player.getLocation());
                         decentHolograms.setTasks(uuid, membersTasks);
+                        player.sendMessage(ChatColor.GREEN + "✔ Your visual task list has been established!");
+                        player.sendMessage(ChatColor.GREEN + "ℹ If you want to move it somewhere else, do"
+                                + ChatColor.GOLD + ChatColor.BOLD + " /establish" + ChatColor.GREEN + " there");
                     });
                 } catch (SQLException | DataAccessException e) {
                     e.printStackTrace();

@@ -2,18 +2,19 @@ package me.colormaestro.taskmanager.integrations;
 
 import me.colormaestro.taskmanager.model.Task;
 import org.bukkit.Location;
-import org.bukkit.entity.Player;
 
 import java.util.List;
 
 public interface DecentHologramsIntegration {
     /**
-     * Creates hologram for player at his current position.
+     * Creates new hologram.
      *
-     * @param player for which to create hologram
+     * @param key of the hologram
+     * @param memberName of player
+     * @param location at which to create hologram
      * @throws IllegalArgumentException if hologram for this player already exists
      */
-    void establishTasksHologram(Player player);
+    void establishTasksHologram(String key, String memberName, Location location);
 
     /**
      * Checks whether hologram with given key exists.
