@@ -13,6 +13,7 @@ import me.colormaestro.taskmanager.commands.PrepareTask;
 import me.colormaestro.taskmanager.commands.RemoveMember;
 import me.colormaestro.taskmanager.commands.ReturnTask;
 import me.colormaestro.taskmanager.commands.SetTaskPlace;
+import me.colormaestro.taskmanager.commands.SynchronizeTasks;
 import me.colormaestro.taskmanager.commands.TaskInfo;
 import me.colormaestro.taskmanager.commands.Tasks;
 import me.colormaestro.taskmanager.commands.TransferTask;
@@ -149,6 +150,7 @@ public final class TaskManager extends JavaPlugin {
         setCommandExecutor("taskinfo", new TaskInfo(creator));
         setCommandExecutor("transfertask", new TransferTask(taskDAO, memberDAO, decentHolograms));
         setCommandExecutor("needtasks", new NeedTasks(this, taskDAO));
+        setCommandExecutor("synchronizetasks", new SynchronizeTasks(this, taskDAO, memberDAO, decentHolograms, dynmap));
     }
 
     private void registerEventListener(Listener listener) {

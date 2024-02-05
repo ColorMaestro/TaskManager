@@ -3,6 +3,8 @@ package me.colormaestro.taskmanager.integrations;
 import me.colormaestro.taskmanager.model.Task;
 import org.bukkit.Location;
 
+import java.util.List;
+
 public interface DynmapIntegration {
 
     /**
@@ -27,4 +29,13 @@ public interface DynmapIntegration {
      * @param key of marker to remove
      */
     void removeTaskMarker(String key);
+
+    /**
+     * Overwrites actives tasks - basically ensures that currently displayed active tasks are cleared and replaced by
+     * specified ones. This means only tasks in-progress ({@link me.colormaestro.taskmanager.enums.TaskStatus#DOING})
+     * and finished tasks ({@link me.colormaestro.taskmanager.enums.TaskStatus#FINISHED}) must be replaced on map.
+     *
+     * @param tasks which to render as active
+     */
+    void overwriteActiveTasks(List<Task> tasks);
 }

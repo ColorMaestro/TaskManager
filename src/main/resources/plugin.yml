@@ -80,6 +80,11 @@ commands:
     usage: Usage /settaskplace <id>
     permission: taskmanager.settaskplace
     permission-message: You don't have permission to set spawn position for task
+  synchronizetasks:
+    description: Synchronizes state of integrations with state of plugins database.
+    usage: Usage /synchronizetasks
+    permission: taskmanager.synchronizetasks
+    permission-message: You don't have permission to synchronize tasks
   linkdiscord:
     description: Links discord account for notifications.
     usage: Usage /linkdiscord

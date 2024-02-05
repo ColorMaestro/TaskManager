@@ -62,6 +62,7 @@ public class Tasks implements CommandExecutor {
             {"/returntask <id> [force]", "returns task back to given (unfinished) state"},
             {"/transfertask <id> <IGN>", "changes the assignee of the task"},
             {"/settaskplace <id>", "sets spawning point for this task for more comfort :)"},
+            {"/synchronizetasks", "synchronizes state of integrations with state of plugins database"},
             {"/linkdiscord", "links discord account for notifications"},
             {"/establish", "establishes the Hologram where is summary of member's tasks"}
     };

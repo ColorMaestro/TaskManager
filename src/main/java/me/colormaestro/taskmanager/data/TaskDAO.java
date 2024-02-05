@@ -284,6 +284,25 @@ public class TaskDAO {
 
     /**
      * Retrieves all active tasks (status {@link me.colormaestro.taskmanager.enums.TaskStatus#DOING} or
+     * {@link me.colormaestro.taskmanager.enums.TaskStatus#FINISHED}). Used typically on synchronizing dynmap integration.
+     * hologram task list.
+     *
+     * @return active (given and finished) tasks
+     * @throws SQLException if SQL error arise
+     */
+    public synchronized List<Task> fetchActiveTasks() throws SQLException {
+        try (Connection connection = DriverManager.getConnection(url);
+             PreparedStatement st = connection.prepareStatement(
+                     "SELECT id, title, description, creator_id, assignee_id, advisor_id, world_name, x, y, z, " +
+                             "yaw, pitch, status, date_created, date_given, date_finished FROM TASKS " +
+                             "WHERE status != 'APPROVED' AND status != 'PREPARED'")) {
+
+            return executeStatement(st);
+        }
+    }
+
+    /**
+     * Retrieves all active tasks (status {@link me.colormaestro.taskmanager.enums.TaskStatus#DOING} or
      * {@link me.colormaestro.taskmanager.enums.TaskStatus#FINISHED}) of selected person. Used typically on updating
      * hologram task list.
      *

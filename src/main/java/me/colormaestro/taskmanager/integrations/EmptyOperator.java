@@ -40,4 +40,9 @@ public class EmptyOperator implements DecentHologramsIntegration, DynmapIntegrat
     public void removeTaskMarker(String key) {
 
     }
+
+    @Override
+    public void overwriteActiveTasks(List<Task> tasks) {
+
+    }
 }
