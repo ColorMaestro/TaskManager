@@ -33,16 +33,8 @@ public class DynmapOperator implements DynmapIntegration {
         createActiveTaskMarker(task);
     }
 
-    private void validateInProgressTask(Task task) {
-        if (task.getId() == null) {
-            throw new IllegalArgumentException("Task is missing id");
-        } else if (task.getStatus() != TaskStatus.DOING) {
-            throw new IllegalArgumentException("Task is not in in-progress state");
-        }
-    }
-
     @Override
-    public void updateTaskFinishedMarkerIcon(String key) {
+    public void markTaskAsFinished(String key) {
         Marker marker = activeTasks.findMarker(key);
         if (marker != null) {
             marker.setMarkerIcon(greenFlag);
@@ -50,7 +42,7 @@ public class DynmapOperator implements DynmapIntegration {
     }
 
     @Override
-    public void removeTaskMarker(String key) {
+    public void removeActiveTask(String key) {
         Marker marker = activeTasks.findMarker(key);
         if (marker != null) {
             marker.deleteMarker();
@@ -66,6 +58,14 @@ public class DynmapOperator implements DynmapIntegration {
             }
 
             createActiveTaskMarker(task);
+        }
+    }
+
+    private void validateInProgressTask(Task task) {
+        if (task.getId() == null) {
+            throw new IllegalArgumentException("Task is missing id");
+        } else if (task.getStatus() != TaskStatus.DOING) {
+            throw new IllegalArgumentException("Task is not in in-progress state");
         }
     }
 

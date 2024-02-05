@@ -32,12 +32,12 @@ public class EmptyOperator implements DecentHologramsIntegration, DynmapIntegrat
     }
 
     @Override
-    public void updateTaskFinishedMarkerIcon(String key) {
+    public void markTaskAsFinished(String key) {
 
     }
 
     @Override
-    public void removeTaskMarker(String key) {
+    public void removeActiveTask(String key) {
 
     }
 

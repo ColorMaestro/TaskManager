@@ -19,14 +19,14 @@ public interface DynmapIntegration {
      *
      * @param key of marker to update
      */
-    void updateTaskFinishedMarkerIcon(String key);
+    void markTaskAsFinished(String key);
 
     /**
      * Removes marker from map.
      *
      * @param key of marker to remove
      */
-    void removeTaskMarker(String key);
+    void removeActiveTask(String key);
 
     /**
      * Overwrites actives tasks - basically ensures that currently displayed active tasks are cleared and replaced by

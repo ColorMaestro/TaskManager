@@ -60,7 +60,7 @@ public class FinishTask implements CommandExecutor {
                 Bukkit.getScheduler().runTask(plugin, () -> {
                     player.sendMessage(ChatColor.GREEN + "Task finished.");
                     decentHolograms.setTasks(assignee.getUuid(), activeTasks);
-                    dynmap.updateTaskFinishedMarkerIcon(String.valueOf(taskId));
+                    dynmap.markTaskAsFinished(String.valueOf(taskId));
 
                     boolean messageSent = MessageSender.sendMessageIfOnline(
                             advisor.getUuid(),

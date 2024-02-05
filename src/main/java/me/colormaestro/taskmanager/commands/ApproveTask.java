@@ -58,7 +58,7 @@ public class ApproveTask implements CommandExecutor {
                 Bukkit.getScheduler().runTask(plugin, () -> {
                     player.sendMessage(ChatColor.GREEN + "Task approved.");
                     decentHolograms.setTasks(assignee.getUuid(), activeTasks);
-                    dynmap.removeTaskMarker(String.valueOf(taskId));
+                    dynmap.removeActiveTask(String.valueOf(taskId));
 
                     boolean messageSent = MessageSender.sendMessageIfOnline(
                             assignee.getUuid(),
