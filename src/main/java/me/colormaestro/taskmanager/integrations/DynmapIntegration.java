@@ -1,7 +1,6 @@
 package me.colormaestro.taskmanager.integrations;
 
 import me.colormaestro.taskmanager.model.Task;
-import org.bukkit.Location;
 
 import java.util.List;
 
@@ -10,11 +9,10 @@ public interface DynmapIntegration {
     /**
      * Adds new marker on map to mark task in progress state ({@link me.colormaestro.taskmanager.enums.TaskStatus#DOING}).
      *
-     * @param task     for which to add marker
-     * @param location where to create marker
+     * @param task for which to add marker
      * @throws IllegalArgumentException if task is missing id or is not in in-progress state.
      */
-    void addInProgressTask(Task task, Location location);
+    void addInProgressTask(Task task);
 
     /**
      * Updated icon of task marker to represent finished task ({@link me.colormaestro.taskmanager.enums.TaskStatus#FINISHED}).

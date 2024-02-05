@@ -27,7 +27,7 @@ public class EmptyOperator implements DecentHologramsIntegration, DynmapIntegrat
     }
 
     @Override
-    public void addInProgressTask(Task task, Location location) {
+    public void addInProgressTask(Task task) {
 
     }
 

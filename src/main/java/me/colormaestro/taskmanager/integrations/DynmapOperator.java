@@ -2,7 +2,6 @@ package me.colormaestro.taskmanager.integrations;
 
 import me.colormaestro.taskmanager.enums.TaskStatus;
 import me.colormaestro.taskmanager.model.Task;
-import org.bukkit.Location;
 import org.dynmap.DynmapAPI;
 import org.dynmap.markers.GenericMarker;
 import org.dynmap.markers.Marker;
@@ -11,7 +10,6 @@ import org.dynmap.markers.MarkerIcon;
 import org.dynmap.markers.MarkerSet;
 
 import java.util.List;
-import java.util.Objects;
 
 public class DynmapOperator implements DynmapIntegration {
     private MarkerSet activeTasks;
@@ -30,17 +28,9 @@ public class DynmapOperator implements DynmapIntegration {
     }
 
     @Override
-    public void addInProgressTask(Task task, Location location) {
+    public void addInProgressTask(Task task) {
         validateInProgressTask(task);
-
-        int taskID = task.getId();
-        String key = String.valueOf(taskID);
-        String label = "[" + taskID + "] " + task.getTitle();
-        double x = location.getX();
-        double y = location.getY();
-        double z = location.getZ();
-        activeTasks.createMarker(key, label, Objects.requireNonNull(location.getWorld()).getName(), x, y, z,
-                orangeFlag, true);
+        createActiveTaskMarker(task);
     }
 
     private void validateInProgressTask(Task task) {
@@ -75,15 +65,16 @@ public class DynmapOperator implements DynmapIntegration {
                 continue;
             }
 
-            int taskID = task.getId();
-            String key = String.valueOf(taskID);
-            String label = "[" + taskID + "] " + task.getTitle();
-            double x = task.getX();
-            double y = task.getY();
-            double z = task.getZ();
-            MarkerIcon icon = task.getStatus() == TaskStatus.DOING ? orangeFlag : greenFlag;
-            activeTasks.createMarker(key, label, task.getWorldName(), x, y, z, icon, true);
+            createActiveTaskMarker(task);
         }
+    }
+
+    private void createActiveTaskMarker(Task task) {
+        int taskID = task.getId();
+        String key = String.valueOf(taskID);
+        String label = "[" + taskID + "] " + task.getTitle();
+        MarkerIcon icon = task.getStatus() == TaskStatus.DOING ? orangeFlag : greenFlag;
+        activeTasks.createMarker(key, label, task.getWorldName(), task.getX(), task.getY(), task.getZ(), icon, true);
     }
 
     private void clearMarkersFromMarkerSet(MarkerSet markerSet) {

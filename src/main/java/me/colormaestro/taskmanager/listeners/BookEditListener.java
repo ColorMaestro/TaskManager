@@ -122,7 +122,7 @@ public class BookEditListener implements Listener {
                 Bukkit.getScheduler().runTask(plugin, () -> {
                     player.sendMessage(ChatColor.GREEN + "Task added.");
                     decentHolograms.setTasks(assignee.getUuid(), activeTasks);
-                    dynmap.addInProgressTask(task, player.getLocation());
+                    dynmap.addInProgressTask(task);
 
                     boolean messageSent = MessageSender.sendMessageIfOnline(
                             assignee.getUuid(),
