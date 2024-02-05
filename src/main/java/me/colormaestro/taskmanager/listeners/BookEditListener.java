@@ -113,8 +113,8 @@ public class BookEditListener implements Listener {
             }
 
             Date currentDate = new Date(System.currentTimeMillis());
-            Task task = new Task(title, description, advisor.getId(), assignee.getId(), advisor.getId(), x, y, z, yaw,
-                    pitch, TaskStatus.DOING, currentDate, currentDate, null);
+            Task task = new Task(title, description, advisor.getId(), assignee.getId(), advisor.getId(),
+                    player.getWorld().getName(), x, y, z, yaw, pitch, TaskStatus.DOING, currentDate, currentDate, null);
             try {
                 int taskID = taskDAO.createTask(task);
                 task.setId(taskID);
@@ -166,8 +166,8 @@ public class BookEditListener implements Listener {
                 return;
             }
 
-            Task task = new Task(title, description, creator.getId(), null, null, x, y, z, yaw, pitch,
-                    TaskStatus.PREPARED, new Date(System.currentTimeMillis()), null, null);
+            Task task = new Task(title, description, creator.getId(), null, null, player.getWorld().getName(),
+                    x, y, z, yaw, pitch, TaskStatus.PREPARED, new Date(System.currentTimeMillis()), null, null);
             try {
                 taskDAO.createTask(task);
                 Bukkit.getScheduler().runTask(plugin, () -> player.sendMessage(ChatColor.GREEN + "Task prepared."));

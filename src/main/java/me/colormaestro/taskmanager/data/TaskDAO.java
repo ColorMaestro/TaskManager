@@ -55,6 +55,7 @@ public class TaskDAO {
                     "creator_id INT NOT NULL," +
                     "assignee_id INT," +
                     "advisor_id INT," +
+                    "world_name VARCHAR(30) NOT NULL," +
                     "x DOUBLE NOT NULL," +
                     "y DOUBLE NOT NULL," +
                     "z DOUBLE NOT NULL," +
@@ -85,23 +86,24 @@ public class TaskDAO {
         }
         try (Connection connection = DriverManager.getConnection(url);
              PreparedStatement st = connection.prepareStatement(
-                     "INSERT INTO TASKS (title, description, creator_id, assignee_id, advisor_id, x, y, z, yaw, " +
-                             "pitch, status, date_created, date_given, date_finished) " +
-                             "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)")) {
+                     "INSERT INTO TASKS (title, description, creator_id, assignee_id, advisor_id, world_name, " +
+                             "x, y, z, yaw, pitch, status, date_created, date_given, date_finished) " +
+                             "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)")) {
             st.setString(1, task.getTitle());
             st.setString(2, task.getDescription());
             st.setInt(3, task.getCreatorID());
             ParsingUtils.setIntOrNull(st, 4, task.getAssigneeID());
             ParsingUtils.setIntOrNull(st, 5, task.getAdvisorID());
-            st.setDouble(6, task.getX());
-            st.setDouble(7, task.getY());
-            st.setDouble(8, task.getZ());
-            st.setFloat(9, task.getYaw());
-            st.setFloat(10, task.getPitch());
-            st.setString(11, task.getStatus().name());
-            st.setDate(12, task.getDateCreation());
-            st.setDate(13, task.getDateAssigned());
-            st.setDate(14, task.getDateCompleted());
+            st.setString(6, task.getWorldName());
+            st.setDouble(7, task.getX());
+            st.setDouble(8, task.getY());
+            st.setDouble(9, task.getZ());
+            st.setFloat(10, task.getYaw());
+            st.setFloat(11, task.getPitch());
+            st.setString(12, task.getStatus().name());
+            st.setDate(13, task.getDateCreation());
+            st.setDate(14, task.getDateAssigned());
+            st.setDate(15, task.getDateCompleted());
             st.executeUpdate();
 
             ResultSet generatedKeys = st.getGeneratedKeys();
@@ -249,8 +251,8 @@ public class TaskDAO {
     public synchronized Task findTask(int id) throws SQLException, DataAccessException {
         try (Connection connection = DriverManager.getConnection(url);
              PreparedStatement st = connection.prepareStatement(
-                     "SELECT title, description, creator_id, assignee_id, advisor_id, x, y, z, yaw, pitch, " +
-                             "status, date_created, date_given, date_finished FROM TASKS WHERE id = ?")) {
+                     "SELECT title, description, creator_id, assignee_id, advisor_id, world_name, x, y, z, yaw, " +
+                             "pitch, status, date_created, date_given, date_finished FROM TASKS WHERE id = ?")) {
 
             st.setInt(1, id);
             ResultSet rs = st.executeQuery();
@@ -263,6 +265,7 @@ public class TaskDAO {
                     rs.getInt("creator_id"),
                     ParsingUtils.getIntOrNull(rs, "assignee_id"),
                     ParsingUtils.getIntOrNull(rs, "advisor_id"),
+                    rs.getString("world_name"),
                     rs.getDouble("x"),
                     rs.getDouble("y"),
                     rs.getDouble("z"),
@@ -291,9 +294,9 @@ public class TaskDAO {
     public synchronized List<Task> fetchPlayersActiveTasks(int assigneeID) throws SQLException {
         try (Connection connection = DriverManager.getConnection(url);
              PreparedStatement st = connection.prepareStatement(
-                     "SELECT id, title, description, creator_id, assignee_id, advisor_id, x, y, z, yaw, pitch, " +
-                             "status, date_created, date_given, date_finished FROM TASKS WHERE assignee_id = ? " +
-                             "AND status != 'APPROVED' order by id desc")) {
+                     "SELECT id, title, description, creator_id, assignee_id, advisor_id, world_name, x, y, z, " +
+                             "yaw, pitch, status, date_created, date_given, date_finished FROM TASKS " +
+                             "WHERE assignee_id = ? AND status != 'APPROVED' order by id desc")) {
 
             return executeStatementWithMemberId(st, assigneeID);
         }
@@ -310,9 +313,9 @@ public class TaskDAO {
     public synchronized List<Task> fetchPlayersApprovedTasks(int assigneeID) throws SQLException {
         try (Connection connection = DriverManager.getConnection(url);
              PreparedStatement st = connection.prepareStatement(
-                     "SELECT id, title, description, creator_id, assignee_id, advisor_id, x, y, z, yaw, pitch, " +
-                             "status, date_created, date_given, date_finished FROM TASKS WHERE assignee_id = ? " +
-                             "AND status == 'APPROVED' order by id desc")) {
+                     "SELECT id, title, description, creator_id, assignee_id, advisor_id, world_name, x, y, z, " +
+                             "yaw, pitch, status, date_created, date_given, date_finished FROM TASKS " +
+                             "WHERE assignee_id = ? AND status == 'APPROVED' order by id desc")) {
 
             return executeStatementWithMemberId(st, assigneeID);
         }
@@ -329,9 +332,9 @@ public class TaskDAO {
     public synchronized List<Task> fetchFinishedTasks(int advisorID) throws SQLException {
         try (Connection connection = DriverManager.getConnection(url);
              PreparedStatement st = connection.prepareStatement(
-                     "SELECT id, title, description, creator_id, assignee_id, advisor_id, x, y, z, yaw, pitch, " +
-                             "status, date_created, date_given, date_finished FROM TASKS WHERE advisor_id = ? " +
-                             "AND status = 'FINISHED'")) {
+                     "SELECT id, title, description, creator_id, assignee_id, advisor_id, world_name, x, y, z, " +
+                             "yaw, pitch, status, date_created, date_given, date_finished FROM TASKS " +
+                             "WHERE advisor_id = ? AND status = 'FINISHED'")) {
 
             return executeStatementWithMemberId(st, advisorID);
         }
@@ -346,8 +349,9 @@ public class TaskDAO {
     public synchronized List<Task> fetchPreparedTasks() throws SQLException {
         try (Connection connection = DriverManager.getConnection(url);
              PreparedStatement st = connection.prepareStatement(
-                     "SELECT id, title, description, creator_id, assignee_id, advisor_id, x, y, z, yaw, pitch, " +
-                             "status, date_created, date_given, date_finished FROM TASKS WHERE status = 'PREPARED'")) {
+                     "SELECT id, title, description, creator_id, assignee_id, advisor_id, world_name, x, y, z, " +
+                             "yaw, pitch, status, date_created, date_given, date_finished FROM TASKS " +
+                             "WHERE status = 'PREPARED'")) {
 
             return executeStatement(st);
         }
@@ -434,15 +438,17 @@ public class TaskDAO {
     public synchronized void updateTaskCords(int taskID, int assigneeID, Location location) throws SQLException, DataAccessException {
         try (Connection connection = DriverManager.getConnection(url);
              PreparedStatement st = connection.prepareStatement(
-                     "UPDATE TASKS SET x = ?, y = ?, z = ?, yaw = ?, pitch = ? WHERE id = ? AND assignee_id = ?")) {
+                     "UPDATE TASKS SET world_name = ?, x = ?, y = ?, z = ?, yaw = ?, pitch = ? " +
+                             "WHERE id = ? AND assignee_id = ?")) {
 
-            st.setDouble(1, location.getX());
-            st.setDouble(2, location.getY());
-            st.setDouble(3, location.getZ());
-            st.setFloat(4, location.getYaw());
-            st.setFloat(5, location.getPitch());
-            st.setInt(6, taskID);
-            st.setInt(7, assigneeID);
+            st.setString(1, location.getWorld().getName());
+            st.setDouble(2, location.getX());
+            st.setDouble(3, location.getY());
+            st.setDouble(4, location.getZ());
+            st.setFloat(5, location.getYaw());
+            st.setFloat(6, location.getPitch());
+            st.setInt(7, taskID);
+            st.setInt(8, assigneeID);
             int affected = st.executeUpdate();
             if (affected == 0) {
                 throw new DataAccessException("No change. Make sure you choose your existing task.");
@@ -542,6 +548,7 @@ public class TaskDAO {
                     rs.getInt("creator_id"),
                     ParsingUtils.getIntOrNull(rs, "assignee_id"),
                     ParsingUtils.getIntOrNull(rs, "advisor_id"),
+                    rs.getString("world_name"),
                     rs.getDouble("x"),
                     rs.getDouble("y"),
                     rs.getDouble("z"),

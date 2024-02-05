@@ -12,6 +12,7 @@ public class Task implements StringReporter {
     private final int creatorID;
     private final Integer assigneeID;
     private final Integer advisorID;
+    private final String worldName;
     private final double x;
     private final double y;
     private final double z;
@@ -23,13 +24,14 @@ public class Task implements StringReporter {
     private final Date dateCompleted;
 
     public Task(String title, String description, int creatorID, Integer assigneeID, Integer advisorID,
-                double x, double y, double z, float yaw, float pitch,
+                String worldName, double x, double y, double z, float yaw, float pitch,
                 TaskStatus status, Date dateCreation, Date dateAssigned, Date dateCompleted) {
         this.title = title;
         this.description = description;
         this.creatorID = creatorID;
         this.assigneeID = assigneeID;
         this.advisorID = advisorID;
+        this.worldName = worldName;
         this.x = x;
         this.y = y;
         this.z = z;
@@ -83,6 +85,10 @@ public class Task implements StringReporter {
 
     public Date getDateCompleted() {
         return dateCompleted;
+    }
+
+    public String getWorldName() {
+        return worldName;
     }
 
     public double getX() {
