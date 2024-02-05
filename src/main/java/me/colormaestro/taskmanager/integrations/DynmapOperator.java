@@ -31,20 +31,24 @@ public class DynmapOperator implements DynmapIntegration {
 
     @Override
     public void addInProgressTask(Task task, Location location) {
-        int taskID = task.getId();
-        if (task.getId() == null) {
-            throw new IllegalArgumentException("Task is missing id");
-        } else if (task.getStatus() != TaskStatus.DOING) {
-            throw new IllegalArgumentException("Task is not in in-progress state");
-        }
+        validateInProgressTask(task);
 
+        int taskID = task.getId();
         String key = String.valueOf(taskID);
-        String label = "[" + taskID + "] " + task.getTitle();;
+        String label = "[" + taskID + "] " + task.getTitle();
         double x = location.getX();
         double y = location.getY();
         double z = location.getZ();
         activeTasks.createMarker(key, label, Objects.requireNonNull(location.getWorld()).getName(), x, y, z,
                 orangeFlag, true);
+    }
+
+    private void validateInProgressTask(Task task) {
+        if (task.getId() == null) {
+            throw new IllegalArgumentException("Task is missing id");
+        } else if (task.getStatus() != TaskStatus.DOING) {
+            throw new IllegalArgumentException("Task is not in in-progress state");
+        }
     }
 
     @Override
