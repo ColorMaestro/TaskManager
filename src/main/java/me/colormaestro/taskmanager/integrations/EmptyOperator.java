@@ -45,4 +45,9 @@ public class EmptyOperator implements DecentHologramsIntegration, DynmapIntegrat
     public void overwriteActiveTasks(List<Task> tasks) {
 
     }
+
+    @Override
+    public void overwriteIdleTasks(List<Task> tasks) {
+
+    }
 }

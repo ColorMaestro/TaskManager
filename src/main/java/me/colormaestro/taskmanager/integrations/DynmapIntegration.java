@@ -36,4 +36,13 @@ public interface DynmapIntegration {
      * @param tasks which to render as active
      */
     void overwriteActiveTasks(List<Task> tasks);
+
+    /**
+     * Overwrites idle tasks - basically ensures that currently displayed idle tasks are cleared and replaced by
+     * specified ones. This means only tasks in-progress ({@link me.colormaestro.taskmanager.enums.TaskStatus#DOING})
+     * which are in this state for more than 30 days since their creation must be replaced on map.
+     *
+     * @param tasks which to render as idle
+     */
+    void overwriteIdleTasks(List<Task> tasks);
 }

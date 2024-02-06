@@ -13,17 +13,29 @@ import java.util.List;
 
 public class DynmapOperator implements DynmapIntegration {
     private MarkerSet activeTasks;
+    private MarkerSet idleTasks;
     private final MarkerIcon orangeFlag;
     private final MarkerIcon greenFlag;
+    private final MarkerIcon exclamation;
 
     public DynmapOperator(DynmapAPI dynmapAPI) {
         MarkerAPI markerAPI = dynmapAPI.getMarkerAPI();
         orangeFlag = markerAPI.getMarkerIcon("orangeflag");
         greenFlag = markerAPI.getMarkerIcon("greenflag");
+        exclamation = markerAPI.getMarkerIcon("exclamation");
+        initMarkerSets(markerAPI);
+    }
+
+    private void initMarkerSets(MarkerAPI markerAPI) {
         activeTasks = markerAPI.getMarkerSet("active_tasks");
         if (activeTasks == null) {
             activeTasks = markerAPI.createMarkerSet("active_tasks", "Active Tasks", null, true);
             activeTasks.setHideByDefault(true);
+        }
+        idleTasks = markerAPI.getMarkerSet("idle_tasks");
+        if (idleTasks == null) {
+            idleTasks = markerAPI.createMarkerSet("idle_tasks", "Idle Tasks", null, true);
+            idleTasks.setHideByDefault(true);
         }
     }
 
@@ -61,6 +73,18 @@ public class DynmapOperator implements DynmapIntegration {
         }
     }
 
+    @Override
+    public void overwriteIdleTasks(List<Task> tasks) {
+        clearMarkersFromMarkerSet(idleTasks);
+        for (Task task : tasks) {
+            if (task.getStatus() != TaskStatus.DOING) {
+                continue;
+            }
+
+            createTaskMarker(idleTasks, task, exclamation);
+        }
+    }
+
     private void validateInProgressTask(Task task) {
         if (task.getId() == null) {
             throw new IllegalArgumentException("Task is missing id");
@@ -70,11 +94,15 @@ public class DynmapOperator implements DynmapIntegration {
     }
 
     private void createActiveTaskMarker(Task task) {
+        MarkerIcon icon = task.getStatus() == TaskStatus.DOING ? orangeFlag : greenFlag;
+        createTaskMarker(activeTasks, task, icon);
+    }
+
+    private void createTaskMarker(MarkerSet markerSet, Task task, MarkerIcon icon) {
         int taskID = task.getId();
         String key = String.valueOf(taskID);
         String label = "[" + taskID + "] " + task.getTitle();
-        MarkerIcon icon = task.getStatus() == TaskStatus.DOING ? orangeFlag : greenFlag;
-        activeTasks.createMarker(key, label, task.getWorldName(), task.getX(), task.getY(), task.getZ(), icon, true);
+        markerSet.createMarker(key, label, task.getWorldName(), task.getX(), task.getY(), task.getZ(), icon, true);
     }
 
     private void clearMarkersFromMarkerSet(MarkerSet markerSet) {
