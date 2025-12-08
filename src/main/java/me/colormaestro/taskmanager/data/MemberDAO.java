@@ -91,7 +91,7 @@ public class MemberDAO {
 
             st.setInt(1, id);
             ResultSet rs = st.executeQuery();
-            if (rs.isClosed()) {
+            if (!rs.next()) {
                 throw new DataAccessException("Failed to get member with id " + id + ".");
             }
             Member member = new Member(
@@ -119,7 +119,7 @@ public class MemberDAO {
 
             st.setString(1, ign);
             ResultSet rs = st.executeQuery();
-            if (rs.isClosed()) {
+            if (!rs.next()) {
                 throw new DataAccessException("Failed to get member with name " + ign + ".");
             }
             Member member = new Member(
@@ -147,7 +147,7 @@ public class MemberDAO {
 
             st.setString(1, uuid.toString());
             ResultSet rs = st.executeQuery();
-            if (rs.isClosed()) {
+            if (!rs.next()) {
                 throw new DataAccessException("Failed to get member with uuid " + uuid + ".");
             }
             Member member = new Member(

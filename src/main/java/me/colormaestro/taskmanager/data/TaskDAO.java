@@ -183,7 +183,7 @@ public class TaskDAO {
 
             statement.setInt(1, id);
             ResultSet rs = statement.executeQuery();
-            if (rs.isClosed()) {
+            if (!rs.next()) {
                 throw new DataAccessException("No task with such an ID found.");
             }
             TaskStatus status = TaskStatus.valueOf(rs.getString("status"));
@@ -222,7 +222,7 @@ public class TaskDAO {
 
             statement.setInt(1, id);
             ResultSet rs = statement.executeQuery();
-            if (rs.isClosed()) {
+            if (!rs.next()) {
                 throw new DataAccessException("No task with such an ID found.");
             }
             TaskStatus status = TaskStatus.valueOf(rs.getString("status"));
@@ -254,7 +254,7 @@ public class TaskDAO {
 
             st.setInt(1, id);
             ResultSet rs = st.executeQuery();
-            if (rs.isClosed()) {
+            if (!rs.next()) {
                 throw new DataAccessException("No task found with id " + id);
             }
             Task task = new Task(
