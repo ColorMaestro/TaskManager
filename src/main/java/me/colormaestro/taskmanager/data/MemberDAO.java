@@ -192,14 +192,13 @@ public class MemberDAO {
     public synchronized boolean memberExists(String uuid) throws SQLException {
         try (Connection connection = DriverManager.getConnection(url);
              PreparedStatement st = connection.prepareStatement(
-                     "SELECT ign FROM MEMBERS WHERE uuid = ?")) {
+                     "SELECT count(1) FROM MEMBERS WHERE uuid = ?")) {
             st.setString(1, uuid);
             ResultSet rs = st.executeQuery();
-            if (rs.isClosed()) {
-                return false;
-            }
+            rs.next();
+            int membersCount = rs.getInt(1);
             rs.close();
-            return true;
+            return membersCount != 0;
         }
     }
 
