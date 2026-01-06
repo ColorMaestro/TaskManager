@@ -17,20 +17,20 @@ import me.colormaestro.taskmanager.commands.TaskInfo;
 import me.colormaestro.taskmanager.commands.Tasks;
 import me.colormaestro.taskmanager.commands.TransferTask;
 import me.colormaestro.taskmanager.commands.VisitTask;
-import me.colormaestro.taskmanager.integrations.DiscordOperator;
+import me.colormaestro.taskmanager.data.MemberDAO;
+import me.colormaestro.taskmanager.data.TaskDAO;
 import me.colormaestro.taskmanager.integrations.DecentHologramsIntegration;
+import me.colormaestro.taskmanager.integrations.DecentHologramsOperator;
+import me.colormaestro.taskmanager.integrations.DiscordOperator;
 import me.colormaestro.taskmanager.integrations.DynmapIntegration;
 import me.colormaestro.taskmanager.integrations.DynmapOperator;
 import me.colormaestro.taskmanager.integrations.EmptyOperator;
-import me.colormaestro.taskmanager.integrations.DecentHologramsOperator;
-import me.colormaestro.taskmanager.data.MemberDAO;
-import me.colormaestro.taskmanager.data.TaskDAO;
+import me.colormaestro.taskmanager.listeners.BookEditListener;
+import me.colormaestro.taskmanager.listeners.PlayerJoinListener;
 import me.colormaestro.taskmanager.listeners.inventory.ActiveTasksViewListener;
 import me.colormaestro.taskmanager.listeners.inventory.ApprovedTasksViewListener;
-import me.colormaestro.taskmanager.listeners.BookEditListener;
 import me.colormaestro.taskmanager.listeners.inventory.DashboardViewListener;
 import me.colormaestro.taskmanager.listeners.inventory.IdleTaskViewListener;
-import me.colormaestro.taskmanager.listeners.PlayerJoinListener;
 import me.colormaestro.taskmanager.listeners.inventory.NeedTasksViewListener;
 import me.colormaestro.taskmanager.listeners.inventory.PreparedTasksViewListener;
 import me.colormaestro.taskmanager.listeners.inventory.SelectMemberListener;
@@ -42,15 +42,11 @@ import me.colormaestro.taskmanager.utils.RunnablesCreator;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.TabCompleter;
-import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.FileConfiguration;
-import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.dynmap.DynmapAPI;
 
-import java.io.File;
-import java.io.IOException;
 import java.util.Objects;
 
 public final class TaskManager extends JavaPlugin {
@@ -75,18 +71,8 @@ public final class TaskManager extends JavaPlugin {
     }
 
     private void loadConfig() {
-        File configFile = new File(getDataFolder(), "config.yml");
-        if (!configFile.exists()) {
-            configFile.getParentFile().mkdirs();
-            saveResource("config.yml", false);
-        }
-
-        config = new YamlConfiguration();
-        try {
-            config.load(configFile);
-        } catch (IOException | InvalidConfigurationException e) {
-            e.printStackTrace();
-        }
+        saveDefaultConfig();
+        config = getConfig();
     }
 
     private void initDatabaseAccessors() {
