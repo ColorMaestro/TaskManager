@@ -1,20 +1,20 @@
 package me.colormaestro.taskmanager.commands;
 
+import me.colormaestro.taskmanager.scheduler.Scheduler;
 import me.colormaestro.taskmanager.utils.RunnablesCreator;
-import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
-import org.bukkit.scheduler.BukkitScheduler;
 import org.jetbrains.annotations.NotNull;
 
 public class Dashboard implements CommandExecutor {
-    private final BukkitScheduler scheduler = Bukkit.getScheduler();
+    private final Scheduler scheduler;
     private final RunnablesCreator creator;
 
-    public Dashboard(RunnablesCreator creator) {
+    public Dashboard(Scheduler scheduler, RunnablesCreator creator) {
+        this.scheduler = scheduler;
         this.creator = creator;
     }
 
@@ -27,11 +27,11 @@ public class Dashboard implements CommandExecutor {
         }
 
         if (args.length > 0) {
-            scheduler.runTaskAsynchronously(creator.getPlugin(), creator.showActiveTasksView(player, args[0], 1));
+            scheduler.runTaskAsynchronously(creator.showActiveTasksView(player, args[0], 1));
             return true;
         }
 
-        scheduler.runTaskAsynchronously(creator.getPlugin(), creator.showDashboardView(player, 1));
+        scheduler.runTaskAsynchronously(creator.showDashboardView(player, 1));
 
         return true;
     }

@@ -122,22 +122,22 @@ public final class TaskManager extends JavaPlugin {
         registerEventListener(new SelectMemberListener(creator));
 
         setCommandExecutor("addmember", new AddMember(scheduler, memberDAO, tasksTabCompleter, membersTabCompleter));
-        setCommandExecutor("removemember", new RemoveMember(this, memberDAO, tasksTabCompleter, membersTabCompleter));
-        setCommandExecutor("dashboard", new Dashboard(creator));
-        setCommandExecutor("tasks", new Tasks(this, taskDAO, memberDAO));
-        setCommandExecutor("addtask", new AddTask(this, taskDAO));
+        setCommandExecutor("removemember", new RemoveMember(scheduler, memberDAO, tasksTabCompleter, membersTabCompleter));
+        setCommandExecutor("dashboard", new Dashboard(scheduler, creator));
+        setCommandExecutor("tasks", new Tasks(scheduler, this, taskDAO, memberDAO));
+        setCommandExecutor("addtask", new AddTask(scheduler, this, taskDAO));
         setCommandExecutor("preparetask", new PrepareTask(this));
-        setCommandExecutor("assigntask", new AssignTask(creator));
-        setCommandExecutor("finishtask", new FinishTask(taskDAO, memberDAO, decentHolograms, dynmap));
-        setCommandExecutor("approvetask", new ApproveTask(taskDAO, memberDAO, decentHolograms, dynmap));
-        setCommandExecutor("visittask", new VisitTask(creator));
-        setCommandExecutor("returntask", new ReturnTask(taskDAO, memberDAO, decentHolograms));
-        setCommandExecutor("settaskplace", new SetTaskPlace(taskDAO, memberDAO));
+        setCommandExecutor("assigntask", new AssignTask(scheduler, creator));
+        setCommandExecutor("finishtask", new FinishTask(scheduler, taskDAO, memberDAO, decentHolograms, dynmap));
+        setCommandExecutor("approvetask", new ApproveTask(scheduler, taskDAO, memberDAO, decentHolograms, dynmap));
+        setCommandExecutor("visittask", new VisitTask(scheduler, creator));
+        setCommandExecutor("returntask", new ReturnTask(scheduler, taskDAO, memberDAO, decentHolograms));
+        setCommandExecutor("settaskplace", new SetTaskPlace(scheduler, taskDAO, memberDAO));
         setCommandExecutor("linkdiscord", new LinkDiscord());
-        setCommandExecutor("establish", new Establish(taskDAO, memberDAO, decentHolograms));
-        setCommandExecutor("taskinfo", new TaskInfo(creator));
-        setCommandExecutor("transfertask", new TransferTask(taskDAO, memberDAO, decentHolograms));
-        setCommandExecutor("needtasks", new NeedTasks(this, taskDAO));
+        setCommandExecutor("establish", new Establish(scheduler, taskDAO, memberDAO, decentHolograms));
+        setCommandExecutor("taskinfo", new TaskInfo(scheduler, creator));
+        setCommandExecutor("transfertask", new TransferTask(scheduler, taskDAO, memberDAO, decentHolograms));
+        setCommandExecutor("needtasks", new NeedTasks(scheduler, this, taskDAO));
     }
 
     private void registerEventListener(Listener listener) {

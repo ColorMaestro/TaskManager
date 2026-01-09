@@ -4,12 +4,12 @@ import me.colormaestro.taskmanager.data.DataAccessException;
 import me.colormaestro.taskmanager.data.MemberDAO;
 import me.colormaestro.taskmanager.data.TaskDAO;
 import me.colormaestro.taskmanager.model.AdvisedTask;
+import me.colormaestro.taskmanager.model.BasicMemberInfo;
 import me.colormaestro.taskmanager.model.IdleTask;
 import me.colormaestro.taskmanager.model.Member;
-import me.colormaestro.taskmanager.model.BasicMemberInfo;
 import me.colormaestro.taskmanager.model.Task;
+import me.colormaestro.taskmanager.scheduler.Scheduler;
 import net.md_5.bungee.api.chat.ComponentBuilder;
-import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.command.Command;
@@ -19,7 +19,6 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.BookMeta;
 import org.bukkit.plugin.Plugin;
-import org.bukkit.scheduler.BukkitScheduler;
 import org.jetbrains.annotations.NotNull;
 
 import java.sql.SQLException;
@@ -29,7 +28,7 @@ import java.util.List;
 import java.util.Random;
 
 public class Tasks implements CommandExecutor {
-    private final BukkitScheduler scheduler = Bukkit.getScheduler();
+    private final Scheduler scheduler;
     private final Plugin plugin;
     private final TaskDAO taskDAO;
     private final MemberDAO memberDAO;
@@ -68,7 +67,8 @@ public class Tasks implements CommandExecutor {
             {"/establish", "establishes the Hologram where is summary of member's tasks"}
     };
 
-    public Tasks(Plugin plugin, TaskDAO taskDAO, MemberDAO memberDAO) {
+    public Tasks(Scheduler scheduler, Plugin plugin, TaskDAO taskDAO, MemberDAO memberDAO) {
+        this.scheduler = scheduler;
         this.plugin = plugin;
         this.taskDAO = taskDAO;
         this.memberDAO = memberDAO;
@@ -92,13 +92,13 @@ public class Tasks implements CommandExecutor {
         }
 
         if (args.length == 1 && args[0].equals("supervised")) {
-            scheduler.runTaskAsynchronously(plugin, () -> {
+            scheduler.runTaskAsynchronously(() -> {
                 try {
                     Member member = memberDAO.findMember(player.getUniqueId());
                     List<AdvisedTask> tasks = taskDAO.fetchAdvisorActiveTasks(member.getId());
-                    scheduler.runTask(plugin, () -> sendAdvisorTasks(player, tasks));
+                    scheduler.runTask(() -> sendAdvisorTasks(player, tasks));
                 } catch (SQLException | DataAccessException ex) {
-                    scheduler.runTask(plugin, () -> player.sendMessage(ChatColor.RED + ex.getMessage()));
+                    scheduler.runTask(() -> player.sendMessage(ChatColor.RED + ex.getMessage()));
                     ex.printStackTrace();
                 }
             });
@@ -106,16 +106,16 @@ public class Tasks implements CommandExecutor {
         }
 
         if (args.length == 1 && args[0].equals("stats")) {
-            scheduler.runTaskAsynchronously(plugin, () -> {
+            scheduler.runTaskAsynchronously(() -> {
                 try {
                     List<BasicMemberInfo> stats = taskDAO.fetchMembersDashboardInfo();
 
-                    scheduler.runTask(plugin, () -> {
+                    scheduler.runTask(() -> {
                         ItemStack book = buildStatsBook(stats);
                         player.openBook(book);
                     });
                 } catch (SQLException ex) {
-                    scheduler.runTask(plugin, () -> player.sendMessage(ChatColor.RED + ex.getMessage()));
+                    scheduler.runTask(() -> player.sendMessage(ChatColor.RED + ex.getMessage()));
                     ex.printStackTrace();
                 }
             });
@@ -123,13 +123,13 @@ public class Tasks implements CommandExecutor {
         }
 
         if (args.length == 1 && args[0].equals("prepared")) {
-            scheduler.runTaskAsynchronously(plugin, () -> {
+            scheduler.runTaskAsynchronously(() -> {
                 try {
                     List<Task> preparedTasks = taskDAO.fetchPreparedTasks();
 
-                    scheduler.runTask(plugin, () -> sendPreparedTasks(player, preparedTasks));
+                    scheduler.runTask(() -> sendPreparedTasks(player, preparedTasks));
                 } catch (SQLException ex) {
-                    scheduler.runTask(plugin, () -> player.sendMessage(ChatColor.RED + ex.getMessage()));
+                    scheduler.runTask(() -> player.sendMessage(ChatColor.RED + ex.getMessage()));
                     ex.printStackTrace();
                 }
             });
@@ -137,13 +137,13 @@ public class Tasks implements CommandExecutor {
         }
 
         if (args.length == 1 && args[0].equals("idle")) {
-            scheduler.runTaskAsynchronously(plugin, () -> {
+            scheduler.runTaskAsynchronously(() -> {
                 try {
                     List<IdleTask> preparedTasks = taskDAO.fetchIdleTasks();
 
-                    scheduler.runTask(plugin, () -> sendIdleTasks(player, preparedTasks));
+                    scheduler.runTask(() -> sendIdleTasks(player, preparedTasks));
                 } catch (SQLException ex) {
-                    scheduler.runTask(plugin, () -> player.sendMessage(ChatColor.RED + ex.getMessage()));
+                    scheduler.runTask(() -> player.sendMessage(ChatColor.RED + ex.getMessage()));
                     ex.printStackTrace();
                 }
             });
@@ -151,7 +151,7 @@ public class Tasks implements CommandExecutor {
         }
 
         if (args.length == 0 || args.length == 1) {
-            scheduler.runTaskAsynchronously(plugin, () -> {
+            scheduler.runTaskAsynchronously(() -> {
                 try {
                     Member member;
                     if (args.length == 0) {
@@ -160,9 +160,9 @@ public class Tasks implements CommandExecutor {
                         member = memberDAO.findMember(args[0]);
                     }
                     List<Task> tasks = taskDAO.fetchPlayersActiveTasks(member.getId());
-                    scheduler.runTask(plugin, () -> sendTasks(player, tasks, member.getIgn()));
+                    scheduler.runTask(() -> sendTasks(player, tasks, member.getIgn()));
                 } catch (SQLException | DataAccessException ex) {
-                    scheduler.runTask(plugin, () -> player.sendMessage(ChatColor.RED + ex.getMessage()));
+                    scheduler.runTask(() -> player.sendMessage(ChatColor.RED + ex.getMessage()));
                     ex.printStackTrace();
                 }
             });

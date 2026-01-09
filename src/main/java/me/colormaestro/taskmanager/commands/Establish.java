@@ -6,32 +6,33 @@ import me.colormaestro.taskmanager.data.TaskDAO;
 import me.colormaestro.taskmanager.integrations.DecentHologramsIntegration;
 import me.colormaestro.taskmanager.model.Member;
 import me.colormaestro.taskmanager.model.Task;
+import me.colormaestro.taskmanager.scheduler.Scheduler;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
-import org.bukkit.plugin.Plugin;
-import org.bukkit.scheduler.BukkitScheduler;
+import org.jetbrains.annotations.NotNull;
 
 import java.sql.SQLException;
 import java.util.List;
 
 public class Establish implements CommandExecutor {
-    private final BukkitScheduler scheduler = Bukkit.getScheduler();
+    private final Scheduler scheduler;
     private final TaskDAO taskDAO;
     private final MemberDAO memberDAO;
     private final DecentHologramsIntegration decentHolograms;
 
-    public Establish(TaskDAO taskDAO, MemberDAO memberDAO, DecentHologramsIntegration decentHolograms) {
+    public Establish(Scheduler scheduler, TaskDAO taskDAO, MemberDAO memberDAO, DecentHologramsIntegration decentHolograms) {
+        this.scheduler = scheduler;
         this.taskDAO = taskDAO;
         this.memberDAO = memberDAO;
         this.decentHolograms = decentHolograms;
     }
 
     @Override
-    public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
+    public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, String[] args) {
         if (!(sender instanceof Player player)) {
             sender.sendMessage(ChatColor.RED + "This command can't be run from console");
             return true;
@@ -46,12 +47,11 @@ public class Establish implements CommandExecutor {
         if (decentHolograms.hologramExists(uuid)) {
             decentHolograms.teleportHologram(uuid, player.getLocation());
         } else {
-            Plugin plugin = Bukkit.getPluginManager().getPlugin("TaskManager");
-            scheduler.runTaskAsynchronously(plugin, () -> {
+            scheduler.runTaskAsynchronously(() -> {
                 try {
                     Member member = memberDAO.findMember(player.getUniqueId());
                     List<Task> membersTasks = taskDAO.fetchPlayersActiveTasks(member.getId());
-                    scheduler.runTask(plugin, () -> {
+                    scheduler.runTask(() -> {
                         decentHolograms.establishTasksHologram(player);
                         decentHolograms.setTasks(uuid, membersTasks);
                     });
