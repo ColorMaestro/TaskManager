@@ -112,14 +112,14 @@ public final class TaskManager extends JavaPlugin {
 
         registerEventListener(new PlayerJoinListener(this, taskDAO, memberDAO, tasksTabCompleter, membersTabCompleter, decentHolograms));
         registerEventListener(new BookEditListener(this, taskDAO, memberDAO, decentHolograms, dynmap));
-        registerEventListener(new DashboardViewListener(creator));
-        registerEventListener(new SupervisedTasksViewListener(creator));
-        registerEventListener(new ActiveTasksViewListener(creator));
-        registerEventListener(new ApprovedTasksViewListener(creator));
-        registerEventListener(new PreparedTasksViewListener(creator));
-        registerEventListener(new IdleTaskViewListener(creator));
-        registerEventListener(new NeedTasksViewListener(creator));
-        registerEventListener(new SelectMemberListener(creator));
+        registerEventListener(new DashboardViewListener(scheduler, creator));
+        registerEventListener(new SupervisedTasksViewListener(scheduler, creator));
+        registerEventListener(new ActiveTasksViewListener(scheduler, creator));
+        registerEventListener(new ApprovedTasksViewListener(scheduler, creator));
+        registerEventListener(new PreparedTasksViewListener(scheduler, creator));
+        registerEventListener(new IdleTaskViewListener(scheduler, creator));
+        registerEventListener(new NeedTasksViewListener(scheduler, creator));
+        registerEventListener(new SelectMemberListener(scheduler, creator));
 
         setCommandExecutor("addmember", new AddMember(scheduler, memberDAO, tasksTabCompleter, membersTabCompleter));
         setCommandExecutor("removemember", new RemoveMember(scheduler, memberDAO, tasksTabCompleter, membersTabCompleter));

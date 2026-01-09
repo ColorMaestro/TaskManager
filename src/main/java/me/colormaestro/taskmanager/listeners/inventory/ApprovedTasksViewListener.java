@@ -1,9 +1,9 @@
 package me.colormaestro.taskmanager.listeners.inventory;
 
+import me.colormaestro.taskmanager.scheduler.Scheduler;
 import me.colormaestro.taskmanager.utils.DataContainerKeys;
 import me.colormaestro.taskmanager.utils.Directives;
 import me.colormaestro.taskmanager.utils.RunnablesCreator;
-import org.bukkit.Bukkit;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.inventory.ClickType;
@@ -14,8 +14,8 @@ import org.bukkit.persistence.PersistentDataType;
 
 public class ApprovedTasksViewListener extends InventoryListener {
 
-    public ApprovedTasksViewListener(RunnablesCreator creator) {
-        super(creator, Directives.APPROVED_TASKS);
+    public ApprovedTasksViewListener(Scheduler scheduler, RunnablesCreator creator) {
+        super(scheduler, creator, Directives.APPROVED_TASKS);
     }
 
     @EventHandler
@@ -34,18 +34,18 @@ public class ApprovedTasksViewListener extends InventoryListener {
 
     private void handleConcreteClick(HumanEntity player, PersistentDataHolder holder) {
         int taskId = extractPersistentValue(holder, DataContainerKeys.TASK_ID, PersistentDataType.INTEGER);
-        scheduler.runTaskAsynchronously(creator.getPlugin(), creator.teleportPlayerToTask(player, taskId));
+        scheduler.runTaskAsynchronously(creator.teleportPlayerToTask(player, taskId));
     }
 
     private void handleSpectralArrowClick(HumanEntity player, PersistentDataHolder holder) {
         String ign = extractPersistentValue(holder, DataContainerKeys.MEMBER_NAME, PersistentDataType.STRING);
-        scheduler.runTaskAsynchronously(creator.getPlugin(), creator.showActiveTasksView(player, ign, 1));
+        scheduler.runTaskAsynchronously(creator.showActiveTasksView(player, ign, 1));
     }
 
     private void handleArrowClick(HumanEntity player, PersistentDataHolder holder) {
         String ign = extractPersistentValue(holder, DataContainerKeys.MEMBER_NAME, PersistentDataType.STRING);
         int subsequentPage = determineNextPage(holder);
 
-        scheduler.runTaskAsynchronously(creator.getPlugin(), creator.showApprovedTasksView(player, ign, subsequentPage));
+        scheduler.runTaskAsynchronously(creator.showApprovedTasksView(player, ign, subsequentPage));
     }
 }
