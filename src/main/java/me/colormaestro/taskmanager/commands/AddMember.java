@@ -3,6 +3,7 @@ package me.colormaestro.taskmanager.commands;
 import me.colormaestro.taskmanager.data.DataAccessException;
 import me.colormaestro.taskmanager.data.MemberDAO;
 import me.colormaestro.taskmanager.model.Member;
+import me.colormaestro.taskmanager.scheduler.Scheduler;
 import me.colormaestro.taskmanager.tabcompleters.ReloadableTabCompleter;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -18,14 +19,13 @@ import org.jetbrains.annotations.NotNull;
 import java.sql.SQLException;
 
 public class AddMember implements CommandExecutor {
-    private final BukkitScheduler scheduler = Bukkit.getScheduler();
-    private final Plugin plugin;
+    private final Scheduler scheduler;
     private final MemberDAO memberDAO;
     private final ReloadableTabCompleter completer;
     private final ReloadableTabCompleter completerA;
 
-    public AddMember(Plugin plugin, MemberDAO memberDAO, ReloadableTabCompleter completer, ReloadableTabCompleter completerA) {
-        this.plugin = plugin;
+    public AddMember(Scheduler scheduler, MemberDAO memberDAO, ReloadableTabCompleter completer, ReloadableTabCompleter completerA) {
+        this.scheduler = scheduler;
         this.memberDAO = memberDAO;
         this.completer = completer;
         this.completerA = completerA;
@@ -58,31 +58,30 @@ public class AddMember implements CommandExecutor {
         }
 
         String finalUuid = uuid;
-        scheduler.runTaskAsynchronously(plugin, () -> {
+        scheduler.runTaskAsynchronously(() -> {
             try {
                 if (!memberDAO.memberExists(finalUuid)) {
                     memberDAO.addMember(finalUuid, ign);
                     completer.reload();
                     completerA.reload();
-                    scheduler.runTask(plugin, () -> player.sendMessage(
+                    scheduler.runTask(() -> player.sendMessage(
                             ChatColor.GREEN + "Player " + ign + " was added as member."));
                 } else {
                     Member member = memberDAO.findMember(ign);
                     if (!member.isActive()) {
                         memberDAO.updateActivity(ign, true);
-                        scheduler.runTask(plugin, () -> player.sendMessage(
+                        scheduler.runTask(() -> player.sendMessage(
                                 ChatColor.GREEN + "Player " + ign + " was added as member."));
                     } else {
-                        scheduler.runTask(plugin, () -> player.sendMessage(
+                        scheduler.runTask(() -> player.sendMessage(
                                 ChatColor.GOLD + "Player " + ign + " has already been added as member - You can start giving tasks!"));
                     }
                 }
             } catch (SQLException ex) {
-                scheduler.runTask(plugin, () -> player.sendMessage(ChatColor.RED + ex.getMessage()));
+                scheduler.runTask(() -> player.sendMessage(ChatColor.RED + ex.getMessage()));
                 ex.printStackTrace();
             } catch (DataAccessException ex) {
-                scheduler.runTask(plugin,
-                        () -> player.sendMessage(ChatColor.RED + ex.getMessage()));
+                scheduler.runTask(() -> player.sendMessage(ChatColor.RED + ex.getMessage()));
             }
         });
 

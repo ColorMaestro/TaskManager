@@ -35,6 +35,8 @@ import me.colormaestro.taskmanager.listeners.inventory.NeedTasksViewListener;
 import me.colormaestro.taskmanager.listeners.inventory.PreparedTasksViewListener;
 import me.colormaestro.taskmanager.listeners.inventory.SelectMemberListener;
 import me.colormaestro.taskmanager.listeners.inventory.SupervisedTasksViewListener;
+import me.colormaestro.taskmanager.scheduler.ProductionScheduler;
+import me.colormaestro.taskmanager.scheduler.Scheduler;
 import me.colormaestro.taskmanager.tabcompleters.MembersTabCompleter;
 import me.colormaestro.taskmanager.tabcompleters.ReloadableTabCompleter;
 import me.colormaestro.taskmanager.tabcompleters.TasksTabCompleter;
@@ -100,6 +102,7 @@ public final class TaskManager extends JavaPlugin {
 
     private void performBindingsSetup() {
         RunnablesCreator creator = new RunnablesCreator(this, taskDAO, memberDAO, decentHolograms);
+        Scheduler scheduler = new ProductionScheduler(this);
 
         ReloadableTabCompleter tasksTabCompleter = new TasksTabCompleter(memberDAO);
         ReloadableTabCompleter membersTabCompleter = new MembersTabCompleter(memberDAO);
@@ -118,7 +121,7 @@ public final class TaskManager extends JavaPlugin {
         registerEventListener(new NeedTasksViewListener(creator));
         registerEventListener(new SelectMemberListener(creator));
 
-        setCommandExecutor("addmember", new AddMember(this, memberDAO, tasksTabCompleter, membersTabCompleter));
+        setCommandExecutor("addmember", new AddMember(scheduler, memberDAO, tasksTabCompleter, membersTabCompleter));
         setCommandExecutor("removemember", new RemoveMember(this, memberDAO, tasksTabCompleter, membersTabCompleter));
         setCommandExecutor("dashboard", new Dashboard(creator));
         setCommandExecutor("tasks", new Tasks(this, taskDAO, memberDAO));
