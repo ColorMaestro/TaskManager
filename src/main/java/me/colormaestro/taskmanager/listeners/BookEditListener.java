@@ -21,6 +21,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerEditBookEvent;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.plugin.Plugin;
+import org.bukkit.scheduler.BukkitScheduler;
 
 import java.sql.Date;
 import java.sql.SQLException;
@@ -28,6 +29,7 @@ import java.util.List;
 import java.util.UUID;
 
 public class BookEditListener implements Listener {
+    private final BukkitScheduler scheduler = Bukkit.getScheduler();
     private final Plugin plugin;
     private final TaskDAO taskDAO;
     private final MemberDAO memberDAO;
@@ -70,12 +72,12 @@ public class BookEditListener implements Listener {
         if (directive.equals(Directives.CREATE_TASK)) {
             String memberName = dataContainer.get(
                     new NamespacedKey(plugin, DataContainerKeys.MEMBER_NAME), PersistentDataType.STRING);
-            Bukkit.getScheduler().runTaskAsynchronously(plugin,
+            scheduler.runTaskAsynchronously(plugin,
                     createDoingTask(p, memberName, p.getUniqueId(), title, description, x, y, z, yaw, pitch));
         }
 
         if (directive.equals(Directives.PREPARE_TASK)) {
-            Bukkit.getScheduler().runTaskAsynchronously(plugin,
+            scheduler.runTaskAsynchronously(plugin,
                     createPreparedTask(p, p.getUniqueId(), title, description, x, y, z, yaw, pitch));
         }
     }
@@ -102,11 +104,11 @@ public class BookEditListener implements Listener {
                 assignee = memberDAO.findMember(ign);
                 advisor = memberDAO.findMember(uuid);
             } catch (SQLException ex) {
-                Bukkit.getScheduler().runTask(plugin, () -> player.sendMessage(ChatColor.RED + ex.getMessage()));
+                scheduler.runTask(plugin, () -> player.sendMessage(ChatColor.RED + ex.getMessage()));
                 ex.printStackTrace();
                 return;
             } catch (DataAccessException ignored) {
-                Bukkit.getScheduler().runTask(plugin, () -> player.sendMessage(ChatColor.GOLD + "Player " + ign +
+                scheduler.runTask(plugin, () -> player.sendMessage(ChatColor.GOLD + "Player " + ign +
                         " is not registered as member. Use" + ChatColor.DARK_AQUA + " /addmember " + ign +
                         ChatColor.GOLD + " for adding player as member, then you can add tasks."));
                 return;
@@ -118,7 +120,7 @@ public class BookEditListener implements Listener {
             try {
                 int taskID = taskDAO.createTask(task);
                 List<Task> activeTasks = taskDAO.fetchPlayersActiveTasks(assignee.getId());
-                Bukkit.getScheduler().runTask(plugin, () -> {
+                scheduler.runTask(plugin, () -> {
                     player.sendMessage(ChatColor.GREEN + "Task added.");
                     decentHolograms.setTasks(assignee.getUuid(), activeTasks);
                     String markerLabel = "[" + taskID + "] " + title;
@@ -134,7 +136,7 @@ public class BookEditListener implements Listener {
                     }
                 });
             } catch (SQLException | IllegalArgumentException ex) {
-                Bukkit.getScheduler().runTask(plugin,
+                scheduler.runTask(plugin,
                         () -> player.sendMessage(ChatColor.RED + ex.getMessage()));
                 ex.printStackTrace();
             }
@@ -161,7 +163,7 @@ public class BookEditListener implements Listener {
             try {
                 creator = memberDAO.findMember(uuid);
             } catch (SQLException | DataAccessException ex) {
-                Bukkit.getScheduler().runTask(plugin, () -> player.sendMessage(ChatColor.RED + ex.getMessage()));
+                scheduler.runTask(plugin, () -> player.sendMessage(ChatColor.RED + ex.getMessage()));
                 ex.printStackTrace();
                 return;
             }
@@ -170,9 +172,9 @@ public class BookEditListener implements Listener {
                     TaskStatus.PREPARED, new Date(System.currentTimeMillis()), null, null);
             try {
                 taskDAO.createTask(task);
-                Bukkit.getScheduler().runTask(plugin, () -> player.sendMessage(ChatColor.GREEN + "Task prepared."));
+                scheduler.runTask(plugin, () -> player.sendMessage(ChatColor.GREEN + "Task prepared."));
             } catch (SQLException | IllegalArgumentException ex) {
-                Bukkit.getScheduler().runTask(plugin,
+                scheduler.runTask(plugin,
                         () -> player.sendMessage(ChatColor.RED + ex.getMessage()));
                 ex.printStackTrace();
             }

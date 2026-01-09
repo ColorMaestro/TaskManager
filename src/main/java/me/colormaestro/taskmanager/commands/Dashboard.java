@@ -7,9 +7,11 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import org.bukkit.scheduler.BukkitScheduler;
 import org.jetbrains.annotations.NotNull;
 
 public class Dashboard implements CommandExecutor {
+    private final BukkitScheduler scheduler = Bukkit.getScheduler();
     private final RunnablesCreator creator;
 
     public Dashboard(RunnablesCreator creator) {
@@ -25,11 +27,11 @@ public class Dashboard implements CommandExecutor {
         }
 
         if (args.length > 0) {
-            Bukkit.getScheduler().runTaskAsynchronously(creator.getPlugin(), creator.showActiveTasksView(player, args[0], 1));
+            scheduler.runTaskAsynchronously(creator.getPlugin(), creator.showActiveTasksView(player, args[0], 1));
             return true;
         }
 
-        Bukkit.getScheduler().runTaskAsynchronously(creator.getPlugin(), creator.showDashboardView(player, 1));
+        scheduler.runTaskAsynchronously(creator.getPlugin(), creator.showDashboardView(player, 1));
 
         return true;
     }

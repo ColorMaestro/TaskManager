@@ -27,7 +27,7 @@ public class SelectMemberListener extends InventoryListener {
     void handleEvent(HumanEntity player, ItemStack itemStack, ClickType clickType) {
         switch (itemStack.getType()) {
             case PLAYER_HEAD -> handlePlayerHeadClick(player, itemStack.getItemMeta());
-            case SPECTRAL_ARROW -> Bukkit.getScheduler()
+            case SPECTRAL_ARROW -> scheduler
                     .runTaskAsynchronously(creator.getPlugin(), creator.showPreparedTasksView(player, 1));
             case ARROW -> handleArrowClick(player, itemStack.getItemMeta());
         }
@@ -36,13 +36,13 @@ public class SelectMemberListener extends InventoryListener {
     private void handlePlayerHeadClick(HumanEntity player, PersistentDataHolder holder) {
         String ign = extractPersistentValue(holder, DataContainerKeys.MEMBER_NAME, PersistentDataType.STRING);
         int taskId = extractPersistentValue(player, DataContainerKeys.TASK_ID, PersistentDataType.INTEGER);
-        Bukkit.getScheduler().runTaskAsynchronously(creator.getPlugin(), creator.assignTask(ign, player, taskId));
+        scheduler.runTaskAsynchronously(creator.getPlugin(), creator.assignTask(ign, player, taskId));
         player.closeInventory();
     }
 
     private void handleArrowClick(HumanEntity player, PersistentDataHolder holder) {
         int taskId = extractPersistentValue(player, DataContainerKeys.TASK_ID, PersistentDataType.INTEGER);
-        Bukkit.getScheduler().runTaskAsynchronously(creator.getPlugin(),
+        scheduler.runTaskAsynchronously(creator.getPlugin(),
                 creator.showAssignTasksView(player, taskId, determineNextPage(holder)));
     }
 }

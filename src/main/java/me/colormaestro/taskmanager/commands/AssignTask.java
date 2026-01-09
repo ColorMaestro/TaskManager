@@ -8,10 +8,12 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
+import org.bukkit.scheduler.BukkitScheduler;
 import org.jetbrains.annotations.NotNull;
 
 public class AssignTask implements CommandExecutor {
 
+    private final BukkitScheduler scheduler = Bukkit.getScheduler();
     private final RunnablesCreator creator;
 
     public AssignTask(RunnablesCreator creator) {
@@ -34,9 +36,9 @@ public class AssignTask implements CommandExecutor {
             Plugin plugin = creator.getPlugin();
             String ign = args[0];
             int taskId = Integer.parseInt(args[1]);
-            Bukkit.getScheduler().runTaskAsynchronously(plugin, creator.assignTask(ign, player, taskId));
+            scheduler.runTaskAsynchronously(plugin, creator.assignTask(ign, player, taskId));
         } catch (NumberFormatException ex) {
-            Bukkit.getScheduler().runTask(creator.getPlugin(),
+            scheduler.runTask(creator.getPlugin(),
                     () -> player.sendMessage(ChatColor.RED + "Task ID must be numerical value!"));
         }
 

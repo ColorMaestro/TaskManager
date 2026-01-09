@@ -2,6 +2,7 @@ package me.colormaestro.taskmanager.listeners.inventory;
 
 import me.colormaestro.taskmanager.utils.DataContainerKeys;
 import me.colormaestro.taskmanager.utils.RunnablesCreator;
+import org.bukkit.Bukkit;
 import org.bukkit.NamespacedKey;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.event.Listener;
@@ -10,8 +11,10 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.persistence.PersistentDataHolder;
 import org.bukkit.persistence.PersistentDataType;
+import org.bukkit.scheduler.BukkitScheduler;
 
 public abstract class InventoryListener implements Listener {
+    protected final BukkitScheduler scheduler = Bukkit.getScheduler();
     protected final RunnablesCreator creator;
     private final String directive;
 

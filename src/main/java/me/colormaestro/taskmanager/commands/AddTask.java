@@ -12,11 +12,13 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.Plugin;
+import org.bukkit.scheduler.BukkitScheduler;
 
 import java.sql.SQLException;
 
 
 public class AddTask implements CommandExecutor {
+    private final BukkitScheduler scheduler = Bukkit.getScheduler();
     private final Plugin plugin;
     private final TaskDAO taskDAO;
     private final ItemStackCreator stackCreator;
@@ -45,20 +47,20 @@ public class AddTask implements CommandExecutor {
             ItemStack book = stackCreator.createAssignmentBook(ign, "");
             player.getInventory().addItem(book);
         } else {  // Description taken from selected task
-            Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
+            scheduler.runTaskAsynchronously(plugin, () -> {
                 try {
                     int taskId = Integer.parseInt(args[1]);
                     Task task = taskDAO.findTask(taskId);
-                    Bukkit.getScheduler().runTask(plugin, () -> {
+                    scheduler.runTask(plugin, () -> {
                         ItemStack book = stackCreator.createAssignmentBook(ign, task.getDescription());
                         player.getInventory().addItem(book);
                     });
                 } catch (SQLException | DataAccessException ex) {
-                    Bukkit.getScheduler().runTask(plugin,
+                    scheduler.runTask(plugin,
                             () -> player.sendMessage(ChatColor.RED + ex.getMessage()));
                     ex.printStackTrace();
                 } catch (NumberFormatException ex) {
-                    Bukkit.getScheduler().runTask(plugin,
+                    scheduler.runTask(plugin,
                             () -> player.sendMessage(ChatColor.RED + "Task ID must be numerical value!"));
                 }
             });

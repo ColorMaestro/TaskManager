@@ -34,19 +34,18 @@ public class ApprovedTasksViewListener extends InventoryListener {
 
     private void handleConcreteClick(HumanEntity player, PersistentDataHolder holder) {
         int taskId = extractPersistentValue(holder, DataContainerKeys.TASK_ID, PersistentDataType.INTEGER);
-        Bukkit.getScheduler().runTaskAsynchronously(creator.getPlugin(), creator.teleportPlayerToTask(player, taskId));
+        scheduler.runTaskAsynchronously(creator.getPlugin(), creator.teleportPlayerToTask(player, taskId));
     }
 
     private void handleSpectralArrowClick(HumanEntity player, PersistentDataHolder holder) {
         String ign = extractPersistentValue(holder, DataContainerKeys.MEMBER_NAME, PersistentDataType.STRING);
-        Bukkit.getScheduler().runTaskAsynchronously(creator.getPlugin(), creator.showActiveTasksView(player, ign, 1));
+        scheduler.runTaskAsynchronously(creator.getPlugin(), creator.showActiveTasksView(player, ign, 1));
     }
 
     private void handleArrowClick(HumanEntity player, PersistentDataHolder holder) {
         String ign = extractPersistentValue(holder, DataContainerKeys.MEMBER_NAME, PersistentDataType.STRING);
         int subsequentPage = determineNextPage(holder);
 
-        Bukkit.getScheduler().runTaskAsynchronously(creator.getPlugin(),
-                creator.showApprovedTasksView(player, ign, subsequentPage));
+        scheduler.runTaskAsynchronously(creator.getPlugin(), creator.showApprovedTasksView(player, ign, subsequentPage));
     }
 }

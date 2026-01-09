@@ -12,11 +12,13 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
+import org.bukkit.scheduler.BukkitScheduler;
 import org.jetbrains.annotations.NotNull;
 
 import java.sql.SQLException;
 
 public class AddMember implements CommandExecutor {
+    private final BukkitScheduler scheduler = Bukkit.getScheduler();
     private final Plugin plugin;
     private final MemberDAO memberDAO;
     private final ReloadableTabCompleter completer;
@@ -56,30 +58,30 @@ public class AddMember implements CommandExecutor {
         }
 
         String finalUuid = uuid;
-        Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
+        scheduler.runTaskAsynchronously(plugin, () -> {
             try {
                 if (!memberDAO.memberExists(finalUuid)) {
                     memberDAO.addMember(finalUuid, ign);
                     completer.reload();
                     completerA.reload();
-                    Bukkit.getScheduler().runTask(plugin, () -> player.sendMessage(
+                    scheduler.runTask(plugin, () -> player.sendMessage(
                             ChatColor.GREEN + "Player " + ign + " was added as member."));
                 } else {
                     Member member = memberDAO.findMember(ign);
                     if (!member.isActive()) {
                         memberDAO.updateActivity(ign, true);
-                        Bukkit.getScheduler().runTask(plugin, () -> player.sendMessage(
+                        scheduler.runTask(plugin, () -> player.sendMessage(
                                 ChatColor.GREEN + "Player " + ign + " was added as member."));
                     } else {
-                        Bukkit.getScheduler().runTask(plugin, () -> player.sendMessage(
+                        scheduler.runTask(plugin, () -> player.sendMessage(
                                 ChatColor.GOLD + "Player " + ign + " has already been added as member - You can start giving tasks!"));
                     }
                 }
             } catch (SQLException ex) {
-                Bukkit.getScheduler().runTask(plugin, () -> player.sendMessage(ChatColor.RED + ex.getMessage()));
+                scheduler.runTask(plugin, () -> player.sendMessage(ChatColor.RED + ex.getMessage()));
                 ex.printStackTrace();
             } catch (DataAccessException ex) {
-                Bukkit.getScheduler().runTask(plugin,
+                scheduler.runTask(plugin,
                         () -> player.sendMessage(ChatColor.RED + ex.getMessage()));
             }
         });

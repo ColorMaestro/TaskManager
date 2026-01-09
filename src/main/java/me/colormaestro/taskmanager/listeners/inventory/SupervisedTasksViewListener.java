@@ -27,7 +27,7 @@ public class SupervisedTasksViewListener extends InventoryListener {
     void handleEvent(HumanEntity player, ItemStack itemStack, ClickType clickType) {
         switch (itemStack.getType()) {
             case ORANGE_CONCRETE, LIME_CONCRETE -> handleConcreteClick(player, itemStack.getItemMeta());
-            case SPECTRAL_ARROW -> Bukkit.getScheduler()
+            case SPECTRAL_ARROW -> scheduler
                     .runTaskAsynchronously(creator.getPlugin(), creator.showDashboardView(player, 1));
             case ARROW -> handleArrowClick(player, itemStack.getItemMeta());
         }
@@ -35,11 +35,11 @@ public class SupervisedTasksViewListener extends InventoryListener {
 
     private void handleConcreteClick(HumanEntity player, PersistentDataHolder holder) {
         int taskId = extractPersistentValue(holder, DataContainerKeys.TASK_ID, PersistentDataType.INTEGER);
-        Bukkit.getScheduler().runTaskAsynchronously(creator.getPlugin(), creator.teleportPlayerToTask(player, taskId));
+        scheduler.runTaskAsynchronously(creator.getPlugin(), creator.teleportPlayerToTask(player, taskId));
     }
 
     private void handleArrowClick(HumanEntity player, PersistentDataHolder holder) {
-        Bukkit.getScheduler().runTaskAsynchronously(creator.getPlugin(),
+        scheduler.runTaskAsynchronously(creator.getPlugin(),
                 creator.showSupervisedTasksView(player, determineNextPage(holder)));
     }
 }

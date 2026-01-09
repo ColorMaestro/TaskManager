@@ -13,11 +13,13 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
+import org.bukkit.scheduler.BukkitScheduler;
 
 import java.sql.SQLException;
 import java.util.List;
 
 public class Establish implements CommandExecutor {
+    private final BukkitScheduler scheduler = Bukkit.getScheduler();
     private final TaskDAO taskDAO;
     private final MemberDAO memberDAO;
     private final DecentHologramsIntegration decentHolograms;
@@ -45,11 +47,11 @@ public class Establish implements CommandExecutor {
             decentHolograms.teleportHologram(uuid, player.getLocation());
         } else {
             Plugin plugin = Bukkit.getPluginManager().getPlugin("TaskManager");
-            Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
+            scheduler.runTaskAsynchronously(plugin, () -> {
                 try {
                     Member member = memberDAO.findMember(player.getUniqueId());
                     List<Task> membersTasks = taskDAO.fetchPlayersActiveTasks(member.getId());
-                    Bukkit.getScheduler().runTask(plugin, () -> {
+                    scheduler.runTask(plugin, () -> {
                         decentHolograms.establishTasksHologram(player);
                         decentHolograms.setTasks(uuid, membersTasks);
                     });

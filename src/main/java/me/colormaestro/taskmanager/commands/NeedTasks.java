@@ -8,12 +8,14 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.plugin.Plugin;
+import org.bukkit.scheduler.BukkitScheduler;
 import org.jetbrains.annotations.NotNull;
 
 import java.sql.SQLException;
 import java.util.List;
 
 public class NeedTasks implements CommandExecutor {
+    private final BukkitScheduler scheduler = Bukkit.getScheduler();
     private final Plugin plugin;
     private final TaskDAO taskDAO;
 
@@ -24,7 +26,7 @@ public class NeedTasks implements CommandExecutor {
 
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
-        Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
+        scheduler.runTaskAsynchronously(plugin, () -> {
             try {
                 int limit = args.length > 0 ? Integer.parseInt(args[0]) : 0;
                 List<BasicMemberInfo> members = taskDAO
@@ -32,12 +34,12 @@ public class NeedTasks implements CommandExecutor {
                         .stream()
                         .filter(basicMemberInfo -> basicMemberInfo.doing() <= limit)
                         .toList();
-                Bukkit.getScheduler().runTask(plugin, () -> sendMessage(sender, members));
+                scheduler.runTask(plugin, () -> sendMessage(sender, members));
             } catch (SQLException ex) {
-                Bukkit.getScheduler().runTask(plugin, () -> sender.sendMessage(ChatColor.RED + ex.getMessage()));
+                scheduler.runTask(plugin, () -> sender.sendMessage(ChatColor.RED + ex.getMessage()));
                 ex.printStackTrace();
             } catch (NumberFormatException ex) {
-                Bukkit.getScheduler().runTask(plugin,
+                scheduler.runTask(plugin,
                         () -> sender.sendMessage(ChatColor.RED + "Limit must be numerical value!"));
             }
         });

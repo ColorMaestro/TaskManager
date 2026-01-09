@@ -14,11 +14,13 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.plugin.Plugin;
+import org.bukkit.scheduler.BukkitScheduler;
 
 import java.sql.SQLException;
 import java.util.List;
 
 public class PlayerJoinListener implements Listener {
+    private static final BukkitScheduler scheduler = Bukkit.getScheduler();
     private final Plugin plugin;
     private final TaskDAO taskDAO;
     private final MemberDAO memberDAO;
@@ -39,17 +41,17 @@ public class PlayerJoinListener implements Listener {
 
     @EventHandler
     public void onJoin(PlayerJoinEvent event) {
-        Bukkit.getScheduler().runTask(plugin, updateMemberLoginTime(event, plugin, memberDAO));
-        Bukkit.getScheduler().runTaskLater(plugin, checkMemberNameUpdate(event, plugin, memberDAO, completer, completerA), 20);
-        Bukkit.getScheduler().runTaskLater(plugin, checkHologram(event, plugin, memberDAO), 180);
-        Bukkit.getScheduler().runTaskLater(plugin, checkDiscordID(event, plugin, memberDAO), 190);
-        Bukkit.getScheduler().runTaskLater(plugin, checkFinishedTasks(event, plugin, taskDAO, memberDAO), 200);
+        scheduler.runTask(plugin, updateMemberLoginTime(event, plugin, memberDAO));
+        scheduler.runTaskLater(plugin, checkMemberNameUpdate(event, plugin, memberDAO, completer, completerA), 20);
+        scheduler.runTaskLater(plugin, checkHologram(event, plugin, memberDAO), 180);
+        scheduler.runTaskLater(plugin, checkDiscordID(event, plugin, memberDAO), 190);
+        scheduler.runTaskLater(plugin, checkFinishedTasks(event, plugin, taskDAO, memberDAO), 200);
     }
 
     private static Runnable updateMemberLoginTime(PlayerJoinEvent event, Plugin plugin, MemberDAO memberDAO) {
         return () -> {
             Player player = event.getPlayer();
-            Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
+            scheduler.runTaskAsynchronously(plugin, () -> {
                 try {
                     memberDAO.updateLastLoginTime(player.getUniqueId());
                 } catch (SQLException ex) {
@@ -72,14 +74,14 @@ public class PlayerJoinListener implements Listener {
                                                   ReloadableTabCompleter completer, ReloadableTabCompleter completerA) {
         return () -> {
             Player player = event.getPlayer();
-            Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
+            scheduler.runTaskAsynchronously(plugin, () -> {
                 try {
                     Member member = memberDAO.findMember(player.getUniqueId());
                     if (!player.getName().equals(member.getIgn())) {
                         memberDAO.updateMemberName(player.getUniqueId(), player.getName());
                         completer.reload();
                         completerA.reload();
-                        Bukkit.getScheduler().runTask(plugin, () -> event.getPlayer().sendMessage(ChatColor.DARK_AQUA +
+                        scheduler.runTask(plugin, () -> event.getPlayer().sendMessage(ChatColor.DARK_AQUA +
                                 "It seems that you changed your name, hereby it was updated in database."));
                     }
                 } catch (SQLException ex) {
@@ -95,10 +97,10 @@ public class PlayerJoinListener implements Listener {
     private Runnable checkHologram(PlayerJoinEvent event, Plugin plugin, MemberDAO memberDAO) {
         return () -> {
             Player player = event.getPlayer();
-            Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
+            scheduler.runTaskAsynchronously(plugin, () -> {
                 try {
                     if (memberDAO.memberExists(player.getUniqueId().toString())) {
-                        Bukkit.getScheduler().runTask(plugin, () -> {
+                        scheduler.runTask(plugin, () -> {
                             if (!decentHolograms.hologramExists(player.getUniqueId().toString())) {
                                 event.getPlayer().sendMessage(ChatColor.DARK_AQUA +
                                         "⚠ Your visual task list has not been established yet");
@@ -127,10 +129,10 @@ public class PlayerJoinListener implements Listener {
     private static Runnable checkDiscordID(PlayerJoinEvent event, Plugin plugin, MemberDAO memberDAO) {
         return () -> {
             Player player = event.getPlayer();
-            Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
+            scheduler.runTaskAsynchronously(plugin, () -> {
                 try {
                     Member member = memberDAO.findMember(player.getUniqueId());
-                    Bukkit.getScheduler().runTask(plugin, () -> {
+                    scheduler.runTask(plugin, () -> {
                         if (member.getDiscordID() == null) {
                             event.getPlayer().sendMessage(ChatColor.BLUE
                                     + "ℹ You don't have linked your discord account yet. If you want to receive");
@@ -162,11 +164,11 @@ public class PlayerJoinListener implements Listener {
     private static Runnable checkFinishedTasks(PlayerJoinEvent event, Plugin plugin, TaskDAO taskDAO, MemberDAO memberDAO) {
         return () -> {
             Player player = event.getPlayer();
-            Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
+            scheduler.runTaskAsynchronously(plugin, () -> {
                 try {
                     Member advisor = memberDAO.findMember(player.getUniqueId());
                     List<Task> finishedTasks = taskDAO.fetchFinishedTasks(advisor.getId());
-                    Bukkit.getScheduler().runTask(plugin, () -> sendFinishedTasks(event.getPlayer(), finishedTasks));
+                    scheduler.runTask(plugin, () -> sendFinishedTasks(event.getPlayer(), finishedTasks));
                 } catch (SQLException ex) {
                     player.sendMessage(ChatColor.RED + ex.getMessage());
                     ex.printStackTrace();

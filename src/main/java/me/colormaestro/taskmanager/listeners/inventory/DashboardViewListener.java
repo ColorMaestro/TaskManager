@@ -32,14 +32,14 @@ public class DashboardViewListener extends InventoryListener implements Listener
     void handleEvent(HumanEntity player, ItemStack itemStack, ClickType clickType) {
         switch (itemStack.getType()) {
             case PLAYER_HEAD -> handlePlayerHeadClick(player, itemStack.getItemMeta(), clickType.isLeftClick());
-            case ENDER_EYE -> Bukkit.getScheduler()
+            case ENDER_EYE -> scheduler
                     .runTaskAsynchronously(creator.getPlugin(), creator.showSupervisedTasksView(player, 1));
             case ARROW -> handleArrowClick(player, itemStack.getItemMeta());
-            case LIGHT_GRAY_CONCRETE -> Bukkit.getScheduler()
+            case LIGHT_GRAY_CONCRETE -> scheduler
                     .runTaskAsynchronously(creator.getPlugin(), creator.showPreparedTasksView(player, 1));
-            case CLOCK -> Bukkit.getScheduler()
+            case CLOCK -> scheduler
                     .runTaskAsynchronously(creator.getPlugin(), creator.showIdleTasksView(player, 1));
-            case PAPER -> Bukkit.getScheduler()
+            case PAPER -> scheduler
                     .runTaskAsynchronously(creator.getPlugin(), creator.showNeedTasksView(player, 0, 1));
         }
     }
@@ -47,7 +47,7 @@ public class DashboardViewListener extends InventoryListener implements Listener
     private void handlePlayerHeadClick(HumanEntity player, PersistentDataHolder holder, boolean isLeftClick) {
         String ign = extractPersistentValue(holder, DataContainerKeys.MEMBER_NAME, PersistentDataType.STRING);
         if (isLeftClick) {
-            Bukkit.getScheduler().runTaskAsynchronously(creator.getPlugin(), creator.showActiveTasksView(player, ign, 1));
+            scheduler.runTaskAsynchronously(creator.getPlugin(), creator.showActiveTasksView(player, ign, 1));
         } else {
             ItemStack book = stackCreator.createAssignmentBook(ign, "");
             player.closeInventory();
@@ -56,7 +56,7 @@ public class DashboardViewListener extends InventoryListener implements Listener
     }
 
     private void handleArrowClick(HumanEntity player, PersistentDataHolder holder) {
-        Bukkit.getScheduler().runTaskAsynchronously(creator.getPlugin(),
+        scheduler.runTaskAsynchronously(creator.getPlugin(),
                 creator.showDashboardView(player, determineNextPage(holder)));
     }
 }

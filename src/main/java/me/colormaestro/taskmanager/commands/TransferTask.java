@@ -16,12 +16,14 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
+import org.bukkit.scheduler.BukkitScheduler;
 import org.jetbrains.annotations.NotNull;
 
 import java.sql.SQLException;
 import java.util.List;
 
 public class TransferTask implements CommandExecutor {
+    private final BukkitScheduler scheduler = Bukkit.getScheduler();
     private final TaskDAO taskDAO;
     private final MemberDAO memberDAO;
     private final DecentHologramsIntegration decentHolograms;
@@ -45,12 +47,12 @@ public class TransferTask implements CommandExecutor {
         }
 
         Plugin plugin = Bukkit.getPluginManager().getPlugin("TaskManager");
-        Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
+        scheduler.runTaskAsynchronously(plugin, () -> {
             try {
                 int taskId = Integer.parseInt(args[0]);
                 Task task = taskDAO.findTask(taskId);
                 if (task.getStatus() == TaskStatus.PREPARED) {
-                    Bukkit.getScheduler().runTask(plugin, () ->
+                    scheduler.runTask(plugin, () ->
                             player.sendMessage(ChatColor.RED + "The task is in prepared state thus transfering is not possible"));
                     return;
                 }
@@ -60,7 +62,7 @@ public class TransferTask implements CommandExecutor {
                 taskDAO.updateTaskAssignee(taskId, newAssignee.getId());
                 List<Task> activeTasksOldAssignee = taskDAO.fetchPlayersActiveTasks(oldAssigneeID);
                 List<Task> activeTasksNewAssignee = taskDAO.fetchPlayersActiveTasks(newAssignee.getId());
-                Bukkit.getScheduler().runTask(plugin, () -> {
+                scheduler.runTask(plugin, () -> {
                     player.sendMessage(ChatColor.GREEN + "Task transferred.");
                     decentHolograms.setTasks(oldAssignee.getUuid(), activeTasksOldAssignee);
                     decentHolograms.setTasks(newAssignee.getUuid(), activeTasksNewAssignee);
@@ -87,14 +89,14 @@ public class TransferTask implements CommandExecutor {
                     }
                 });
             } catch (SQLException ex) {
-                Bukkit.getScheduler().runTask(plugin,
+                scheduler.runTask(plugin,
                         () -> player.sendMessage(ChatColor.RED + ex.getMessage()));
                 ex.printStackTrace();
             } catch (NumberFormatException ignored) {
-                Bukkit.getScheduler().runTask(plugin,
+                scheduler.runTask(plugin,
                         () -> player.sendMessage(ChatColor.RED + "Task ID must be numerical value!"));
             } catch (DataAccessException ignored) {
-                Bukkit.getScheduler().runTask(plugin,
+                scheduler.runTask(plugin,
                         () -> player.sendMessage(ChatColor.RED + "Invalid task ID or new assignee!"));
             }
         });
