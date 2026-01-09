@@ -40,6 +40,7 @@ import me.colormaestro.taskmanager.scheduler.Scheduler;
 import me.colormaestro.taskmanager.tabcompleters.MembersTabCompleter;
 import me.colormaestro.taskmanager.tabcompleters.ReloadableTabCompleter;
 import me.colormaestro.taskmanager.tabcompleters.TasksTabCompleter;
+import me.colormaestro.taskmanager.utils.ItemStackCreator;
 import me.colormaestro.taskmanager.utils.RunnablesCreator;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandExecutor;
@@ -101,20 +102,21 @@ public final class TaskManager extends JavaPlugin {
     }
 
     private void performBindingsSetup() {
-        Scheduler scheduler = new ProductionScheduler(this);
-        RunnablesCreator creator = new RunnablesCreator(scheduler, this, taskDAO, memberDAO, decentHolograms);
-
         ReloadableTabCompleter tasksTabCompleter = new TasksTabCompleter(memberDAO);
         ReloadableTabCompleter membersTabCompleter = new MembersTabCompleter(memberDAO);
         setTabCompleter("tasks", tasksTabCompleter);
         setTabCompleter("addtask", membersTabCompleter);
         setTabCompleter("dashboard", membersTabCompleter);
 
+        Scheduler scheduler = new ProductionScheduler(this);
+        ItemStackCreator stackCreator = new ItemStackCreator(this);
+        RunnablesCreator creator = new RunnablesCreator(scheduler, this, stackCreator, taskDAO, memberDAO, decentHolograms);
+
         registerEventListener(new PlayerJoinListener(this, taskDAO, memberDAO, tasksTabCompleter, membersTabCompleter, decentHolograms));
         registerEventListener(new BookEditListener(this, taskDAO, memberDAO, decentHolograms, dynmap));
-        registerEventListener(new DashboardViewListener(scheduler, creator));
+        registerEventListener(new DashboardViewListener(scheduler, creator, stackCreator));
         registerEventListener(new SupervisedTasksViewListener(scheduler, creator));
-        registerEventListener(new ActiveTasksViewListener(scheduler, creator));
+        registerEventListener(new ActiveTasksViewListener(scheduler, creator, stackCreator));
         registerEventListener(new ApprovedTasksViewListener(scheduler, creator));
         registerEventListener(new PreparedTasksViewListener(scheduler, creator));
         registerEventListener(new IdleTaskViewListener(scheduler, creator));
@@ -125,8 +127,8 @@ public final class TaskManager extends JavaPlugin {
         setCommandExecutor("removemember", new RemoveMember(scheduler, memberDAO, tasksTabCompleter, membersTabCompleter));
         setCommandExecutor("dashboard", new Dashboard(scheduler, creator));
         setCommandExecutor("tasks", new Tasks(scheduler, this, taskDAO, memberDAO));
-        setCommandExecutor("addtask", new AddTask(scheduler, this, taskDAO));
-        setCommandExecutor("preparetask", new PrepareTask(this));
+        setCommandExecutor("addtask", new AddTask(scheduler, stackCreator, taskDAO));
+        setCommandExecutor("preparetask", new PrepareTask(stackCreator));
         setCommandExecutor("assigntask", new AssignTask(scheduler, creator));
         setCommandExecutor("finishtask", new FinishTask(scheduler, taskDAO, memberDAO, decentHolograms, dynmap));
         setCommandExecutor("approvetask", new ApproveTask(scheduler, taskDAO, memberDAO, decentHolograms, dynmap));

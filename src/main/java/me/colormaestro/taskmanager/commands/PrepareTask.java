@@ -14,8 +14,8 @@ public class PrepareTask implements CommandExecutor {
 
     private final ItemStackCreator stackCreator;
 
-    public PrepareTask(Plugin plugin) {
-        this.stackCreator = new ItemStackCreator(plugin);
+    public PrepareTask(ItemStackCreator stackCreator) {
+        this.stackCreator = stackCreator;
     }
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {

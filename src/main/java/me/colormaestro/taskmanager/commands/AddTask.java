@@ -22,10 +22,10 @@ public class AddTask implements CommandExecutor {
     private final TaskDAO taskDAO;
     private final ItemStackCreator stackCreator;
 
-    public AddTask(Scheduler scheduler, Plugin plugin, TaskDAO taskDAO) {
+    public AddTask(Scheduler scheduler, ItemStackCreator stackCreator, TaskDAO taskDAO) {
         this.scheduler = scheduler;
         this.taskDAO = taskDAO;
-        this.stackCreator = new ItemStackCreator(plugin);
+        this.stackCreator = stackCreator;
     }
 
     @Override

@@ -44,14 +44,14 @@ public class RunnablesCreator {
     private final DecentHologramsIntegration decentHolograms;
     private final ItemStackCreator stackCreator;
 
-    public RunnablesCreator(Scheduler scheduler, Plugin plugin, TaskDAO taskDAO, MemberDAO memberDAO,
-                            DecentHologramsIntegration decentHolograms) {
+    public RunnablesCreator(Scheduler scheduler, Plugin plugin, ItemStackCreator stackCreator, TaskDAO taskDAO,
+                            MemberDAO memberDAO, DecentHologramsIntegration decentHolograms) {
         this.scheduler = scheduler;
         this.plugin = plugin;
         this.taskDAO = taskDAO;
         this.memberDAO = memberDAO;
         this.decentHolograms = decentHolograms;
-        this.stackCreator = new ItemStackCreator(plugin);
+        this.stackCreator = stackCreator;
     }
 
     public Runnable showDashboardView(HumanEntity player, int page) {

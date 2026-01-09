@@ -18,9 +18,9 @@ public class DashboardViewListener extends InventoryListener implements Listener
 
     private final ItemStackCreator stackCreator;
 
-    public DashboardViewListener(Scheduler scheduler, RunnablesCreator creator) {
+    public DashboardViewListener(Scheduler scheduler, RunnablesCreator creator, ItemStackCreator stackCreator) {
         super(scheduler, creator, Directives.DASHBOARD);
-        stackCreator = new ItemStackCreator(creator.getPlugin());
+        this.stackCreator = stackCreator;
     }
 
     @EventHandler

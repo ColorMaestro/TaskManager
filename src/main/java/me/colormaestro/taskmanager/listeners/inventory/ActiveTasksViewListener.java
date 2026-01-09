@@ -14,12 +14,11 @@ import org.bukkit.persistence.PersistentDataHolder;
 import org.bukkit.persistence.PersistentDataType;
 
 public class ActiveTasksViewListener extends InventoryListener {
-
     private final ItemStackCreator stackCreator;
 
-    public ActiveTasksViewListener(Scheduler scheduler, RunnablesCreator creator) {
+    public ActiveTasksViewListener(Scheduler scheduler, RunnablesCreator creator, ItemStackCreator stackCreator) {
         super(scheduler, creator, Directives.ACTIVE_TASKS);
-        stackCreator = new ItemStackCreator(creator.getPlugin());
+        this.stackCreator = stackCreator;
     }
 
     @EventHandler
