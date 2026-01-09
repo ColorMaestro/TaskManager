@@ -6,10 +6,11 @@ import me.colormaestro.taskmanager.data.TaskDAO;
 import me.colormaestro.taskmanager.integrations.DecentHologramsIntegration;
 import me.colormaestro.taskmanager.integrations.DiscordOperator;
 import me.colormaestro.taskmanager.model.AdvisedTask;
+import me.colormaestro.taskmanager.model.BasicMemberInfo;
 import me.colormaestro.taskmanager.model.IdleTask;
 import me.colormaestro.taskmanager.model.Member;
-import me.colormaestro.taskmanager.model.BasicMemberInfo;
 import me.colormaestro.taskmanager.model.Task;
+import me.colormaestro.taskmanager.scheduler.Scheduler;
 import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.ComponentBuilder;
 import org.bukkit.Bukkit;
@@ -24,7 +25,6 @@ import org.bukkit.inventory.meta.BookMeta;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.plugin.Plugin;
-import org.bukkit.scheduler.BukkitScheduler;
 
 import java.sql.SQLException;
 import java.util.List;
@@ -37,15 +37,16 @@ public class RunnablesCreator {
     private static final int LAST_ROW_RIGHT_FROM_MIDDLE = 50;
     private static final int LAST_ROW_THIRD = 47;
 
-    private final BukkitScheduler scheduler = Bukkit.getScheduler();
+    private final Scheduler scheduler;
     private final TaskDAO taskDAO;
     private final MemberDAO memberDAO;
     private final Plugin plugin;
     private final DecentHologramsIntegration decentHolograms;
     private final ItemStackCreator stackCreator;
 
-    public RunnablesCreator(Plugin plugin, TaskDAO taskDAO, MemberDAO memberDAO,
+    public RunnablesCreator(Scheduler scheduler, Plugin plugin, TaskDAO taskDAO, MemberDAO memberDAO,
                             DecentHologramsIntegration decentHolograms) {
+        this.scheduler = scheduler;
         this.plugin = plugin;
         this.taskDAO = taskDAO;
         this.memberDAO = memberDAO;
@@ -60,7 +61,7 @@ public class RunnablesCreator {
                 int totalPages = stats.size() / PAGE_SIZE + 1;
                 // Variable used in lambda should be final or effectively final
                 List<BasicMemberInfo> finalStats = getPageFromList(stats, page);
-                scheduler.runTask(plugin, () -> {
+                scheduler.runTask(() -> {
                     String inventoryTitle = ChatColor.BLUE + "" + ChatColor.BOLD + "Tasks Dashboard" + ChatColor.RESET + " (" + page + "/" + totalPages + ") " + Directives.DASHBOARD;
                     InventoryBuilder builder = new InventoryBuilder(player, inventoryTitle);
 
@@ -96,8 +97,7 @@ public class RunnablesCreator {
                     player.openInventory(builder.build());
                 });
             } catch (SQLException ex) {
-                scheduler.runTask(plugin,
-                        () -> player.sendMessage(ChatColor.RED + ex.getMessage()));
+                scheduler.runTask(() -> player.sendMessage(ChatColor.RED + ex.getMessage()));
                 ex.printStackTrace();
             }
         };
@@ -110,7 +110,7 @@ public class RunnablesCreator {
                 List<Task> tasks = taskDAO.fetchPlayersActiveTasks(member.getId());
                 int totalPages = tasks.size() / PAGE_SIZE + 1;
                 List<Task> finalTasks = getPageFromList(tasks, page);
-                scheduler.runTask(plugin, () -> {
+                scheduler.runTask(() -> {
                     String title = ChatColor.BLUE + "" + ChatColor.BOLD + ign + "'s tasks" + ChatColor.RESET + " (" + page + "/" + totalPages + ") " + Directives.ACTIVE_TASKS;
                     InventoryBuilder builder = new InventoryBuilder(player, title);
 
@@ -151,8 +151,7 @@ public class RunnablesCreator {
                     player.openInventory(builder.build());
                 });
             } catch (SQLException | DataAccessException ex) {
-                scheduler.runTask(plugin,
-                        () -> player.sendMessage(ChatColor.RED + ex.getMessage()));
+                scheduler.runTask(() -> player.sendMessage(ChatColor.RED + ex.getMessage()));
                 ex.printStackTrace();
             }
         };
@@ -165,7 +164,7 @@ public class RunnablesCreator {
                 List<Task> tasks = taskDAO.fetchPlayersApprovedTasks(member.getId());
                 int totalPages = tasks.size() / PAGE_SIZE + 1;
                 List<Task> finalTasks = getPageFromList(tasks, page);
-                scheduler.runTask(plugin, () -> {
+                scheduler.runTask(() -> {
                     String title = ChatColor.DARK_AQUA + "" + ChatColor.BOLD + ign + "'s approved tasks" + ChatColor.RESET + " (" + page + "/" + totalPages + ") " + Directives.APPROVED_TASKS;
                     InventoryBuilder builder = new InventoryBuilder(player, title);
 
@@ -202,8 +201,7 @@ public class RunnablesCreator {
                     player.openInventory(builder.build());
                 });
             } catch (SQLException | DataAccessException ex) {
-                scheduler.runTask(plugin,
-                        () -> player.sendMessage(ChatColor.RED + ex.getMessage()));
+                scheduler.runTask(() -> player.sendMessage(ChatColor.RED + ex.getMessage()));
                 ex.printStackTrace();
             }
         };
@@ -216,7 +214,7 @@ public class RunnablesCreator {
                 List<AdvisedTask> tasks = taskDAO.fetchAdvisorActiveTasks(member.getId());
                 int totalPages = tasks.size() / PAGE_SIZE + 1;
                 List<AdvisedTask> finalTasks = getPageFromList(tasks, page);
-                scheduler.runTask(plugin, () -> {
+                scheduler.runTask(() -> {
                     String title = ChatColor.DARK_PURPLE + "" + ChatColor.BOLD + "Your supervised tasks" + ChatColor.RESET + " (" + page + "/" + totalPages + ") " + Directives.SUPERVISED_TASKS;
                     InventoryBuilder builder = new InventoryBuilder(player, title);
 
@@ -245,8 +243,7 @@ public class RunnablesCreator {
                     player.openInventory(builder.build());
                 });
             } catch (SQLException | DataAccessException ex) {
-                scheduler.runTask(plugin,
-                        () -> player.sendMessage(ChatColor.RED + ex.getMessage()));
+                scheduler.runTask(() -> player.sendMessage(ChatColor.RED + ex.getMessage()));
                 ex.printStackTrace();
             }
         };
@@ -258,7 +255,7 @@ public class RunnablesCreator {
                 List<Task> tasks = taskDAO.fetchPreparedTasks();
                 int totalPages = tasks.size() / PAGE_SIZE + 1;
                 List<Task> finalTasks = getPageFromList(tasks, page);
-                scheduler.runTask(plugin, () -> {
+                scheduler.runTask(() -> {
                     String title = ChatColor.DARK_GRAY + "" + ChatColor.BOLD + "Prepared tasks" + ChatColor.RESET + " (" + page + "/" + totalPages + ") " + Directives.PREPARED_TASKS;
                     InventoryBuilder builder = new InventoryBuilder(player, title);
 
@@ -289,8 +286,7 @@ public class RunnablesCreator {
                     player.openInventory(builder.build());
                 });
             } catch (SQLException ex) {
-                scheduler.runTask(plugin,
-                        () -> player.sendMessage(ChatColor.RED + ex.getMessage()));
+                scheduler.runTask(() -> player.sendMessage(ChatColor.RED + ex.getMessage()));
                 ex.printStackTrace();
             }
         };
@@ -302,7 +298,7 @@ public class RunnablesCreator {
                 List<IdleTask> tasks = taskDAO.fetchIdleTasks();
                 int totalPages = tasks.size() / PAGE_SIZE + 1;
                 List<IdleTask> finalTasks = getPageFromList(tasks, page);
-                scheduler.runTask(plugin, () -> {
+                scheduler.runTask(() -> {
                     String title = ChatColor.DARK_AQUA + "" + ChatColor.BOLD + "Idle tasks" + ChatColor.RESET + " (" + page + "/" + totalPages + ") " + Directives.IDLE_TASKS;
                     InventoryBuilder builder = new InventoryBuilder(player, title);
 
@@ -332,8 +328,7 @@ public class RunnablesCreator {
                     player.openInventory(builder.build());
                 });
             } catch (SQLException ex) {
-                scheduler.runTask(plugin,
-                        () -> player.sendMessage(ChatColor.RED + ex.getMessage()));
+                scheduler.runTask(() -> player.sendMessage(ChatColor.RED + ex.getMessage()));
                 ex.printStackTrace();
             }
         };
@@ -349,7 +344,7 @@ public class RunnablesCreator {
                         .toList();
                 int totalPages = stats.size() / PAGE_SIZE + 1;
                 List<BasicMemberInfo> finalStats = getPageFromList(stats, page);
-                scheduler.runTask(plugin, () -> {
+                scheduler.runTask(() -> {
                     String title = ChatColor.RED + "" + ChatColor.BOLD + "Members with " + limit + " or less tasks" + ChatColor.RESET + " (" + page + "/" + totalPages + ") " + Directives.NEED_TASKS;
                     InventoryBuilder builder = new InventoryBuilder(player, title);
 
@@ -388,8 +383,7 @@ public class RunnablesCreator {
                     player.openInventory(builder.build());
                 });
             } catch (SQLException ex) {
-                scheduler.runTask(plugin,
-                        () -> player.sendMessage(ChatColor.RED + ex.getMessage()));
+                scheduler.runTask(() -> player.sendMessage(ChatColor.RED + ex.getMessage()));
                 ex.printStackTrace();
             }
         };
@@ -402,7 +396,7 @@ public class RunnablesCreator {
                 int totalPages = stats.size() / PAGE_SIZE + 1;
                 // Variable used in lambda should be final or effectively final
                 List<BasicMemberInfo> finalStats = getPageFromList(stats, page);
-                scheduler.runTask(plugin, () -> {
+                scheduler.runTask(() -> {
                     String inventoryTitle = ChatColor.BLUE + "" + ChatColor.BOLD + "Select Member" + ChatColor.RESET + " (" + page + "/" + totalPages + ") " + Directives.SELECT_MEMBER;
                     InventoryBuilder builder = new InventoryBuilder(player, inventoryTitle);
 
@@ -443,8 +437,7 @@ public class RunnablesCreator {
                     player.openInventory(builder.build());
                 });
             } catch (SQLException ex) {
-                scheduler.runTask(plugin,
-                        () -> player.sendMessage(ChatColor.RED + ex.getMessage()));
+                scheduler.runTask(() -> player.sendMessage(ChatColor.RED + ex.getMessage()));
                 ex.printStackTrace();
             }
         };
@@ -454,7 +447,7 @@ public class RunnablesCreator {
         return () -> {
             try {
                 Task task = taskDAO.findTask(taskId);
-                scheduler.runTask(plugin, () -> {
+                scheduler.runTask(() -> {
                     double x = task.getX();
                     double y = task.getY();
                     double z = task.getZ();
@@ -465,8 +458,7 @@ public class RunnablesCreator {
                     player.teleport(new Location(player.getWorld(), x, y, z, yaw, pitch));
                 });
             } catch (SQLException | DataAccessException ex) {
-                scheduler.runTask(plugin,
-                        () -> player.sendMessage(ChatColor.RED + ex.getMessage()));
+                scheduler.runTask(() -> player.sendMessage(ChatColor.RED + ex.getMessage()));
                 ex.printStackTrace();
             }
         };
@@ -484,13 +476,12 @@ public class RunnablesCreator {
                 String creatorName = memberDAO.findMember(creatorID).getIgn();
                 String advisorName = advisorID != null ? memberDAO.findMember(advisorID).getIgn() : "Unassigned";
                 String assigneeName = assigneeID != null ? memberDAO.findMember(assigneeID).getIgn() : "Unassigned";
-                scheduler.runTask(plugin, () -> {
+                scheduler.runTask(() -> {
                     ItemStack book = createTaskBook(task, creatorName, advisorName, assigneeName);
                     player.getInventory().addItem(book);
                 });
             } catch (SQLException | DataAccessException ex) {
-                scheduler.runTask(plugin,
-                        () -> player.sendMessage(ChatColor.RED + ex.getMessage()));
+                scheduler.runTask(() -> player.sendMessage(ChatColor.RED + ex.getMessage()));
                 ex.printStackTrace();
             }
         };
@@ -504,11 +495,11 @@ public class RunnablesCreator {
                 assignee = memberDAO.findMember(ign);
                 advisor = memberDAO.findMember(uuid);
             } catch (SQLException ex) {
-                scheduler.runTask(plugin, () -> player.sendMessage(ChatColor.RED + ex.getMessage()));
+                scheduler.runTask(() -> player.sendMessage(ChatColor.RED + ex.getMessage()));
                 ex.printStackTrace();
                 return;
             } catch (DataAccessException ignored) {
-                scheduler.runTask(plugin, () -> player.sendMessage(ChatColor.GOLD + "Player " + ign +
+                scheduler.runTask(() -> player.sendMessage(ChatColor.GOLD + "Player " + ign +
                         " is not registered as member. Use" + ChatColor.DARK_AQUA + " /addmember " + ign +
                         ChatColor.GOLD + " for adding player as member, then you can add tasks."));
                 return;
@@ -518,7 +509,7 @@ public class RunnablesCreator {
                 taskDAO.assignTask(taskId, assignee.getId(), advisor.getId());
                 Task task = taskDAO.findTask(taskId);
                 List<Task> activeTasks = taskDAO.fetchPlayersActiveTasks(assignee.getId());
-                scheduler.runTask(plugin, () -> {
+                scheduler.runTask(() -> {
                     player.sendMessage(ChatColor.GREEN + "Task assigned.");
                     decentHolograms.setTasks(assignee.getUuid(), activeTasks);
 
@@ -532,12 +523,10 @@ public class RunnablesCreator {
                     }
                 });
             } catch (SQLException | DataAccessException ex) {
-                scheduler.runTask(plugin,
-                        () -> player.sendMessage(ChatColor.RED + ex.getMessage()));
+                scheduler.runTask(() -> player.sendMessage(ChatColor.RED + ex.getMessage()));
                 ex.printStackTrace();
             } catch (NumberFormatException ex) {
-                scheduler.runTask(plugin,
-                        () -> player.sendMessage(ChatColor.RED + "Task ID must be numerical value!"));
+                scheduler.runTask(() -> player.sendMessage(ChatColor.RED + "Task ID must be numerical value!"));
             }
         };
     }

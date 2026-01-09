@@ -101,8 +101,8 @@ public final class TaskManager extends JavaPlugin {
     }
 
     private void performBindingsSetup() {
-        RunnablesCreator creator = new RunnablesCreator(this, taskDAO, memberDAO, decentHolograms);
         Scheduler scheduler = new ProductionScheduler(this);
+        RunnablesCreator creator = new RunnablesCreator(scheduler, this, taskDAO, memberDAO, decentHolograms);
 
         ReloadableTabCompleter tasksTabCompleter = new TasksTabCompleter(memberDAO);
         ReloadableTabCompleter membersTabCompleter = new MembersTabCompleter(memberDAO);
