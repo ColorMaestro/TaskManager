@@ -139,7 +139,7 @@ public final class TaskManager extends JavaPlugin {
         setCommandExecutor("establish", new Establish(scheduler, taskDAO, memberDAO, decentHolograms));
         setCommandExecutor("taskinfo", new TaskInfo(scheduler, creator));
         setCommandExecutor("transfertask", new TransferTask(scheduler, taskDAO, memberDAO, decentHolograms));
-        setCommandExecutor("needtasks", new NeedTasks(scheduler, this, taskDAO));
+        setCommandExecutor("needtasks", new NeedTasks(scheduler, taskDAO));
     }
 
     private void registerEventListener(Listener listener) {

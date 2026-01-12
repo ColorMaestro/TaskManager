@@ -7,7 +7,6 @@ import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
-import org.bukkit.plugin.Plugin;
 import org.jetbrains.annotations.NotNull;
 
 import java.sql.SQLException;
@@ -15,12 +14,10 @@ import java.util.List;
 
 public class NeedTasks implements CommandExecutor {
     private final Scheduler scheduler;
-    private final Plugin plugin;
     private final TaskDAO taskDAO;
 
-    public NeedTasks(Scheduler scheduler, Plugin plugin, TaskDAO taskDAO) {
+    public NeedTasks(Scheduler scheduler, TaskDAO taskDAO) {
         this.scheduler = scheduler;
-        this.plugin = plugin;
         this.taskDAO = taskDAO;
     }
 
