@@ -29,7 +29,7 @@ import java.util.Random;
 
 public class Tasks implements CommandExecutor {
     private final Scheduler scheduler;
-    private final Plugin plugin;
+    private final String pluginVersion;
     private final TaskDAO taskDAO;
     private final MemberDAO memberDAO;
     private final Random rand;
@@ -67,9 +67,9 @@ public class Tasks implements CommandExecutor {
             {"/establish", "establishes the Hologram where is summary of member's tasks"}
     };
 
-    public Tasks(Scheduler scheduler, Plugin plugin, TaskDAO taskDAO, MemberDAO memberDAO) {
+    public Tasks(Scheduler scheduler, String pluginVersion, TaskDAO taskDAO, MemberDAO memberDAO) {
         this.scheduler = scheduler;
-        this.plugin = plugin;
+        this.pluginVersion = pluginVersion;
         this.taskDAO = taskDAO;
         this.memberDAO = memberDAO;
         this.rand = new Random();
@@ -184,7 +184,7 @@ public class Tasks implements CommandExecutor {
             }
         }
         sender.sendMessage(ChatColor.AQUA + "-=-=-=-=-=- TaskManager " +
-                plugin.getDescription().getVersion() + " (" + page + "/3) help -=-=-=-=-=-");
+                pluginVersion + " (" + page + "/3) help -=-=-=-=-=-");
         for (var item : helpItems) {
             sender.sendMessage(ChatColor.GOLD + item[0] + ChatColor.WHITE + " - " + item[1]);
         }

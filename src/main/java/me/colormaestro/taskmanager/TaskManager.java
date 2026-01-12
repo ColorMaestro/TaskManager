@@ -126,7 +126,7 @@ public final class TaskManager extends JavaPlugin {
         setCommandExecutor("addmember", new AddMember(scheduler, memberDAO, tasksTabCompleter, membersTabCompleter));
         setCommandExecutor("removemember", new RemoveMember(scheduler, memberDAO, tasksTabCompleter, membersTabCompleter));
         setCommandExecutor("dashboard", new Dashboard(scheduler, creator));
-        setCommandExecutor("tasks", new Tasks(scheduler, this, taskDAO, memberDAO));
+        setCommandExecutor("tasks", new Tasks(scheduler, getDescription().getVersion(), taskDAO, memberDAO));
         setCommandExecutor("addtask", new AddTask(scheduler, stackCreator, taskDAO));
         setCommandExecutor("preparetask", new PrepareTask(stackCreator));
         setCommandExecutor("assigntask", new AssignTask(scheduler, creator));
