@@ -35,9 +35,12 @@ import me.colormaestro.taskmanager.listeners.inventory.NeedTasksViewListener;
 import me.colormaestro.taskmanager.listeners.inventory.PreparedTasksViewListener;
 import me.colormaestro.taskmanager.listeners.inventory.SelectMemberListener;
 import me.colormaestro.taskmanager.listeners.inventory.SupervisedTasksViewListener;
+import me.colormaestro.taskmanager.scheduler.ProductionScheduler;
+import me.colormaestro.taskmanager.scheduler.Scheduler;
 import me.colormaestro.taskmanager.tabcompleters.MembersTabCompleter;
 import me.colormaestro.taskmanager.tabcompleters.ReloadableTabCompleter;
 import me.colormaestro.taskmanager.tabcompleters.TasksTabCompleter;
+import me.colormaestro.taskmanager.utils.ItemStackCreator;
 import me.colormaestro.taskmanager.utils.RunnablesCreator;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandExecutor;
@@ -99,42 +102,44 @@ public final class TaskManager extends JavaPlugin {
     }
 
     private void performBindingsSetup() {
-        RunnablesCreator creator = new RunnablesCreator(this, taskDAO, memberDAO, decentHolograms);
-
         ReloadableTabCompleter tasksTabCompleter = new TasksTabCompleter(memberDAO);
         ReloadableTabCompleter membersTabCompleter = new MembersTabCompleter(memberDAO);
         setTabCompleter("tasks", tasksTabCompleter);
         setTabCompleter("addtask", membersTabCompleter);
         setTabCompleter("dashboard", membersTabCompleter);
 
+        Scheduler scheduler = new ProductionScheduler(this);
+        ItemStackCreator stackCreator = new ItemStackCreator(this);
+        RunnablesCreator creator = new RunnablesCreator(scheduler, this, stackCreator, taskDAO, memberDAO, decentHolograms);
+
         registerEventListener(new PlayerJoinListener(this, taskDAO, memberDAO, tasksTabCompleter, membersTabCompleter, decentHolograms));
         registerEventListener(new BookEditListener(this, taskDAO, memberDAO, decentHolograms, dynmap));
-        registerEventListener(new DashboardViewListener(creator));
-        registerEventListener(new SupervisedTasksViewListener(creator));
-        registerEventListener(new ActiveTasksViewListener(creator));
-        registerEventListener(new ApprovedTasksViewListener(creator));
-        registerEventListener(new PreparedTasksViewListener(creator));
-        registerEventListener(new IdleTaskViewListener(creator));
-        registerEventListener(new NeedTasksViewListener(creator));
-        registerEventListener(new SelectMemberListener(creator));
+        registerEventListener(new DashboardViewListener(scheduler, creator, stackCreator));
+        registerEventListener(new SupervisedTasksViewListener(scheduler, creator));
+        registerEventListener(new ActiveTasksViewListener(scheduler, creator, stackCreator));
+        registerEventListener(new ApprovedTasksViewListener(scheduler, creator));
+        registerEventListener(new PreparedTasksViewListener(scheduler, creator));
+        registerEventListener(new IdleTaskViewListener(scheduler, creator));
+        registerEventListener(new NeedTasksViewListener(scheduler, creator));
+        registerEventListener(new SelectMemberListener(scheduler, creator));
 
-        setCommandExecutor("addmember", new AddMember(this, memberDAO, tasksTabCompleter, membersTabCompleter));
-        setCommandExecutor("removemember", new RemoveMember(this, memberDAO, tasksTabCompleter, membersTabCompleter));
-        setCommandExecutor("dashboard", new Dashboard(creator));
-        setCommandExecutor("tasks", new Tasks(this, taskDAO, memberDAO));
-        setCommandExecutor("addtask", new AddTask(this, taskDAO));
-        setCommandExecutor("preparetask", new PrepareTask(this));
-        setCommandExecutor("assigntask", new AssignTask(creator));
-        setCommandExecutor("finishtask", new FinishTask(taskDAO, memberDAO, decentHolograms, dynmap));
-        setCommandExecutor("approvetask", new ApproveTask(taskDAO, memberDAO, decentHolograms, dynmap));
-        setCommandExecutor("visittask", new VisitTask(creator));
-        setCommandExecutor("returntask", new ReturnTask(taskDAO, memberDAO, decentHolograms));
-        setCommandExecutor("settaskplace", new SetTaskPlace(taskDAO, memberDAO));
+        setCommandExecutor("addmember", new AddMember(scheduler, memberDAO, tasksTabCompleter, membersTabCompleter));
+        setCommandExecutor("removemember", new RemoveMember(scheduler, memberDAO, tasksTabCompleter, membersTabCompleter));
+        setCommandExecutor("dashboard", new Dashboard(scheduler, creator));
+        setCommandExecutor("tasks", new Tasks(scheduler, this, taskDAO, memberDAO));
+        setCommandExecutor("addtask", new AddTask(scheduler, stackCreator, taskDAO));
+        setCommandExecutor("preparetask", new PrepareTask(stackCreator));
+        setCommandExecutor("assigntask", new AssignTask(scheduler, creator));
+        setCommandExecutor("finishtask", new FinishTask(scheduler, taskDAO, memberDAO, decentHolograms, dynmap));
+        setCommandExecutor("approvetask", new ApproveTask(scheduler, taskDAO, memberDAO, decentHolograms, dynmap));
+        setCommandExecutor("visittask", new VisitTask(scheduler, creator));
+        setCommandExecutor("returntask", new ReturnTask(scheduler, taskDAO, memberDAO, decentHolograms));
+        setCommandExecutor("settaskplace", new SetTaskPlace(scheduler, taskDAO, memberDAO));
         setCommandExecutor("linkdiscord", new LinkDiscord());
-        setCommandExecutor("establish", new Establish(taskDAO, memberDAO, decentHolograms));
-        setCommandExecutor("taskinfo", new TaskInfo(creator));
-        setCommandExecutor("transfertask", new TransferTask(taskDAO, memberDAO, decentHolograms));
-        setCommandExecutor("needtasks", new NeedTasks(this, taskDAO));
+        setCommandExecutor("establish", new Establish(scheduler, taskDAO, memberDAO, decentHolograms));
+        setCommandExecutor("taskinfo", new TaskInfo(scheduler, creator));
+        setCommandExecutor("transfertask", new TransferTask(scheduler, taskDAO, memberDAO, decentHolograms));
+        setCommandExecutor("needtasks", new NeedTasks(scheduler, taskDAO));
     }
 
     private void registerEventListener(Listener listener) {

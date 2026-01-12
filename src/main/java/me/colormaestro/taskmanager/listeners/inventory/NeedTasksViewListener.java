@@ -1,9 +1,9 @@
 package me.colormaestro.taskmanager.listeners.inventory;
 
+import me.colormaestro.taskmanager.scheduler.Scheduler;
 import me.colormaestro.taskmanager.utils.DataContainerKeys;
 import me.colormaestro.taskmanager.utils.Directives;
 import me.colormaestro.taskmanager.utils.RunnablesCreator;
-import org.bukkit.Bukkit;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.inventory.ClickType;
@@ -15,8 +15,8 @@ import org.bukkit.persistence.PersistentDataType;
 public class NeedTasksViewListener extends InventoryListener {
     private static final int MAX_LIMIT = 10;
 
-    public NeedTasksViewListener(RunnablesCreator creator) {
-        super(creator, Directives.NEED_TASKS);
+    public NeedTasksViewListener(Scheduler scheduler, RunnablesCreator creator) {
+        super(scheduler, creator, Directives.NEED_TASKS);
     }
 
     @EventHandler
@@ -31,20 +31,19 @@ public class NeedTasksViewListener extends InventoryListener {
             case SMALL_AMETHYST_BUD -> decreaseLimit(player, itemStack.getItemMeta());
             case AMETHYST_CLUSTER -> increaseLimit(player, itemStack.getItemMeta());
             case ARROW -> handleArrowClick(player, itemStack.getItemMeta());
-            case SPECTRAL_ARROW -> Bukkit.getScheduler()
-                    .runTaskAsynchronously(creator.getPlugin(), creator.showDashboardView(player, 1));
+            case SPECTRAL_ARROW -> scheduler
+                    .runTaskAsynchronously(creator.showDashboardView(player, 1));
         }
     }
 
     private void handlePlayerHeadClick(HumanEntity player, PersistentDataHolder holder) {
         String ign = extractPersistentValue(holder, DataContainerKeys.MEMBER_NAME, PersistentDataType.STRING);
-        Bukkit.getScheduler().runTaskAsynchronously(creator.getPlugin(), creator.showActiveTasksView(player, ign, 1));
+        scheduler.runTaskAsynchronously(creator.showActiveTasksView(player, ign, 1));
     }
 
     private void handleArrowClick(HumanEntity player, PersistentDataHolder holder) {
         int currentLimit = extractPersistentValue(player, DataContainerKeys.CURRENT_LIMIT, PersistentDataType.INTEGER);
-        Bukkit.getScheduler().runTaskAsynchronously(creator.getPlugin(),
-                creator.showNeedTasksView(player, currentLimit, determineNextPage(holder)));
+        scheduler.runTaskAsynchronously(creator.showNeedTasksView(player, currentLimit, determineNextPage(holder)));
     }
 
     private void decreaseLimit(HumanEntity player, PersistentDataHolder holder) {
@@ -55,8 +54,7 @@ public class NeedTasksViewListener extends InventoryListener {
         if (currentLimit < 0)
             currentLimit = 0;
 
-        Bukkit.getScheduler().runTaskAsynchronously(creator.getPlugin(),
-                creator.showNeedTasksView(player, currentLimit, 1));
+        scheduler.runTaskAsynchronously(creator.showNeedTasksView(player, currentLimit, 1));
     }
 
     private void increaseLimit(HumanEntity player, PersistentDataHolder holder) {
@@ -67,7 +65,6 @@ public class NeedTasksViewListener extends InventoryListener {
         if (currentLimit > MAX_LIMIT)
             currentLimit = MAX_LIMIT;
 
-        Bukkit.getScheduler().runTaskAsynchronously(creator.getPlugin(),
-                creator.showNeedTasksView(player, currentLimit, 1));
+        scheduler.runTaskAsynchronously(creator.showNeedTasksView(player, currentLimit, 1));
     }
 }

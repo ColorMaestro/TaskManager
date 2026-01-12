@@ -1,20 +1,20 @@
 package me.colormaestro.taskmanager.commands;
 
+import me.colormaestro.taskmanager.scheduler.Scheduler;
 import me.colormaestro.taskmanager.utils.RunnablesCreator;
-import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
-import org.bukkit.plugin.Plugin;
 import org.jetbrains.annotations.NotNull;
 
 public class AssignTask implements CommandExecutor {
-
+    private final Scheduler scheduler;
     private final RunnablesCreator creator;
 
-    public AssignTask(RunnablesCreator creator) {
+    public AssignTask(Scheduler scheduler, RunnablesCreator creator) {
+        this.scheduler = scheduler;
         this.creator = creator;
     }
 
@@ -31,13 +31,11 @@ public class AssignTask implements CommandExecutor {
         }
 
         try {
-            Plugin plugin = creator.getPlugin();
             String ign = args[0];
             int taskId = Integer.parseInt(args[1]);
-            Bukkit.getScheduler().runTaskAsynchronously(plugin, creator.assignTask(ign, player, taskId));
+            scheduler.runTaskAsynchronously(creator.assignTask(ign, player, taskId));
         } catch (NumberFormatException ex) {
-            Bukkit.getScheduler().runTask(creator.getPlugin(),
-                    () -> player.sendMessage(ChatColor.RED + "Task ID must be numerical value!"));
+            scheduler.runTask(() -> player.sendMessage(ChatColor.RED + "Task ID must be numerical value!"));
         }
 
         return true;
