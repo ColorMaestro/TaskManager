@@ -11,19 +11,28 @@ import me.colormaestro.taskmanager.model.IdleTask;
 import me.colormaestro.taskmanager.model.Member;
 import me.colormaestro.taskmanager.model.Task;
 import me.colormaestro.taskmanager.scheduler.FakeScheduler;
+import org.assertj.core.api.SoftAssertions;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.entity.Player;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
+import org.yaml.snakeyaml.Yaml;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.sql.Date;
 import java.sql.SQLException;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.ZoneOffset;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -41,6 +50,7 @@ public class TaskTest {
     private static final String PLAYER_NAME = "ColorMaestro";
     private static final String MEMBER_NAME = "JohnDoe";
     private static final String MEMBER_NAME_2 = "JaneSmith";
+    private static final String PLUGIN_VERSION = "1.0";
     private static final Member MEMBER = new Member(
             MEMBER_UUID.toString(),
             MEMBER_NAME,
@@ -51,9 +61,18 @@ public class TaskTest {
     private static final Command FAKE_COMMAND = new FakeCommand();
     private final MemberDAO memberDAOmock = mock(MemberDAO.class);
     private final TaskDAO taskDAOmock = mock(TaskDAO.class);
-    private final Tasks tasks = new Tasks(new FakeScheduler(), "1.0", taskDAOmock, memberDAOmock);
+    private final Tasks tasks = new Tasks(new FakeScheduler(), PLUGIN_VERSION, taskDAOmock, memberDAOmock);
     private final SendMessageAnswer sendMessageAnswer = new SendMessageAnswer();
     private final Player playerMock = mock(Player.class);
+
+    private static Stream<Arguments> helpArguments() {
+        return Stream.of(
+                Arguments.of((Object) new String[]{"help"}),
+                Arguments.of((Object) new String[]{"help", "1"}),
+                Arguments.of((Object) new String[]{"help", "2"}),
+                Arguments.of((Object) new String[]{"help", "3"})
+        );
+    }
 
     @BeforeEach
     void setUp() throws SQLException, DataAccessException {
@@ -172,6 +191,37 @@ public class TaskTest {
                 ));
     }
 
+    @ParameterizedTest
+    @MethodSource("helpArguments")
+    void eachPageOfHelpSubcommandShowsAtMostNineLinesInChatWithCorrectHeadlineMessage(String[] arguments) {
+        tasks.onCommand(playerMock, FAKE_COMMAND, "", arguments);
+
+        assertThat(sendMessageAnswer.getMessages().size()).isLessThanOrEqualTo(9);  // Headline message included
+        assertThat(sendMessageAnswer.getMessages().get(0))
+                .as("Headline message should show correct information")
+                .isEqualTo("%s-=-=-=-=-=- TaskManager %s (%s/3) help -=-=-=-=-=-"
+                        .formatted(ChatColor.AQUA, PLUGIN_VERSION, arguments.length == 2 ? arguments[1] : "1")
+                );
+    }
+
+    @Test
+    void eachCommandDeclaredInPluginYmlFileIsMentionedInHelpAtLeastOnce() throws IOException {
+        tasks.onCommand(playerMock, FAKE_COMMAND, "", new String[]{"help", "1"});
+        tasks.onCommand(playerMock, FAKE_COMMAND, "", new String[]{"help", "2"});
+        tasks.onCommand(playerMock, FAKE_COMMAND, "", new String[]{"help", "3"});
+
+        String concatenatedMessageOutput = String.join("\n", sendMessageAnswer.getMessages());
+
+        SoftAssertions softly = new SoftAssertions();
+
+        for (String command : extractDeclaredCommandsFromPluginYml()) {
+            softly.assertThat(concatenatedMessageOutput.contains("/%s".formatted(command)))
+                    .as("Command %s should be mentioned at least once in help".formatted(command)).isTrue();
+        }
+
+        softly.assertAll();
+    }
+
     private List<Task> createActiveTasks() {
         return List.of(
                 createTask(3, "First Task", TaskStatus.FINISHED),
@@ -221,5 +271,18 @@ public class TaskTest {
                 new IdleTask(7, "First Idle Task", null, new Date(tenDaysAgo), null, null),
                 new IdleTask(13, "Second Idle Task", null, new Date(fiveDaysAgo), null, null)
         );
+    }
+
+    @SuppressWarnings({"DataFlowIssue", "unchecked"})
+    private String[] extractDeclaredCommandsFromPluginYml() throws IOException {
+        InputStream inputStream = getClass()
+                .getClassLoader()
+                .getResourceAsStream("plugin.yml");
+
+        Map<String, Object> yamlData = new Yaml().load(inputStream);
+        Map<String, Object> commands = (Map<String, Object>) yamlData.get("commands");
+        inputStream.close();
+
+        return commands.keySet().toArray(new String[]{});
     }
 }
